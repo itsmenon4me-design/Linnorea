@@ -121,11 +121,6 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     const normalizedIndex = (nextIndex + slideCount) % slideCount;
     if (normalizedIndex === activeIndex || transitionRef.current) return;
 
-    if (reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setActiveIndex(normalizedIndex);
-      return;
-    }
-
     const nextTransition: SlideTransition = {
       from: activeIndex,
       to: normalizedIndex,
