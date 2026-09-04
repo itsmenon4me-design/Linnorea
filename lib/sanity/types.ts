@@ -67,6 +67,8 @@ export type Project = {
 
 export type SiteSettings = {
   brandStatement?: LocalizedString;
+  officeAddress?: Partial<Record<Locale, string>>;
+  googleMapsUrl?: string;
   whatsappNumber?: string;
   whatsappCtaText?: LocalizedString;
 };

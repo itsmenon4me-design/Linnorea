@@ -8,7 +8,6 @@ type FooterProps = {
   currentLocale: Locale;
   dictionary: Dictionary;
 };
-
 type SocialLink = {
   platform?: string;
   url?: string;
@@ -23,6 +22,15 @@ type SiteSettings = {
     de?: string;
     it?: string;
   };
+  officeAddress?: {
+    id?: string;
+    en?: string;
+    ja?: string;
+    fr?: string;
+    de?: string;
+    it?: string;
+  };
+  googleMapsUrl?: string;
   whatsappNumber?: string;
   whatsappCtaText?: {
     id?: string;
@@ -38,6 +46,7 @@ type SiteSettings = {
 export async function Footer({ currentLocale, dictionary }: FooterProps) {
   const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
   const brandText = settings?.brandStatement?.[currentLocale] ?? settings?.brandStatement?.id ?? "Linnorea Design Works";
+  const officeAddress = settings?.officeAddress?.[currentLocale] ?? settings?.officeAddress?.id ?? "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
   const whatsappNumber = settings?.whatsappNumber ?? "+621234567890";
   const whatsappText = settings?.whatsappCtaText?.[currentLocale] ?? settings?.whatsappCtaText?.id ?? dictionary.home.cta;
   const socialLinks = settings?.socialLinks ?? [
@@ -60,6 +69,11 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
         <div className="space-y-5">
           <div className="text-[11px] font-medium uppercase tracking-[0.35em] text-white/60">Linnorea</div>
           <p className="max-w-md text-sm leading-6 text-white/75">{brandText}</p>
+          {settings?.googleMapsUrl ? (
+            <a href={settings.googleMapsUrl} target="_blank" rel="noreferrer" className="block max-w-md text-sm leading-6 text-white/70 transition-opacity hover:text-white">{officeAddress}</a>
+          ) : (
+            <p className="max-w-md text-sm leading-6 text-white/70">{officeAddress}</p>
+          )}
           <a
             href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
             target="_blank"
