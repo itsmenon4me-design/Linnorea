@@ -289,26 +289,31 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
                 aria-selected={isActive}
                 aria-label={`Show slide ${index + 1}`}
                 onClick={() => changeSlide(index)}
-                className={`relative flex items-center justify-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none ${isActive ? "h-4 w-4 bg-transparent" : "h-2.5 w-2.5 border border-white/25 bg-white/80"}`}
+                className="flex h-6 w-6 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
               >
                 {isActive ? (
-                  <svg key={`progress-${activeIndex}`} viewBox="0 0 24 24" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden="true">
-                    <circle cx="12" cy="12" r={dotRadius} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.6" />
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r={dotRadius}
-                      fill="none"
-                      stroke="var(--color-accent-progress)"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeDasharray={dotCircumference}
-                      strokeDashoffset={dotCircumference}
-                      className={reducedMotion || !isInView ? "" : "dot-progress-ring"}
-                      style={progressStyle}
-                    />
-                  </svg>
-                ) : null}
+                  <span className="relative flex h-5 w-5 items-center justify-center" aria-hidden="true">
+                    <svg key={`progress-${activeIndex}`} viewBox="0 0 24 24" className="absolute inset-0 h-full w-full -rotate-90">
+                      <circle cx="12" cy="12" r={dotRadius} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.6" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r={dotRadius}
+                        fill="none"
+                        stroke="var(--color-accent-progress)"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeDasharray={dotCircumference}
+                        strokeDashoffset={dotCircumference}
+                        className={reducedMotion || !isInView ? "" : "dot-progress-ring"}
+                        style={progressStyle}
+                      />
+                    </svg>
+                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  </span>
+                ) : (
+                  <span className="h-2.5 w-2.5 rounded-full border border-white/25 bg-white/80" />
+                )}
               </button>
             );
           })}
