@@ -248,14 +248,17 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         },
       });
 
+      gsap.set(imageCurtain, { scaleX: 1, opacity: 1, transformOrigin: "100% 50%" });
       gsap.set(incomingPanel, { opacity: 0 });
       gsap.set([incomingElements[0], incomingElements[2], incomingElements[3], ...incomingWords], { opacity: 0 });
       timeline
         .to(currentElements, { opacity: 0, duration: 0.18, ease: "power1.out" }, 0)
         .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
-        .to(imageCurtain, { scaleX: 0.08, duration: 0.2, ease: "power2.inOut" }, 0.16)
-        .to(imageCurtain, { scaleX: 1, duration: 0.24, ease: "power2.inOut" }, 0.36)
-        .to(incomingPanel, { opacity: 1, duration: 0.14, ease: "power1.out" }, 0.6)
+        .to(imageCurtain, { scaleX: 0.08, duration: 0.24, ease: "power2.inOut" }, 0.16)
+        .to(imageCurtain, { opacity: 0, duration: 0.08, ease: "power1.out" }, 0.4)
+        .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, 0.88)
+        .to(imageCurtain, { scaleX: 1, duration: 0.24, ease: "power2.inOut" }, 0.88)
+        .to(incomingPanel, { opacity: 1, duration: 0.14, ease: "power1.out" }, 1.12)
         .to(incomingElements[0], { opacity: 1, duration: 0.16, ease: "power1.out" }, 0.24)
         .to(incomingWords, { opacity: 1, duration: 0.18, stagger: 0.05, ease: "power1.out" }, headlineStart)
         .to(incomingElements[2], { opacity: 1, duration: 0.2, ease: "power1.out" }, descriptionStart)
