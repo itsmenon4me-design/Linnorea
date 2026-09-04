@@ -128,7 +128,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     transitionRef.current = nextTransition;
     setActiveIndex(normalizedIndex);
     setTransition(nextTransition);
-  }, [activeIndex, reducedMotion, slideCount]);
+  }, [activeIndex, slideCount]);
 
   useEffect(() => {
     const section = sectionRef.current;
