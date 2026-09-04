@@ -42,7 +42,6 @@ type SlideData = {
 type SlideTransition = {
   from: number;
   to: number;
-  direction: 1 | -1;
 };
 
 type TextSlideProps = {
@@ -130,7 +129,6 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     const nextTransition: SlideTransition = {
       from: activeIndex,
       to: normalizedIndex,
-      direction: normalizedIndex > activeIndex || (activeIndex === slideCount - 1 && normalizedIndex === 0) ? 1 : -1,
     };
     transitionRef.current = nextTransition;
     setActiveIndex(normalizedIndex);
@@ -234,8 +232,15 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     const context = gsap.context(() => {
       const currentElements = currentText.querySelectorAll<HTMLElement>("[data-slide-element]");
       const incomingElements = incomingText.querySelectorAll<HTMLElement>("[data-slide-element]");
+      const currentLabel = currentElements[0];
+      const currentDescription = currentElements[2];
+      const currentAction = currentElements[3];
+      const incomingLabel = incomingElements[0];
+      const incomingDescription = incomingElements[2];
+      const incomingAction = incomingElements[3];
+      const currentWords = currentText.querySelectorAll<HTMLElement>("[data-headline-word]");
       const incomingWords = incomingText.querySelectorAll<HTMLElement>("[data-headline-word]");
-      const headlineStart = 0.36;
+      const headlineStart = 1.02;
       const headlineDuration = 0.18 + Math.max(0, incomingWords.length - 1) * 0.05;
       const descriptionStart = headlineStart + headlineDuration + 0.06;
       const actionStart = descriptionStart + 0.2 + 0.06;
@@ -250,19 +255,21 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
 
       gsap.set(imageCurtain, { scaleX: 1, opacity: 1, transformOrigin: "100% 50%" });
       gsap.set(incomingPanel, { opacity: 0 });
-      gsap.set([incomingElements[0], incomingElements[2], incomingElements[3], ...incomingWords], { opacity: 0 });
+      gsap.set([incomingLabel, incomingDescription, incomingAction, ...incomingWords], { opacity: 0 });
       timeline
-        .to(currentElements, { opacity: 0, duration: 0.18, ease: "power1.out" }, 0)
+        .to(currentAction, { opacity: 0, duration: 0.12, ease: "power1.out" }, 0)
+        .to([currentLabel, ...currentWords], { opacity: 0, duration: 0.14, stagger: 0.05, ease: "power1.out" }, 0.08)
+        .to(currentDescription, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0.28)
         .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
         .to(imageCurtain, { scaleX: 0.08, duration: 0.24, ease: "power2.inOut" }, 0.16)
         .to(imageCurtain, { opacity: 0, duration: 0.08, ease: "power1.out" }, 0.4)
         .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, 0.88)
         .to(imageCurtain, { scaleX: 1, duration: 0.24, ease: "power2.inOut" }, 0.88)
         .to(incomingPanel, { opacity: 1, duration: 0.14, ease: "power1.out" }, 1.12)
-        .to(incomingElements[0], { opacity: 1, duration: 0.16, ease: "power1.out" }, 0.24)
+        .to(incomingLabel, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0.88)
         .to(incomingWords, { opacity: 1, duration: 0.18, stagger: 0.05, ease: "power1.out" }, headlineStart)
-        .to(incomingElements[2], { opacity: 1, duration: 0.2, ease: "power1.out" }, descriptionStart)
-        .to(incomingElements[3], { opacity: 1, duration: 0.18, ease: "power1.out" }, actionStart);
+        .to(incomingDescription, { opacity: 1, duration: 0.2, ease: "power1.out" }, descriptionStart)
+        .to(incomingAction, { opacity: 1, duration: 0.18, ease: "power1.out" }, actionStart);
     }, sectionRef);
 
     return () => context.revert();
