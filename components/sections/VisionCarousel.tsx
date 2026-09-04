@@ -291,9 +291,9 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
           ) : <TextSlide ref={currentTextRef} slide={activeSlide} readMoreLabel={readMoreLabel} />}
         </div>
 
-        <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-[#d2d2d2]">
+        <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-transparent">
           {transition ? (
-            <div ref={imageCurtainRef} className="absolute inset-0 origin-center">
+            <div ref={imageCurtainRef} className="absolute inset-0 origin-center bg-[#d2d2d2]">
               <PanelSlide ref={currentPanelRef} slide={slides[transition.from]} />
               <PanelSlide ref={incomingPanelRef} slide={slides[transition.to]} isIncoming />
             </div>
