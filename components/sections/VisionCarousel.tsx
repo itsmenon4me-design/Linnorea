@@ -106,6 +106,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
   const transitionRef = useRef<SlideTransition | null>(null);
   const currentPanelRef = useRef<HTMLDivElement | null>(null);
   const incomingPanelRef = useRef<HTMLDivElement | null>(null);
+  const imageCurtainRef = useRef<HTMLDivElement | null>(null);
   const currentTextRef = useRef<HTMLDivElement | null>(null);
   const incomingTextRef = useRef<HTMLDivElement | null>(null);
   const activeSlide = slides[activeIndex];
@@ -203,12 +204,13 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
 
     const currentPanel = currentPanelRef.current;
     const incomingPanel = incomingPanelRef.current;
+    const imageCurtain = imageCurtainRef.current;
     const currentText = currentTextRef.current;
     const incomingText = incomingTextRef.current;
-    if (!currentPanel || !incomingPanel || !currentText || !incomingText) return;
+    if (!currentPanel || !incomingPanel || !imageCurtain || !currentText || !incomingText) return;
 
     if (reducedMotion) {
-      gsap.set([currentPanel, incomingPanel], { clearProps: "all" });
+      gsap.set([currentPanel, incomingPanel, imageCurtain], { clearProps: "all" });
       gsap.set([currentText, incomingText], { clearProps: "all" });
       window.setTimeout(() => {
         setActiveIndex(transition.to);
@@ -228,11 +230,13 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         },
       });
 
-      gsap.set(incomingPanel, { xPercent: transition.direction * 100 });
+      gsap.set(incomingPanel, { opacity: 0 });
       gsap.set(incomingText, { xPercent: transition.direction * 100 });
       timeline
-        .to(currentPanel, { xPercent: transition.direction * -100, duration: 0.72, ease: "power2.inOut" }, 0)
-        .to(incomingPanel, { xPercent: 0, duration: 0.72, ease: "power2.inOut" }, 0)
+        .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
+        .to(imageCurtain, { scaleX: 0.08, duration: 0.2, ease: "power2.inOut" }, 0.16)
+        .to(imageCurtain, { scaleX: 1, duration: 0.24, ease: "power2.inOut" }, 0.36)
+        .to(incomingPanel, { opacity: 1, duration: 0.14, ease: "power1.out" }, 0.6)
         .to(currentText, { xPercent: transition.direction * -100, duration: 0.72, ease: "power2.inOut" }, 0)
         .to(incomingText, { xPercent: 0, duration: 0.72, ease: "power2.inOut" }, 0);
     }, sectionRef);
@@ -257,12 +261,12 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
           ) : <TextSlide ref={currentTextRef} slide={activeSlide} readMoreLabel={readMoreLabel} />}
         </div>
 
-        <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-[linear-gradient(135deg,#252a30,#101216)]">
+        <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-[#d2d2d2]">
           {transition ? (
-            <>
+            <div ref={imageCurtainRef} className="absolute inset-0 origin-center">
               <PanelSlide ref={currentPanelRef} slide={slides[transition.from]} />
               <PanelSlide ref={incomingPanelRef} slide={slides[transition.to]} isIncoming />
-            </>
+            </div>
           ) : <PanelSlide ref={currentPanelRef} slide={activeSlide} />}
         </div>
       </div>
