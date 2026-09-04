@@ -207,6 +207,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     if (!currentPanel || !incomingPanel || !imageCurtain || !currentText || !incomingText) return;
 
     if (reducedMotion) {
+      gsap.set([incomingPanel, incomingText], { opacity: 0 });
       const timeline = gsap.timeline({
         defaults: { duration: 0.12, ease: "power1.out" },
         onComplete: () => {
@@ -235,10 +236,13 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       const incomingAction = incomingElements[3];
       const currentWords = currentText.querySelectorAll<HTMLElement>("[data-headline-word]");
       const incomingWords = incomingText.querySelectorAll<HTMLElement>("[data-headline-word]");
-      const headlineStart = 1.02;
+      const exitHeadlineEnd = 0.08 + 0.14 + Math.max(0, currentWords.length - 1) * 0.05;
+      const blankStart = Math.max(0.5, exitHeadlineEnd);
+      const boxStart = blankStart + 0.5;
       const headlineDuration = 0.18 + Math.max(0, incomingWords.length - 1) * 0.05;
-      const descriptionStart = headlineStart + headlineDuration + 0.06;
-      const actionStart = descriptionStart + 0.2 + 0.06;
+      const headlineStart = boxStart;
+      const descriptionStart = boxStart;
+      const actionStart = boxStart + headlineDuration + 0.06;
       const timeline = gsap.timeline({
         defaults: { ease: "power2.inOut" },
         onComplete: () => {
@@ -255,15 +259,15 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
         .to(imageCurtain, { scaleX: 0.08, duration: 0.24, ease: "power2.inOut" }, 0.16)
         .to(imageCurtain, { opacity: 0, duration: 0.08, ease: "power1.out" }, 0.4)
-        .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, 1)
-        .to(imageCurtain, { scaleX: 1, duration: 0.3, ease: "power2.out" }, 1)
-        .to(incomingPanel, { opacity: 1, duration: 0.16, ease: "power1.out" }, 1.7)
+        .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, boxStart)
+        .to(imageCurtain, { scaleX: 1, duration: 0.3, ease: "power2.out" }, boxStart)
+        .to(incomingPanel, { opacity: 1, duration: 0.16, ease: "power1.out" }, actionStart)
         .to(currentAction, { opacity: 0, duration: 0.12, ease: "power1.out" }, 0)
         .to([currentLabel, ...currentWords], { opacity: 0, duration: 0.14, stagger: 0.05, ease: "power1.out" }, 0.08)
         .to(currentDescription, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0.28)
-        .to(incomingLabel, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0.9)
+        .to(incomingLabel, { opacity: 1, duration: 0.12, ease: "power1.out" }, boxStart)
         .to(incomingWords, { opacity: 1, duration: 0.18, stagger: 0.05, ease: "power1.out" }, headlineStart)
-        .to(incomingDescription, { opacity: 1, duration: 0.2, ease: "power1.out" }, descriptionStart)
+        .to(incomingDescription, { opacity: 1, duration: Math.max(0.1, headlineDuration - 0.04), ease: "power1.out" }, descriptionStart)
         .to(incomingAction, { opacity: 1, duration: 0.18, ease: "power1.out" }, actionStart);
     }, sectionRef);
 
