@@ -55,7 +55,7 @@ const TextSlide = forwardRef<HTMLDivElement, TextSlideProps>(function TextSlide(
   return (
     <div ref={ref} className={isIncoming ? "absolute inset-0" : undefined}>
       <p data-slide-element className="text-[10px] uppercase tracking-[0.35em] text-white/55">{slide.label}</p>
-      <h2 data-slide-element className="mt-5 max-w-xl text-3xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white md:text-5xl">{slide.headline}</h2>
+      <h2 data-slide-element className="mt-5 max-w-xl text-2xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white md:text-4xl">{slide.headline}</h2>
       <p data-slide-element className="mt-6 max-w-md text-sm leading-6 text-white/65 md:text-base">{slide.description}</p>
       <a data-slide-element href="#collections" className="group mt-8 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.28em] text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
         <ArrowAction label={readMoreLabel} />

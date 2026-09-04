@@ -28,7 +28,7 @@ export default async function ProductPage({ params }: ProductProps) {
       <Header currentLocale={safeLocale} dictionary={dictionary} />
       <header className="mx-auto max-w-7xl px-5 pb-20 pt-36 md:px-8 md:pb-28 md:pt-48">
         <p className="text-[10px] uppercase tracking-[0.38em] text-[#c8a875]">Linnorea Living</p>
-        <h1 className="mt-6 text-6xl font-medium leading-[0.9] tracking-[-0.07em] md:text-7xl lg:text-8xl">{dictionary.nav.product}</h1>
+        <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.product}</h1>
       </header>
       {products.length ? <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-16 px-5 pb-24 md:grid-cols-2 md:px-8">
         {products.map((product) => {

@@ -38,14 +38,14 @@ export default async function AboutPage({ params }: AboutProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#07080a] via-black/20 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-40 md:px-8 md:pb-20">
           <p className="text-[10px] uppercase tracking-[0.38em] text-[#c8a875]">Linnorea Design Works</p>
-          <h1 className="mt-6 text-6xl font-medium leading-[0.9] tracking-[-0.07em] md:text-7xl lg:text-8xl">{dictionary.nav.about}</h1>
+          <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.about}</h1>
         </div>
       </section>
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
         <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
           <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Our philosophy</p>
-          <div className="space-y-6 text-2xl leading-[1.25] tracking-[-0.035em] text-white/90 md:text-5xl">
+          <div className="space-y-6 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">
             {story.split(/\n\n+/).map((paragraph, index) => <p key={`${paragraph}-${index}`}>{paragraph}</p>)}
           </div>
         </div>
@@ -76,7 +76,7 @@ export default async function AboutPage({ params }: AboutProps) {
       </section>
 
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
-        <h2 className="max-w-xl text-4xl font-medium tracking-[-0.055em] md:text-6xl">See how the thinking becomes space.</h2>
+        <h2 className="max-w-xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">See how the thinking becomes space.</h2>
         <div className="flex flex-wrap gap-3">
           <Link href={`/${safeLocale}/project`} className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[#07080a]">{dictionary.ui.viewProjects}</Link>
           {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[#c8a875] px-5 text-[10px] uppercase tracking-[0.22em] text-[#e3c995] transition hover:bg-[#c8a875] hover:text-[#07080a]">{localizedValue(settings?.whatsappCtaText, safeLocale) || dictionary.home.cta}</a> : null}

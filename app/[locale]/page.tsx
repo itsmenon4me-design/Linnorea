@@ -69,7 +69,7 @@ export default async function HomePage({ params }: HomePageProps) {
         <div data-reveal className="mx-auto mb-10 flex max-w-7xl items-end justify-between gap-6">
           <div>
             <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">Collections</p>
-            <h2 className="mt-4 text-4xl font-medium tracking-[-0.055em] md:text-6xl">Selected spaces.</h2>
+            <h2 className="mt-4 text-3xl font-medium tracking-[-0.05em] md:text-5xl">Selected spaces.</h2>
           </div>
           {featuredProjects.length === 0 ? <p className="max-w-xs text-right text-xs leading-5 text-white/55">Featured projects will appear here when they are marked in Sanity.</p> : null}
         </div>

@@ -75,7 +75,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         <div className="absolute inset-0 bg-gradient-to-t from-[#07080a] via-black/25 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-14 pt-40 md:px-8 md:pb-20">
           <p className="text-[10px] uppercase tracking-[0.38em] text-[#c8a875]">{style || project.category || "Project"}</p>
-          <h1 className="mt-5 max-w-5xl text-6xl font-medium leading-[0.9] tracking-[-0.07em] md:text-7xl lg:text-8xl">{title}</h1>
+          <h1 className="mt-5 max-w-5xl text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{title}</h1>
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-sm text-white/75">
             {location ? <span>{location}</span> : null}
             {project.year ? <span>{project.year}</span> : null}
@@ -88,7 +88,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
           <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
             <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Concept</p>
-            <p className="max-w-3xl whitespace-pre-line text-2xl leading-[1.25] tracking-[-0.035em] text-white/90 md:text-5xl">{description}</p>
+            <p className="max-w-3xl whitespace-pre-line text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">{description}</p>
           </div>
         </ScrollReveal>
       ) : null}
