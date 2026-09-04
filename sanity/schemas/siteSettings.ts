@@ -53,34 +53,7 @@ export const siteSettings = defineType({
       name: "socialLinks",
       title: "Social links",
       type: "array",
-      of: [
-        {
-          type: "object",
-          fields: [
-            defineField({
-              name: "platform",
-              title: "Platform",
-              type: "string",
-              options: {
-                list: ["Instagram", "Threads", "LinkedIn", "Pinterest"],
-              },
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: "url",
-              title: "URL",
-              type: "url",
-              validation: (Rule) => Rule.required(),
-            }),
-          ],
-          preview: {
-            select: {
-              title: "platform",
-              subtitle: "url",
-            },
-          },
-        },
-      ],
+      of: [{ type: "socialLink" }],
     }),
     defineField({
       name: "seoDefaults",
