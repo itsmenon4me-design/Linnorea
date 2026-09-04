@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "project": "Projet",
+    "service": "Service",
+    "product": "Produit"
+  },
+  "home": {
+    "eyebrow": "Placeholder",
+    "headline": "Where Space Feels.",
+    "subheadline": "Texte fictif pour la page d'accueil de Linnorea. Le message final reste à confirmer.",
+    "cta": "Réserver une consultation",
+    "discover": "Découvrir"
+  },
+  "ui": {
+    "viewProjects": "Voir les projets",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "readMore": "Lire la suite",
+    "comingSoon": "Bientôt disponible"
+  }
+}

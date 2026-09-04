@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "about": "Tentang",
+    "project": "Proyek",
+    "service": "Layanan",
+    "product": "Produk"
+  },
+  "home": {
+    "eyebrow": "Placeholder",
+    "headline": "Where Space Feels.",
+    "subheadline": "",
+    "cta": "Jadwalkan Konsultasi",
+    "discover": "Temukan"
+  },
+  "ui": {
+    "viewProjects": "Lihat proyek",
+    "previous": "Sebelumnya",
+    "next": "Selanjutnya",
+    "readMore": "Baca selengkapnya",
+    "comingSoon": "Segera hadir"
+  }
+}

@@ -1,0 +1,105 @@
+import type { Locale } from "@/lib/i18n/config";
+
+export type LocalizedString = Partial<Record<Locale, string>> & {
+  id?: string;
+  en?: string;
+};
+
+export type SanityImage = {
+  _key?: string;
+  _type?: string;
+  asset?: {
+    _ref?: string;
+    _id?: string;
+  };
+};
+
+export type MuxVideo = {
+  asset?: {
+    playbackId?: string;
+    status?: string;
+  };
+};
+
+export type HeroSlide = {
+  _id: string;
+  _type?: string;
+  image?: SanityImage;
+  eyebrow?: LocalizedString;
+  headline?: LocalizedString;
+  subheadline?: LocalizedString;
+  heroVideo?: MuxVideo;
+  order?: number;
+};
+
+export type VisionSlide = {
+  _id: string;
+  _type?: string;
+  label?: LocalizedString;
+  headline?: LocalizedString;
+  description?: LocalizedString;
+  image?: SanityImage;
+  order?: number;
+};
+
+export type PortableTextBlock = {
+  _key?: string;
+  _type?: string;
+  children?: Array<{ text?: string }>;
+};
+
+export type Project = {
+  _id: string;
+  title?: LocalizedString;
+  slug?: { current?: string };
+  coverImage?: SanityImage;
+  gallery?: SanityImage[];
+  heroVideo?: { asset?: { _ref?: string; url?: string } };
+  category?: string;
+  styleTag?: LocalizedString;
+  location?: LocalizedString;
+  year?: string;
+  area?: string;
+  description?: Partial<Record<Locale, PortableTextBlock[]>>;
+  scopeOfWork?: LocalizedString;
+  order?: number;
+};
+
+export type SiteSettings = {
+  brandStatement?: LocalizedString;
+  whatsappNumber?: string;
+  whatsappCtaText?: LocalizedString;
+};
+
+export type Service = {
+  _id: string;
+  title?: LocalizedString;
+  image?: SanityImage;
+  description?: LocalizedString;
+  order?: number;
+};
+
+export type Product = {
+  _id: string;
+  name?: LocalizedString;
+  images?: SanityImage[];
+  description?: LocalizedString;
+  order?: number;
+};
+
+export function localizedValue(value: LocalizedString | undefined, locale: Locale) {
+  return value?.[locale] ?? value?.en ?? value?.id ?? "";
+}
+
+export function plainText(value: string | undefined) {
+  return (value ?? "")
+    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+}
+
+export function portableTextToPlainText(blocks: PortableTextBlock[] | undefined) {
+  return blocks
+    ?.map((block) => block.children?.map((child) => child.text ?? "").join("") ?? "")
+    .filter(Boolean)
+    .join("\n\n") ?? "";
+}

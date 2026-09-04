@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "Chi siamo",
+    "project": "Progetto",
+    "service": "Servizio",
+    "product": "Prodotto"
+  },
+  "home": {
+    "eyebrow": "Placeholder",
+    "headline": "Where Space Feels.",
+    "subheadline": "Testo placeholder per la homepage di Linnorea. Il messaggio finale è ancora TBD.",
+    "cta": "Prenota una consulenza",
+    "discover": "Scopri"
+  },
+  "ui": {
+    "viewProjects": "Vedi i progetti",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "readMore": "Leggi di più",
+    "comingSoon": "In arrivo"
+  }
+}

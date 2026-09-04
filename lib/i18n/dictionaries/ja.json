@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "about": "私たちについて",
+    "project": "プロジェクト",
+    "service": "サービス",
+    "product": "商品"
+  },
+  "home": {
+    "eyebrow": "プレースホルダー",
+    "headline": "Where Space Feels.",
+    "subheadline": "Linnorea のホームページ用の仮コピーです。最終文言は未定です。",
+    "cta": "相談を予約する",
+    "discover": "詳しく見る"
+  },
+  "ui": {
+    "viewProjects": "プロジェクトを見る",
+    "previous": "前へ",
+    "next": "次へ",
+    "readMore": "続きを読む",
+    "comingSoon": "近日公開"
+  }
+}
