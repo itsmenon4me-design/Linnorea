@@ -31,13 +31,13 @@ export default async function AboutPage({ params }: AboutProps) {
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
 
   return (
-    <main className="bg-[#07080a] text-white">
+    <main className="bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
-      <section className="relative flex min-h-[72vh] items-end overflow-hidden bg-[#17191c]">
+      <section className="relative flex min-h-[72vh] items-end overflow-hidden bg-[var(--color-bg-elevated)]">
         <div className="absolute inset-0 flex items-center justify-center text-center text-[10px] uppercase tracking-[0.32em] text-white/40">[Placeholder studio visual]</div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07080a] via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/20 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-40 md:px-8 md:pb-20">
-          <p className="text-[10px] uppercase tracking-[0.38em] text-[#c8a875]">Linnorea Design Works</p>
+          <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">Linnorea Design Works</p>
           <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.about}</h1>
         </div>
       </section>
@@ -58,7 +58,7 @@ export default async function AboutPage({ params }: AboutProps) {
             {["Listen before designing.", "Let the room lead.", "Make daily rituals feel considered."].map((value, index) => (
               <ScrollReveal key={value} className="border-b border-white/15 pb-8">
                 <div data-reveal>
-                  <span className="text-sm text-[#c8a875]">0{index + 1}</span>
+                  <span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span>
                   <h2 className="mt-8 max-w-xs text-2xl leading-tight tracking-[-0.04em] text-white/90">{value}</h2>
                   <p className="mt-5 text-sm leading-6 text-white/55">[Placeholder approach copy, awaiting final content]</p>
                 </div>
@@ -78,8 +78,8 @@ export default async function AboutPage({ params }: AboutProps) {
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
         <h2 className="max-w-xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">See how the thinking becomes space.</h2>
         <div className="flex flex-wrap gap-3">
-          <Link href={`/${safeLocale}/project`} className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[#07080a]">{dictionary.ui.viewProjects}</Link>
-          {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[#c8a875] px-5 text-[10px] uppercase tracking-[0.22em] text-[#e3c995] transition hover:bg-[#c8a875] hover:text-[#07080a]">{localizedValue(settings?.whatsappCtaText, safeLocale) || dictionary.home.cta}</a> : null}
+          <Link href={`/${safeLocale}/project`} className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[var(--color-bg-base)]">{dictionary.ui.viewProjects}</Link>
+          {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{localizedValue(settings?.whatsappCtaText, safeLocale) || dictionary.home.cta}</a> : null}
         </div>
       </section>
     </main>

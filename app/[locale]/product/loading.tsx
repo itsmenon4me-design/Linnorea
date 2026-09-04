@@ -1,0 +1,1 @@
+export default function ProductLoading() { return <main className="min-h-screen animate-pulse bg-[var(--color-bg-base)] p-8 pt-40"><div className="h-20 w-2/3 bg-white/10" /><div className="mt-20 grid gap-8 md:grid-cols-2"><div className="aspect-square bg-white/10" /><div className="aspect-square bg-white/10" /></div></main>; }

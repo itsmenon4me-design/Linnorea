@@ -49,7 +49,7 @@ export default async function HomePage({ params }: HomePageProps) {
   const mosaicTiles = Array.from({ length: 6 }, (_, index) => featuredProjects[index] ?? null);
 
   return (
-    <main className="min-h-screen bg-[#07080a] text-white">
+    <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
       <Hero dictionary={dictionary} locale={safeLocale} slides={heroSlides} />
       <ScrollReveal as="section">
@@ -79,8 +79,8 @@ export default async function HomePage({ params }: HomePageProps) {
             const style = project ? localizedValue(project.styleTag, safeLocale) : "Awaiting featured project";
             const imageUrl = project?.coverImage ? urlFor(project.coverImage).width(1400).height(1000).fit("crop").auto("format").url() : null;
             const tile = (
-              <article data-reveal className="group relative aspect-[4/3] overflow-hidden bg-[#17191c]">
-                {imageUrl ? <Image src={imageUrl} alt={title} width={1200} height={900} className="h-[116%] w-full origin-bottom object-cover transition-transform duration-[2400ms] ease-out motion-reduce:transition-none group-hover:scale-[1.1]" /> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#171b1f,#07080a)] px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">[Placeholder featured image]</div>}
+              <article data-reveal className="group relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
+                {imageUrl ? <Image src={imageUrl} alt={title} width={1200} height={900} className="h-[116%] w-full origin-bottom object-cover transition-transform duration-[2400ms] ease-out motion-reduce:transition-none group-hover:scale-[1.1]" /> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#171b1f,var(--color-bg-base))] px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">[Placeholder featured image]</div>}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/60">{style}</p>

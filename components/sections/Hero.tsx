@@ -318,7 +318,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   };
 
   return (
-    <section ref={rootRef} data-home-hero className="relative isolate flex min-h-screen items-end overflow-hidden bg-[#07080a] text-white">
+    <section ref={rootRef} data-home-hero className="relative isolate flex min-h-screen items-end overflow-hidden bg-[var(--color-bg-base)] text-white">
       <div className="absolute inset-0">
         {resolvedSlides.map((slide, index) => {
           const slidePlaybackId = playbackIds[index];
@@ -410,7 +410,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                         cy="16"
                         r={dotRadius}
                         fill="none"
-                        stroke="#d51f2c"
+                        stroke="var(--color-accent-progress)"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeDasharray={dotCircumference}
@@ -445,7 +445,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       <a
         href="#collections"
         data-animate
-        className="group pointer-events-auto absolute bottom-[12%] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#c8a875]"
+        className="group pointer-events-auto absolute bottom-[12%] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]"
         aria-label={`${dictionary.home.discover} collections`}
       >
         <ArrowAction label={dictionary.home.discover} size="md" className="text-[10px] uppercase tracking-[0.35em] md:text-xs" />

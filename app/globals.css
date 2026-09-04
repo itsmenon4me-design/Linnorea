@@ -1,26 +1,240 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #07080a;
+  --foreground: #f4f4f5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-bg-base: #07080a;
+  --color-bg-elevated: #17191c;
+  --color-accent-progress: #d51f2c;
+  --color-accent-gold: #c8a875;
+  --color-accent-gold-light: #e3c995;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+}
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg-base);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 450ms ease;
+}
+
+.splash-screen--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen--ready {
+    display: none;
+  }
+}
+
+.splash-screen__logo {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+  animation: splash-logo-pulse 1.8s ease-in-out infinite;
+}
+
+@media (max-width: 959.99px) {
+  .header-site {
+    background: var(--color-bg-elevated);
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    transition: none;
+  }
+}
+
+@media (min-width: 960px) {
+  .header-desktop-nav {
+    display: flex;
+  }
+
+  .header-desktop-language {
+    display: block;
+  }
+
+  .header-mobile-toggle,
+  .header-mobile-menu {
+    display: none;
+  }
+}
+
+@keyframes splash-logo-pulse {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.arrow-circle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-foreground);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+}
+
+[data-home-hero] mux-player {
+  --media-control-display: none;
+  --media-play-button-display: none;
+  --media-loading-indicator-display: none;
+}
+
+[data-home-hero] .hero-pause-button:hover,
+[data-home-hero] .hero-pause-button:focus-visible {
+  background: var(--color-foreground);
+  color: var(--color-bg-base);
+}
+
+.arrow-circle-button svg {
+  display: block;
+}
+
+.arrow-circle-button:hover,
+.arrow-circle-button:focus-visible {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.arrow-circle-button--sm {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.arrow-circle-button--md {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.hero-discover-button {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hero-discover-action:hover .hero-discover-button {
+  border-color: rgba(213, 31, 44, 0.9);
+  background: rgba(213, 31, 44, 0.08);
+}
+
+.hero-discover-action:hover .hero-discover-label {
+  border-color: var(--color-foreground);
+}
+
+@keyframes hero-discover-fill {
+  from {
+    stroke-dashoffset: 163.36;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes dot-progress-fill {
+  from {
+    stroke-dashoffset: 43.98;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dot-progress-ring {
+  transform-origin: center;
+  animation: dot-progress-fill 6s linear forwards;
+}
+
+.hero-discover-action:hover .hero-discover-fill {
+  animation: hero-discover-fill 0.5s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .arrow-circle-button,
+  .arrow-circle-button:hover,
+  .arrow-circle-button:focus-visible {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .dot-progress-ring {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+
+  .splash-screen,
+  .splash-screen__logo {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .splash-screen__logo {
+    opacity: 0.8;
+  }
+
+  .hero-discover-action:hover .hero-discover-fill {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
 }

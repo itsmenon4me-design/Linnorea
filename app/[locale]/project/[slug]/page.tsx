@@ -54,9 +54,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
 
   return (
-    <main className="bg-[#07080a] text-white">
+    <main className="bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
-      <section className="relative flex min-h-[88vh] items-end overflow-hidden bg-[#17191c]">
+      <section className="relative flex min-h-[88vh] items-end overflow-hidden bg-[var(--color-bg-elevated)]">
         {project.heroVideo?.asset?.url ? (
           <video
             src={project.heroVideo.asset.url}
@@ -72,9 +72,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-[0.3em] text-white/45">[Placeholder hero image]</div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07080a] via-black/25 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/25 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-14 pt-40 md:px-8 md:pb-20">
-          <p className="text-[10px] uppercase tracking-[0.38em] text-[#c8a875]">{style || project.category || "Project"}</p>
+          <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">{style || project.category || "Project"}</p>
           <h1 className="mt-5 max-w-5xl text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{title}</h1>
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-sm text-white/75">
             {location ? <span>{location}</span> : null}
@@ -99,7 +99,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
             const imageUrl = urlFor(image).width(2200).height(index % 3 === 1 ? 1300 : 1500).fit("crop").auto("format").url();
             return (
               <ScrollReveal key={image._key ?? `${project._id}-${index}`} as="div">
-                <div data-reveal className="relative aspect-[4/3] overflow-hidden bg-[#17191c] md:aspect-[16/9]">
+                <div data-reveal className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)] md:aspect-[16/9]">
                   <Image src={imageUrl} alt={`${title} gallery ${index + 1}`} fill sizes="100vw" className="object-cover" />
                 </div>
               </ScrollReveal>
@@ -126,24 +126,24 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         <section className="mx-5 border-y border-white/15 py-20 md:mx-8 md:py-28">
           <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-end">
             <h2 className="max-w-2xl text-4xl font-medium tracking-[-0.055em] md:text-6xl">Punya ruang yang ingin diwujudkan?</h2>
-            <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[#c8a875] px-5 text-[10px] uppercase tracking-[0.22em] text-[#e3c995] transition hover:bg-[#c8a875] hover:text-[#07080a]">{whatsappText}</a>
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{whatsappText}</a>
           </div>
         </section>
       ) : null}
 
       <nav aria-label="Project navigation" className="mx-auto grid max-w-7xl grid-cols-2 px-5 py-20 md:px-8 md:py-28">
         {previous ? (
-          <Link href={`/${safeLocale}/project/${previous.slug?.current}`} className="group flex items-start gap-4 border-r border-white/15 pr-5 focus-visible:outline-2 focus-visible:outline-[#c8a875]">
+          <Link href={`/${safeLocale}/project/${previous.slug?.current}`} className="group flex items-start gap-4 border-r border-white/15 pr-5 focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)]">
             <span className="block">
               <ArrowAction label={dictionary.ui.previous} direction="left" />
-              <span className="mt-4 block text-xl text-white/85 transition group-hover:text-[#e3c995]">{localizedValue(previous.title, safeLocale)}</span>
+              <span className="mt-4 block text-xl text-white/85 transition group-hover:text-[var(--color-accent-gold-light)]">{localizedValue(previous.title, safeLocale)}</span>
             </span>
           </Link>
         ) : <span />}
         {next ? (
-          <Link href={`/${safeLocale}/project/${next.slug?.current}`} className="group ml-auto flex items-start justify-end gap-4 pl-5 text-right focus-visible:outline-2 focus-visible:outline-[#c8a875]">
+          <Link href={`/${safeLocale}/project/${next.slug?.current}`} className="group ml-auto flex items-start justify-end gap-4 pl-5 text-right focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)]">
             <span className="block text-right">
-              <span className="mt-4 block text-xl text-white/85 transition group-hover:text-[#e3c995]">{localizedValue(next.title, safeLocale)}</span>
+              <span className="mt-4 block text-xl text-white/85 transition group-hover:text-[var(--color-accent-gold-light)]">{localizedValue(next.title, safeLocale)}</span>
             </span>
             <ArrowAction label={dictionary.ui.next} />
           </Link>

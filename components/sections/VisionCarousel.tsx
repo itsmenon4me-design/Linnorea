@@ -248,7 +248,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       ref={sectionRef}
       tabIndex={0}
       aria-label="Vision and goals carousel"
-      className="border-y border-white/10 bg-[#0d0f12] px-5 py-16 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/60 md:px-8 md:py-24"
+      className="border-y border-white/10 bg-[var(--color-bg-elevated)] px-5 py-16 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/60 md:px-8 md:py-24"
     >
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-center md:gap-16">
         <div className={transition ? "relative min-h-[300px] md:min-h-[340px]" : undefined}>
@@ -299,7 +299,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
                       cy="12"
                       r={dotRadius}
                       fill="none"
-                      stroke="#d9302f"
+                      stroke="var(--color-accent-progress)"
                       strokeWidth="2.2"
                       strokeLinecap="round"
                       strokeDasharray={dotCircumference}

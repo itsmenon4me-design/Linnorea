@@ -28,11 +28,11 @@ export default async function ProjectListingPage({ params }: ProjectListingProps
   const projects = await sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } });
 
   return (
-    <main className="min-h-screen bg-[#07080a] text-white">
+    <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
       <section className="mx-auto max-w-7xl px-5 pb-24 pt-36 md:px-8 md:pt-48">
         <div className="max-w-4xl border-b border-white/15 pb-12">
-          <p className="text-[10px] uppercase tracking-[0.38em] text-[#c8a875]">Linnorea Design Works</p>
+          <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">Linnorea Design Works</p>
           <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.project}</h1>
         </div>
         {projects.length === 0 ? (
