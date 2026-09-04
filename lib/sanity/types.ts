@@ -73,6 +73,22 @@ export type SiteSettings = {
   whatsappCtaText?: LocalizedString;
 };
 
+export type ApproachItem = {
+  _id: string;
+  title?: LocalizedString;
+  description?: LocalizedString;
+  order?: number;
+};
+
+export type TeamMember = {
+  _id: string;
+  name?: string;
+  role?: LocalizedString;
+  bio?: LocalizedString;
+  photo?: SanityImage;
+  order?: number;
+};
+
 export type Service = {
   _id: string;
   title?: LocalizedString;

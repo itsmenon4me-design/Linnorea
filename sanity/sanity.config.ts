@@ -10,6 +10,8 @@ import { product } from "./schemas/product";
 import { service } from "./schemas/service";
 import { siteSettings } from "./schemas/siteSettings";
 import { socialLink } from "./schemas/socialLink";
+import { approachItem } from "./schemas/approachItem";
+import { teamMember } from "./schemas/teamMember";
 import { structure } from "./structure";
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID ?? process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "stol8iwq";
@@ -41,6 +43,8 @@ export default defineConfig({
       product,
       siteSettings,
       socialLink,
+      approachItem,
+      teamMember,
     ],
   },
 });

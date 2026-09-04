@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
-import { siteSettingsQuery } from "@/lib/sanity/queries";
-import { localizedValue, type SiteSettings } from "@/lib/sanity/types";
+import { urlFor } from "@/lib/sanity/image";
+import { approachItemsQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
+import { localizedValue, type ApproachItem, type SiteSettings, type TeamMember } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 type AboutProps = { params: Promise<{ locale: string }> };
@@ -25,7 +27,11 @@ export default async function AboutPage({ params }: AboutProps) {
   const { locale } = await params;
   const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
   const dictionary = getDictionary(safeLocale);
-  const settings = await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } });
+  const [settings, approachItems, teamMembers] = await Promise.all([
+    sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<ApproachItem[]>(approachItemsQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<TeamMember[]>(teamMembersQuery, {}, { next: { revalidate } }),
+  ]);
   const story = localizedValue(settings?.brandStatement, safeLocale) || "[Placeholder brand story, awaiting approved copy]";
   const whatsappNumber = settings?.whatsappNumber;
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
@@ -55,12 +61,16 @@ export default async function AboutPage({ params }: AboutProps) {
         <div className="border-t border-white/15 pt-6">
           <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Approach</p>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
-            {["Listen before designing.", "Let the room lead.", "Make daily rituals feel considered."].map((value, index) => (
-              <ScrollReveal key={value} className="border-b border-white/15 pb-8">
+            {(approachItems.length ? approachItems : [
+              { _id: "fallback-1", title: { id: "Listen before designing." }, description: { id: "[Placeholder approach copy, awaiting final content]" } },
+              { _id: "fallback-2", title: { id: "Let the room lead." }, description: { id: "[Placeholder approach copy, awaiting final content]" } },
+              { _id: "fallback-3", title: { id: "Make daily rituals feel considered." }, description: { id: "[Placeholder approach copy, awaiting final content]" } },
+            ]).map((item, index) => (
+              <ScrollReveal key={item._id} className="border-b border-white/15 pb-8">
                 <div data-reveal>
                   <span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span>
-                  <h2 className="mt-8 max-w-xs text-2xl leading-tight tracking-[-0.04em] text-white/90">{value}</h2>
-                  <p className="mt-5 text-sm leading-6 text-white/55">[Placeholder approach copy, awaiting final content]</p>
+                  <h2 className="mt-8 max-w-xs text-2xl leading-tight tracking-[-0.04em] text-white/90">{localizedValue(item.title, safeLocale)}</h2>
+                  <p className="mt-5 text-sm leading-6 text-white/55">{localizedValue(item.description, safeLocale)}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -71,7 +81,18 @@ export default async function AboutPage({ params }: AboutProps) {
       <section className="mx-5 border-y border-white/15 py-16 md:mx-8 md:py-24">
         <div className="mx-auto max-w-7xl">
           <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Team</p>
-          <p className="mt-6 text-sm text-white/65">Team and founder information has not been confirmed yet.</p>
+          {teamMembers.length ? (
+            <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+              {teamMembers.map((member) => (
+                <article key={member._id} className="border-b border-white/15 pb-6">
+                  {member.photo ? <Image src={urlFor(member.photo).width(800).height(800).fit("crop").auto("format").url()} alt={member.name ?? ""} width={800} height={800} className="mb-5 aspect-square w-full object-cover" /> : null}
+                  <h2 className="text-2xl tracking-[-0.04em]">{member.name}</h2>
+                  <p className="mt-2 text-sm text-[var(--color-accent-gold)]">{localizedValue(member.role, safeLocale)}</p>
+                  {localizedValue(member.bio, safeLocale) ? <p className="mt-4 text-sm leading-6 text-white/65">{localizedValue(member.bio, safeLocale)}</p> : null}
+                </article>
+              ))}
+            </div>
+          ) : <p className="mt-6 text-sm text-white/65">Team and founder information has not been confirmed yet.</p>}
         </div>
       </section>
 

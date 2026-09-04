@@ -80,6 +80,18 @@ export const siteSettingsQuery = `
   }
 `;
 
+export const approachItemsQuery = `
+  *[_type == "approachItem"] | order(order asc, _createdAt asc) {
+    _id, title, description, order
+  }
+`;
+
+export const teamMembersQuery = `
+  *[_type == "teamMember"] | order(order asc, _createdAt asc) {
+    _id, name, role, bio, photo, order
+  }
+`;
+
 export const serviceListQuery = `
   *[_type == "service"] | order(order asc, _createdAt asc) {
     _id, title, slug, image, description, order
