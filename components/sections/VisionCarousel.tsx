@@ -53,10 +53,14 @@ type TextSlideProps = {
 const TextSlide = forwardRef<HTMLDivElement, TextSlideProps>(function TextSlide({ slide, readMoreLabel }, ref) {
   return (
     <div ref={ref} className="absolute inset-0">
-      <p className="text-[10px] uppercase tracking-[0.35em] text-white/55">{slide.label}</p>
-      <h2 className="mt-5 max-w-xl text-2xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white md:text-4xl">{slide.headline}</h2>
-      <p className="mt-6 max-w-md text-sm leading-6 text-white/65 md:text-base">{slide.description}</p>
-      <a href="#collections" className="group mt-8 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.28em] text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+      <p data-slide-element className="text-[10px] uppercase tracking-[0.35em] text-white/55">{slide.label}</p>
+      <h2 data-slide-element className="mt-5 max-w-xl text-2xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white md:text-4xl">
+        {slide.headline.split(" ").map((word, index) => (
+          <span key={`${word}-${index}`} data-headline-word className="inline-block">{`${word}${index < slide.headline.split(" ").length - 1 ? "\u00a0" : ""}`}</span>
+        ))}
+      </h2>
+      <p data-slide-element className="mt-6 max-w-md text-sm leading-6 text-white/65 md:text-base">{slide.description}</p>
+      <a data-slide-element href="#collections" className="group mt-8 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.28em] text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
         <ArrowAction label={readMoreLabel} />
       </a>
     </div>
@@ -210,17 +214,31 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     if (!currentPanel || !incomingPanel || !imageCurtain || !currentText || !incomingText) return;
 
     if (reducedMotion) {
-      gsap.set([currentPanel, incomingPanel, imageCurtain], { clearProps: "all" });
-      gsap.set([currentText, incomingText], { clearProps: "all" });
-      window.setTimeout(() => {
-        setActiveIndex(transition.to);
-        transitionRef.current = null;
-        setTransition(null);
-      }, 0);
-      return;
+      const timeline = gsap.timeline({
+        defaults: { duration: 0.12, ease: "power1.out" },
+        onComplete: () => {
+          setActiveIndex(transition.to);
+          transitionRef.current = null;
+          setTransition(null);
+        },
+      });
+      timeline
+        .to([currentPanel, currentText], { opacity: 0 })
+        .set([incomingPanel, incomingText], { opacity: 1 });
+      return () => {
+        timeline.kill();
+        gsap.set([currentPanel, incomingPanel, imageCurtain, currentText, incomingText], { clearProps: "all" });
+      };
     }
 
     const context = gsap.context(() => {
+      const currentElements = currentText.querySelectorAll<HTMLElement>("[data-slide-element]");
+      const incomingElements = incomingText.querySelectorAll<HTMLElement>("[data-slide-element]");
+      const incomingWords = incomingText.querySelectorAll<HTMLElement>("[data-headline-word]");
+      const headlineStart = 0.36;
+      const headlineDuration = 0.18 + Math.max(0, incomingWords.length - 1) * 0.05;
+      const descriptionStart = headlineStart + headlineDuration + 0.06;
+      const actionStart = descriptionStart + 0.2 + 0.06;
       const timeline = gsap.timeline({
         defaults: { ease: "power2.inOut" },
         onComplete: () => {
@@ -231,14 +249,17 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       });
 
       gsap.set(incomingPanel, { opacity: 0 });
-      gsap.set(incomingText, { xPercent: transition.direction * 100 });
+      gsap.set([incomingElements[0], incomingElements[2], incomingElements[3], ...incomingWords], { opacity: 0 });
       timeline
+        .to(currentElements, { opacity: 0, duration: 0.18, ease: "power1.out" }, 0)
         .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
         .to(imageCurtain, { scaleX: 0.08, duration: 0.2, ease: "power2.inOut" }, 0.16)
         .to(imageCurtain, { scaleX: 1, duration: 0.24, ease: "power2.inOut" }, 0.36)
         .to(incomingPanel, { opacity: 1, duration: 0.14, ease: "power1.out" }, 0.6)
-        .to(currentText, { xPercent: transition.direction * -100, duration: 0.72, ease: "power2.inOut" }, 0)
-        .to(incomingText, { xPercent: 0, duration: 0.72, ease: "power2.inOut" }, 0);
+        .to(incomingElements[0], { opacity: 1, duration: 0.16, ease: "power1.out" }, 0.24)
+        .to(incomingWords, { opacity: 1, duration: 0.18, stagger: 0.05, ease: "power1.out" }, headlineStart)
+        .to(incomingElements[2], { opacity: 1, duration: 0.2, ease: "power1.out" }, descriptionStart)
+        .to(incomingElements[3], { opacity: 1, duration: 0.18, ease: "power1.out" }, actionStart);
     }, sectionRef);
 
     return () => context.revert();
