@@ -252,16 +252,16 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       gsap.set(incomingPanel, { opacity: 0 });
       gsap.set([incomingLabel, incomingDescription, incomingAction, ...incomingWords], { opacity: 0 });
       timeline
-        .to(currentAction, { opacity: 0, duration: 0.12, ease: "power1.out" }, 0)
-        .to([currentLabel, ...currentWords], { opacity: 0, duration: 0.14, stagger: 0.05, ease: "power1.out" }, 0.08)
-        .to(currentDescription, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0.28)
         .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
         .to(imageCurtain, { scaleX: 0.08, duration: 0.24, ease: "power2.inOut" }, 0.16)
         .to(imageCurtain, { opacity: 0, duration: 0.08, ease: "power1.out" }, 0.4)
-        .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, 0.88)
-        .to(imageCurtain, { scaleX: 1, duration: 0.24, ease: "power2.inOut" }, 0.88)
-        .to(incomingPanel, { opacity: 1, duration: 0.14, ease: "power1.out" }, 1.12)
-        .to(incomingLabel, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0.88)
+        .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, 1)
+        .to(imageCurtain, { scaleX: 1, duration: 0.3, ease: "power2.out" }, 1)
+        .to(incomingPanel, { opacity: 1, duration: 0.16, ease: "power1.out" }, 1.7)
+        .to(currentAction, { opacity: 0, duration: 0.12, ease: "power1.out" }, 0)
+        .to([currentLabel, ...currentWords], { opacity: 0, duration: 0.14, stagger: 0.05, ease: "power1.out" }, 0.08)
+        .to(currentDescription, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0.28)
+        .to(incomingLabel, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0.9)
         .to(incomingWords, { opacity: 1, duration: 0.18, stagger: 0.05, ease: "power1.out" }, headlineStart)
         .to(incomingDescription, { opacity: 1, duration: 0.2, ease: "power1.out" }, descriptionStart)
         .to(incomingAction, { opacity: 1, duration: 0.18, ease: "power1.out" }, actionStart);
