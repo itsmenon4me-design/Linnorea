@@ -47,17 +47,16 @@ type SlideTransition = {
 
 type TextSlideProps = {
   slide: SlideData;
-  isIncoming?: boolean;
   readMoreLabel: string;
 };
 
-const TextSlide = forwardRef<HTMLDivElement, TextSlideProps>(function TextSlide({ slide, isIncoming = false, readMoreLabel }, ref) {
+const TextSlide = forwardRef<HTMLDivElement, TextSlideProps>(function TextSlide({ slide, readMoreLabel }, ref) {
   return (
-    <div ref={ref} className={isIncoming ? "absolute inset-0" : undefined}>
-      <p data-slide-element className="text-[10px] uppercase tracking-[0.35em] text-white/55">{slide.label}</p>
-      <h2 data-slide-element className="mt-5 max-w-xl text-2xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white md:text-4xl">{slide.headline}</h2>
-      <p data-slide-element className="mt-6 max-w-md text-sm leading-6 text-white/65 md:text-base">{slide.description}</p>
-      <a data-slide-element href="#collections" className="group mt-8 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.28em] text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+    <div ref={ref} className="absolute inset-0">
+      <p className="text-[10px] uppercase tracking-[0.35em] text-white/55">{slide.label}</p>
+      <h2 className="mt-5 max-w-xl text-2xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-white md:text-4xl">{slide.headline}</h2>
+      <p className="mt-6 max-w-md text-sm leading-6 text-white/65 md:text-base">{slide.description}</p>
+      <a href="#collections" className="group mt-8 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.28em] text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
         <ArrowAction label={readMoreLabel} />
       </a>
     </div>
@@ -208,11 +207,9 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     const incomingText = incomingTextRef.current;
     if (!currentPanel || !incomingPanel || !currentText || !incomingText) return;
 
-    const currentElements = currentText.querySelectorAll<HTMLElement>("[data-slide-element]");
-    const incomingElements = incomingText.querySelectorAll<HTMLElement>("[data-slide-element]");
     if (reducedMotion) {
       gsap.set([currentPanel, incomingPanel], { clearProps: "all" });
-      gsap.set(incomingElements, { opacity: 1, y: 0, clearProps: "transform" });
+      gsap.set([currentText, incomingText], { clearProps: "all" });
       window.setTimeout(() => {
         setActiveIndex(transition.to);
         transitionRef.current = null;
@@ -223,7 +220,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
 
     const context = gsap.context(() => {
       const timeline = gsap.timeline({
-        defaults: { ease: "power2.out" },
+        defaults: { ease: "power2.inOut" },
         onComplete: () => {
           setActiveIndex(transition.to);
           transitionRef.current = null;
@@ -232,12 +229,12 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       });
 
       gsap.set(incomingPanel, { xPercent: transition.direction * 100 });
-      gsap.set(incomingElements, { opacity: 0, y: 18 });
+      gsap.set(incomingText, { xPercent: transition.direction * 100 });
       timeline
-        .to(currentElements, { opacity: 0, y: -8, duration: 0.24, stagger: 0.03 }, 0)
         .to(currentPanel, { xPercent: transition.direction * -100, duration: 0.72, ease: "power2.inOut" }, 0)
         .to(incomingPanel, { xPercent: 0, duration: 0.72, ease: "power2.inOut" }, 0)
-        .to(incomingElements, { opacity: 1, y: 0, duration: 0.46, stagger: 0.12, ease: "power2.out" }, 0.18);
+        .to(currentText, { xPercent: transition.direction * -100, duration: 0.72, ease: "power2.inOut" }, 0)
+        .to(incomingText, { xPercent: 0, duration: 0.72, ease: "power2.inOut" }, 0);
     }, sectionRef);
 
     return () => context.revert();
@@ -251,11 +248,11 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       className="border-y border-white/10 bg-[var(--color-bg-elevated)] px-5 py-16 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/60 md:px-8 md:py-24"
     >
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-center md:gap-16">
-        <div className={transition ? "relative min-h-[300px] md:min-h-[340px]" : undefined}>
+        <div className="relative min-h-[300px] md:min-h-[340px]">
           {transition ? (
             <>
               <TextSlide ref={currentTextRef} slide={slides[transition.from]} readMoreLabel={readMoreLabel} />
-              <TextSlide ref={incomingTextRef} slide={slides[transition.to]} isIncoming readMoreLabel={readMoreLabel} />
+              <TextSlide ref={incomingTextRef} slide={slides[transition.to]} readMoreLabel={readMoreLabel} />
             </>
           ) : <TextSlide ref={currentTextRef} slide={activeSlide} readMoreLabel={readMoreLabel} />}
         </div>
@@ -271,7 +268,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
       </div>
 
       <div className="mx-auto mt-10 flex max-w-7xl items-center justify-between gap-6">
-        <button type="button" onClick={() => changeSlide(activeIndex - 1)} aria-label={previousLabel} className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors duration-300 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none">
+        <button type="button" onClick={() => changeSlide(activeIndex - 1)} disabled={Boolean(transition)} aria-label={previousLabel} className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors duration-300 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none">
           <ArrowIcon direction="left" className="h-[55%] w-[55%]" />
         </button>
         <div className="flex items-center gap-3" role="tablist" aria-label="Vision slides">
@@ -289,7 +286,8 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
                 aria-selected={isActive}
                 aria-label={`Show slide ${index + 1}`}
                 onClick={() => changeSlide(index)}
-                className="flex h-6 w-6 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                disabled={Boolean(transition)}
+                className="flex h-6 w-6 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-40"
               >
                 {isActive ? (
                   <span className="relative flex h-5 w-5 items-center justify-center" aria-hidden="true">
@@ -318,7 +316,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
             );
           })}
         </div>
-        <button type="button" onClick={() => changeSlide(activeIndex + 1)} aria-label={nextLabel} className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors duration-300 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none">
+        <button type="button" onClick={() => changeSlide(activeIndex + 1)} disabled={Boolean(transition)} aria-label={nextLabel} className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors duration-300 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none">
           <ArrowIcon className="h-[55%] w-[55%]" />
         </button>
       </div>
