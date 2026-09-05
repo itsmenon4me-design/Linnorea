@@ -43,7 +43,7 @@ export function LazyVisionCarousel(props: LazyVisionCarouselProps) {
   }, []);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="min-h-[49.5rem] md:min-h-[50rem]">
       {isNearViewport ? (
         <DeferredVisionCarousel {...props} />
       ) : (
