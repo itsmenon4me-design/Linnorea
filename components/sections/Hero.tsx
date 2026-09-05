@@ -34,6 +34,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const [isHeroInView, setIsHeroInView] = useState(true);
   const [isTabVisible, setIsTabVisible] = useState(true);
   const [autoAdvanceResetKey, setAutoAdvanceResetKey] = useState(0);
+  const [readyVideoIndexes, setReadyVideoIndexes] = useState<Set<number>>(() => new Set());
 
   const resolvedSlides = useMemo<HeroSlide[]>(
     () =>
@@ -63,6 +64,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     [resolvedSlides],
   );
   const activePlaybackId = playbackIds[activeIndex] ?? null;
+  const nextIndex = resolvedSlides.length > 1 ? (activeIndex + 1) % resolvedSlides.length : activeIndex;
+  const isPlayerWindowIndex = (index: number) => index === activeIndex || index === nextIndex;
   const playActiveVideo = (player: MuxPlayerElement) => {
     if (player.readyState < 3) {
       return;
@@ -71,6 +74,21 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     void player.play().catch((error: unknown) => {
       console.warn("Hero video could not be played.", error);
     });
+  };
+
+  const handleVideoCanPlay = (index: number) => {
+    setReadyVideoIndexes((current) => {
+      if (current.has(index)) return current;
+      const next = new Set(current);
+      next.add(index);
+      return next;
+    });
+
+    if (index === activeIndex && !isPaused && isHeroInView && isTabVisible) {
+      const player = muxPlayerRefs.current[index];
+      if (player) playActiveVideo(player);
+      window.dispatchEvent(new Event("linnorea:hero-ready"));
+    }
   };
 
   useEffect(() => {
@@ -210,7 +228,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
     const advance = () => {
       setProgress(1);
-      setActiveIndex((currentIndex) => (currentIndex + 1) % resolvedSlides.length);
+      const nextActiveIndex = (activeIndex + 1) % resolvedSlides.length;
+      const nextWindowIndex = (nextActiveIndex + 1) % resolvedSlides.length;
+      setReadyVideoIndexes(new Set([nextActiveIndex, nextWindowIndex]));
+      setActiveIndex(nextActiveIndex);
     };
 
     const startedAt = performance.now() - progressRef.current * AUTO_ADVANCE_MS;
@@ -238,6 +259,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const goToSlide = (index: number, isManualNavigation = false) => {
     const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
     const currentPlayer = muxPlayerRefs.current[activeIndex];
+    const nextWindowIndex = resolvedSlides.length > 1 ? (normalizedIndex + 1) % resolvedSlides.length : normalizedIndex;
+    setReadyVideoIndexes(new Set([normalizedIndex, nextWindowIndex]));
 
     if (normalizedIndex !== activeIndex && currentPlayer) {
       currentPlayer.pause();
@@ -326,7 +349,22 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
           return (
             <div key={slide._id ?? `hero-media-${index}`} className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${isActive ? "opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!isActive}>
-              {slidePlaybackId && mounted ? (
+              {slideMediaUrl ? (
+                <Image
+                  src={slideMediaUrl}
+                  alt={isActive ? headline : ""}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
+                  className={`object-cover transition-opacity duration-300 motion-reduce:transition-none ${slidePlaybackId && isActive && readyVideoIndexes.has(index) ? "opacity-0" : "opacity-100"}`}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
+                  Placeholder Hero Image
+                </div>
+              )}
+              {slidePlaybackId && mounted && isPlayerWindowIndex(index) ? (
                 <MuxPlayer
                   ref={(player) => {
                     muxPlayerRefs.current[index] = player;
@@ -355,32 +393,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                   }}
                   onTimeUpdate={isActive ? handleVideoTimeUpdate : undefined}
                   onEnded={() => handleVideoEnded(index)}
-                  onCanPlay={isActive && !isPaused ? () => {
-                    const player = muxPlayerRefs.current[index];
-                    if (player) {
-                      playActiveVideo(player);
-                    }
-                    if (isActive) {
-                      window.dispatchEvent(new Event("linnorea:hero-ready"));
-                    }
-                  } : undefined}
-                  className="pointer-events-none h-full w-full object-cover"
+                  onCanPlay={() => handleVideoCanPlay(index)}
+                  className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && readyVideoIndexes.has(index) ? "opacity-100" : "opacity-0"}`}
                 />
-              ) : slideMediaUrl ? (
-                <Image
-                  src={slideMediaUrl}
-                  alt={isActive ? headline : ""}
-                  fill
-                  priority={index === 0}
-                  sizes="100vw"
-                  onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
-                  Placeholder Hero Image
-                </div>
-              )}
+              ) : null}
             </div>
           );
         })}
