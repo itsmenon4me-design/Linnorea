@@ -13,6 +13,13 @@ export const siteSettings = defineType({
   name: "siteSettings",
   title: "Site settings",
   type: "document",
+  fieldsets: [
+    {
+      name: "studioVisual",
+      title: "Studio Visual (About page)",
+      description: "Isi salah satu, video akan diprioritaskan jika keduanya diisi.",
+    },
+  ],
   fields: [
     defineField({
       name: "logo",
@@ -24,6 +31,19 @@ export const siteSettings = defineType({
       name: "brandStatement",
       title: "Brand statement",
       type: "localeString",
+    }),
+    defineField({
+      name: "studioVisualImage",
+      title: "Studio visual image",
+      type: "image",
+      options: { hotspot: true },
+      fieldset: "studioVisual",
+    }),
+    defineField({
+      name: "studioVisualVideo",
+      title: "Studio visual video",
+      type: "mux.video",
+      fieldset: "studioVisual",
     }),
     defineField({
       name: "officeAddress",

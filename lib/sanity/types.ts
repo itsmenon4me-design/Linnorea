@@ -67,6 +67,8 @@ export type Project = {
 
 export type SiteSettings = {
   brandStatement?: LocalizedString;
+  studioVisualImage?: SanityImage;
+  studioVisualVideo?: MuxVideo;
   officeAddress?: Partial<Record<Locale, string>>;
   googleMapsUrl?: string;
   whatsappNumber?: string;

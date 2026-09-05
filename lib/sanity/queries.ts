@@ -71,6 +71,13 @@ export const siteSettingsQuery = `
     _type,
     logo,
     brandStatement,
+    studioVisualImage,
+    studioVisualVideo {
+      asset-> {
+        playbackId,
+        status
+      }
+    },
     officeAddress,
     googleMapsUrl,
     whatsappNumber,
