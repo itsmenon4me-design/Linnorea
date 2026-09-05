@@ -3,6 +3,7 @@ import { sanityClient } from "@/lib/sanity/client";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { localizedValue, type SiteSettings } from "@/lib/sanity/types";
 
 type FooterProps = {
   currentLocale: Locale;
@@ -13,42 +14,12 @@ type SocialLink = {
   url?: string;
 };
 
-type SiteSettings = {
-  brandStatement?: {
-    id?: string;
-    en?: string;
-    ja?: string;
-    fr?: string;
-    de?: string;
-    it?: string;
-  };
-  officeAddress?: {
-    id?: string;
-    en?: string;
-    ja?: string;
-    fr?: string;
-    de?: string;
-    it?: string;
-  };
-  googleMapsUrl?: string;
-  whatsappNumber?: string;
-  whatsappCtaText?: {
-    id?: string;
-    en?: string;
-    ja?: string;
-    fr?: string;
-    de?: string;
-    it?: string;
-  };
-  socialLinks?: SocialLink[];
-};
-
 export async function Footer({ currentLocale, dictionary }: FooterProps) {
   const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
-  const brandText = settings?.brandStatement?.[currentLocale] ?? settings?.brandStatement?.id ?? "Linnorea Design Works";
-  const officeAddress = settings?.officeAddress?.[currentLocale] ?? settings?.officeAddress?.id ?? "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
+  const brandText = localizedValue(settings?.brandStatement, currentLocale) || "Linnorea Design Works";
+  const officeAddress = localizedValue(settings?.officeAddress, currentLocale) || "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
   const whatsappNumber = settings?.whatsappNumber ?? "+621234567890";
-  const whatsappText = settings?.whatsappCtaText?.[currentLocale] ?? settings?.whatsappCtaText?.id ?? dictionary.home.cta;
+  const whatsappText = localizedValue(settings?.whatsappCtaText, currentLocale) || dictionary.home.cta;
   const socialLinks = settings?.socialLinks ?? [
     { platform: "Instagram", url: "https://instagram.com" },
     { platform: "Threads", url: "https://www.threads.net" },
