@@ -349,54 +349,56 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
           return (
             <div key={slide._id ?? `hero-media-${index}`} className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${isActive ? "opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!isActive}>
-              {slideMediaUrl ? (
-                <Image
-                  src={slideMediaUrl}
-                  alt={isActive ? headline : ""}
-                  fill
-                  priority={index === 0}
-                  sizes="100vw"
-                  onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
-                  className={`object-cover transition-opacity duration-300 motion-reduce:transition-none ${slidePlaybackId && isActive && readyVideoIndexes.has(index) ? "opacity-0" : "opacity-100"}`}
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
-                  Placeholder Hero Image
-                </div>
-              )}
-              {slidePlaybackId && mounted && isPlayerWindowIndex(index) ? (
-                <MuxPlayer
-                  ref={(player) => {
-                    muxPlayerRefs.current[index] = player;
-                  }}
-                  playbackId={slidePlaybackId}
-                  autoPlay={isActive}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  poster={slideMediaUrl ?? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0`}
-                  theme="microvideo"
-                  nohotkeys
-                  defaultHiddenCaptions
-                  noVolumePref
-                  disablePictureInPicture
-                  style={{
-                    "--controls": "none",
-                    "--time-range": "none",
-                    "--volume-range": "none",
-                    "--media-control-display": "none",
-                    "--media-control-bar-display": "none",
-                    "--media-time-range-display": "none",
-                    "--media-preview-time-display": "none",
-                    "--media-play-button-display": "none",
-                    "--media-loading-indicator-display": "none",
-                  }}
-                  onTimeUpdate={isActive ? handleVideoTimeUpdate : undefined}
-                  onEnded={() => handleVideoEnded(index)}
-                  onCanPlay={() => handleVideoCanPlay(index)}
-                  className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && readyVideoIndexes.has(index) ? "opacity-100" : "opacity-0"}`}
-                />
-              ) : null}
+              <div className="hero-media-frame">
+                {slideMediaUrl ? (
+                  <Image
+                    src={slideMediaUrl}
+                    alt={isActive ? headline : ""}
+                    fill
+                    priority={index === 0}
+                    sizes="100vw"
+                    onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
+                    className={`object-cover transition-opacity duration-300 motion-reduce:transition-none ${slidePlaybackId && isActive && readyVideoIndexes.has(index) ? "opacity-0" : "opacity-100"}`}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
+                    Placeholder Hero Image
+                  </div>
+                )}
+                {slidePlaybackId && mounted && isPlayerWindowIndex(index) ? (
+                  <MuxPlayer
+                    ref={(player) => {
+                      muxPlayerRefs.current[index] = player;
+                    }}
+                    playbackId={slidePlaybackId}
+                    autoPlay={isActive}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    poster={slideMediaUrl ?? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0`}
+                    theme="microvideo"
+                    nohotkeys
+                    defaultHiddenCaptions
+                    noVolumePref
+                    disablePictureInPicture
+                    style={{
+                      "--controls": "none",
+                      "--time-range": "none",
+                      "--volume-range": "none",
+                      "--media-control-display": "none",
+                      "--media-control-bar-display": "none",
+                      "--media-time-range-display": "none",
+                      "--media-preview-time-display": "none",
+                      "--media-play-button-display": "none",
+                      "--media-loading-indicator-display": "none",
+                    }}
+                    onTimeUpdate={isActive ? handleVideoTimeUpdate : undefined}
+                    onEnded={() => handleVideoEnded(index)}
+                    onCanPlay={() => handleVideoCanPlay(index)}
+                    className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && readyVideoIndexes.has(index) ? "opacity-100" : "opacity-0"}`}
+                  />
+                ) : null}
+              </div>
             </div>
           );
         })}

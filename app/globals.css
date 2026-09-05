@@ -121,9 +121,25 @@ button {
 }
 
 [data-home-hero] mux-player {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
   --media-control-display: none;
   --media-play-button-display: none;
   --media-loading-indicator-display: none;
+}
+
+.hero-media-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  contain: layout paint size;
+  overflow: hidden;
 }
 
 [data-home-hero] .hero-pause-button:hover,
