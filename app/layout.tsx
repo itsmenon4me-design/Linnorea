@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { NavigationSplash } from "@/components/layout/NavigationSplash";
@@ -21,9 +22,15 @@ type RootLayoutProps = Readonly<{
   params: Promise<{ locale?: string }>;
 }>;
 
+async function getSafeLocale(locale?: string) {
+  const requestHeaders = await headers();
+  const requestedLocale = locale ?? requestHeaders.get("x-locale") ?? undefined;
+  return locales.includes(requestedLocale as Locale) ? (requestedLocale as Locale) : defaultLocale;
+}
+
 export async function generateMetadata({ params }: Omit<RootLayoutProps, "children">): Promise<Metadata> {
   const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
+  const safeLocale = await getSafeLocale(locale);
   const seo = await getSiteSeo(safeLocale);
 
   return {
@@ -37,7 +44,7 @@ export async function generateMetadata({ params }: Omit<RootLayoutProps, "childr
 
 export default async function RootLayout({ children, params }: RootLayoutProps) {
   const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
+  const safeLocale = await getSafeLocale(locale);
 
   return (
     <html lang={safeLocale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
