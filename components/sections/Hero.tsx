@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type MuxPlayerElement from "@mux/mux-player";
 import { gsap } from "gsap";
 import { ArrowAction } from "@/components/ui/ArrowAction";
+import { CarouselDot } from "@/components/ui/CarouselDot";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { urlFor } from "@/lib/sanity/image";
 import { localizedValue, type HeroSlide } from "@/lib/sanity/types";
@@ -62,8 +63,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     [resolvedSlides],
   );
   const activePlaybackId = playbackIds[activeIndex] ?? null;
-  const dotRadius = 10;
-  const dotCircumference = 2 * Math.PI * dotRadius;
   const playActiveVideo = (player: MuxPlayerElement) => {
     if (player.readyState < 3) {
       return;
@@ -336,8 +335,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                   autoPlay={isActive}
                   muted
                   playsInline
-                  preload="auto"
-                  poster={`https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0`}
+                  preload="metadata"
+                  poster={slideMediaUrl ?? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0`}
                   theme="microvideo"
                   nohotkeys
                   defaultHiddenCaptions
@@ -388,7 +387,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       </div>
       <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,8,10,0.9),rgba(7,8,10,0.3),rgba(7,8,10,0.7))]" />
       <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center pb-6 md:pb-10">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {resolvedSlides.map((slide, index) => {
             const isActive = index === activeIndex;
             const buttonSizeClass = isActive ? "h-5 w-5" : "h-2.5 w-2.5";
@@ -396,29 +395,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
               <button
                 key={slide._id ?? `hero-slide-${index}`}
                 type="button"
-                aria-label={`Ke slide ${index + 1}`}
+                aria-label={`${dictionary.ui.showSlide} ${index + 1}`}
                 aria-pressed={isActive}
                 onClick={() => goToSlide(index, true)}
                 className={`relative m-0 flex ${buttonSizeClass} items-center justify-center rounded-full border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
               >
-                <span className={isActive ? "relative h-5 w-5" : "h-2.5 w-2.5 rounded-full bg-white/75"}>
-                  {isActive ? (
-                    <svg key={`hero-dot-${activeIndex}`} viewBox="0 0 32 32" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden="true">
-                      <circle cx="16" cy="16" r={dotRadius} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" />
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r={dotRadius}
-                        fill="none"
-                        stroke="var(--color-accent-progress)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeDasharray={dotCircumference}
-                        strokeDashoffset={dotCircumference * (1 - progress)}
-                      />
-                    </svg>
-                  ) : null}
-                </span>
+                <CarouselDot active={isActive} passed={index < activeIndex} progress={progress} resetKey={`hero-dot-${activeIndex}`} />
               </button>
             );
           })}
@@ -426,7 +408,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       </div>
       <button
         type="button"
-        aria-label={isPaused ? "Play hero media" : "Pause hero media"}
+        aria-label={isPaused ? dictionary.ui.playHeroMedia : dictionary.ui.pauseHeroMedia}
         aria-pressed={isPaused}
         onClick={togglePause}
         className="arrow-circle-button hero-pause-button group absolute bottom-6 right-6 z-20 flex h-10 w-10 items-center justify-center bg-black/30 text-white/90 backdrop-blur-sm transition-colors duration-200 hover:!bg-white hover:!text-black focus-visible:!bg-white focus-visible:!text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:bottom-10 md:right-10"
