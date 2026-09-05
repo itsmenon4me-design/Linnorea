@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/sections/Hero";
-import { VisionCarousel } from "@/components/sections/VisionCarousel";
+import { LazyVisionCarousel } from "@/components/sections/LazyVisionCarousel";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
+import { RevealCurtain } from "@/components/animation/RevealCurtain";
 import { ArrowAction } from "@/components/ui/ArrowAction";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -54,12 +55,13 @@ export default async function HomePage({ params }: HomePageProps) {
       <Hero dictionary={dictionary} locale={safeLocale} slides={heroSlides} />
       <ScrollReveal as="section">
         <div data-reveal>
-          <VisionCarousel
+          <LazyVisionCarousel
             slides={visionSlides}
             locale={safeLocale}
             readMoreLabel={dictionary.ui.readMore}
             previousLabel={dictionary.ui.previous}
             nextLabel={dictionary.ui.next}
+            dictionary={dictionary}
           />
         </div>
       </ScrollReveal>
@@ -68,19 +70,21 @@ export default async function HomePage({ params }: HomePageProps) {
         <div id="collections" className="scroll-mt-20" />
         <div data-reveal className="mx-auto mb-10 flex max-w-7xl items-end justify-between gap-6">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">Collections</p>
-            <h2 className="mt-4 text-3xl font-medium tracking-[-0.05em] md:text-5xl">Selected spaces.</h2>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">{dictionary.home.collections}</p>
+            <h2 className="mt-4 text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.home.selectedSpaces}</h2>
           </div>
-          {featuredProjects.length === 0 ? <p className="max-w-xs text-right text-xs leading-5 text-white/55">Featured projects will appear here when they are marked in Sanity.</p> : null}
+          {featuredProjects.length === 0 ? <p className="max-w-xs text-right text-xs leading-5 text-white/55">{dictionary.home.featuredProjectsEmpty}</p> : null}
         </div>
         <div className="mx-auto grid max-w-7xl gap-0 md:grid-cols-2">
           {mosaicTiles.map((project, index) => {
-            const title = project ? localizedValue(project.title, safeLocale) || "Untitled project" : "Featured project placeholder";
-            const style = project ? localizedValue(project.styleTag, safeLocale) : "Awaiting featured project";
+            const title = project ? localizedValue(project.title, safeLocale) || dictionary.home.untitledProject : dictionary.home.featuredProjectPlaceholder;
+            const style = project ? localizedValue(project.styleTag, safeLocale) : dictionary.home.awaitingFeaturedProject;
             const imageUrl = project?.coverImage ? urlFor(project.coverImage).width(1400).height(1000).fit("crop").auto("format").url() : null;
             const tile = (
               <article data-reveal className="group relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                {imageUrl ? <Image src={imageUrl} alt={title} width={1200} height={900} className="h-[116%] w-full origin-bottom object-cover transition-transform duration-[2400ms] ease-out motion-reduce:transition-none group-hover:scale-[1.1]" /> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#171b1f,var(--color-bg-base))] px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">[Placeholder featured image]</div>}
+                <RevealCurtain>
+                  {imageUrl ? <Image src={imageUrl} alt={title} width={1200} height={900} className="h-[116%] w-full origin-bottom object-cover transition-transform duration-[2400ms] ease-out motion-reduce:transition-none group-hover:scale-[1.1]" /> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#171b1f,var(--color-bg-base))] px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.home.featuredImagePlaceholder}</div>}
+                </RevealCurtain>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/60">{style}</p>

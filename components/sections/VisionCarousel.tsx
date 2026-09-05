@@ -1,13 +1,15 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { ArrowAction } from "@/components/ui/ArrowAction";
+import { CarouselDot } from "@/components/ui/CarouselDot";
 import { urlFor } from "@/lib/sanity/image";
 import { localizedValue, type VisionSlide } from "@/lib/sanity/types";
 import type { Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 const AUTO_ADVANCE_MS = 6000;
 
@@ -42,6 +44,7 @@ type SlideData = {
 type SlideTransition = {
   from: number;
   to: number;
+  direction: 1 | -1;
 };
 
 type TextSlideProps = {
@@ -69,17 +72,19 @@ const TextSlide = forwardRef<HTMLDivElement, TextSlideProps>(function TextSlide(
 type PanelSlideProps = {
   slide: SlideData;
   isIncoming?: boolean;
+  placeholderImageLabel: string;
+  imagePlaceholderLabel: string;
 };
 
-const PanelSlide = forwardRef<HTMLDivElement, PanelSlideProps>(function PanelSlide({ slide, isIncoming = false }, ref) {
+const PanelSlide = forwardRef<HTMLDivElement, PanelSlideProps>(function PanelSlide({ slide, isIncoming = false, placeholderImageLabel, imagePlaceholderLabel }, ref) {
   return (
     <div ref={ref} className={`absolute inset-0 ${isIncoming ? "z-10" : "z-0"}`}>
       {slide.image ? (
-        <Image src={urlFor(slide.image).width(1400).height(1000).fit("crop").auto("format").url()} alt={slide.headline} fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover" />
+        <Image data-panel-image src={urlFor(slide.image).width(1400).height(1000).fit("crop").auto("format").url()} alt={slide.headline} fill sizes="(min-width: 768px) 60vw, 100vw" loading={isIncoming ? "eager" : undefined} className="object-cover" />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.35em] text-white/40">[Placeholder vision image]</div>
+        <div data-panel-image className="absolute inset-0 flex items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.35em] text-white/40">{placeholderImageLabel}</div>
       )}
-      {!slide.image ? <span className="absolute bottom-4 left-4 text-[10px] uppercase tracking-[0.25em] text-white/45">Image placeholder</span> : null}
+      {!slide.image ? <span className="absolute bottom-4 left-4 text-[10px] uppercase tracking-[0.25em] text-white/45">{imagePlaceholderLabel}</span> : null}
     </div>
   );
 });
@@ -90,14 +95,15 @@ type VisionCarouselProps = {
   readMoreLabel: string;
   previousLabel: string;
   nextLabel: string;
+  dictionary: Dictionary;
 };
 
-export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previousLabel, nextLabel }: VisionCarouselProps) {
+export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previousLabel, nextLabel, dictionary }: VisionCarouselProps) {
   const slides: SlideData[] = cmsSlides.length > 0
     ? cmsSlides.map((slide) => ({
-        label: localizedValue(slide.label, locale) || "Vision slide",
-        headline: localizedValue(slide.headline, locale) || "[Placeholder headline]",
-        description: localizedValue(slide.description, locale) || "[Placeholder description]",
+        label: localizedValue(slide.label, locale) || dictionary.ui.visionSlide,
+        headline: localizedValue(slide.headline, locale) || dictionary.ui.placeholderHeadline,
+        description: localizedValue(slide.description, locale) || dictionary.ui.placeholderDescription,
         image: slide.image,
       }))
     : fallbackSlides;
@@ -105,17 +111,30 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
   const [transition, setTransition] = useState<SlideTransition | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [isNearViewport, setIsNearViewport] = useState(false);
+  const [progress, setProgress] = useState(0);
   const sectionRef = useRef<HTMLElement | null>(null);
   const transitionRef = useRef<SlideTransition | null>(null);
   const currentPanelRef = useRef<HTMLDivElement | null>(null);
   const incomingPanelRef = useRef<HTMLDivElement | null>(null);
-  const imageCurtainRef = useRef<HTMLDivElement | null>(null);
   const currentTextRef = useRef<HTMLDivElement | null>(null);
   const incomingTextRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef(0);
   const activeSlide = slides[activeIndex];
   const slideCount = slides.length;
-  const dotRadius = 9;
-  const dotCircumference = 2 * Math.PI * dotRadius;
+  const preloadImages = useMemo(() => {
+    if (slideCount <= 1) return [];
+
+    const adjacentIndexes = new Set([
+      (activeIndex + 1) % slideCount,
+      (activeIndex - 1 + slideCount) % slideCount,
+    ]);
+
+    return Array.from(adjacentIndexes)
+      .map((index) => slides[index].image)
+      .filter((image): image is NonNullable<SlideData["image"]> => Boolean(image))
+      .map((image) => urlFor(image).width(1400).height(1000).fit("crop").auto("format").url());
+  }, [activeIndex, slideCount, slides]);
 
   const changeSlide = useCallback((nextIndex: number) => {
     const normalizedIndex = (nextIndex + slideCount) % slideCount;
@@ -124,9 +143,11 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     const nextTransition: SlideTransition = {
       from: activeIndex,
       to: normalizedIndex,
+      direction: nextIndex > activeIndex ? 1 : -1,
     };
     transitionRef.current = nextTransition;
-    setActiveIndex(normalizedIndex);
+    setProgress(0);
+    progressRef.current = 0;
     setTransition(nextTransition);
   }, [activeIndex, slideCount]);
 
@@ -183,31 +204,52 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || !isInView) {
+    const element = sectionRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion || !isInView || slideCount <= 1 || transition) {
       return;
     }
 
-    const intervalId = window.setInterval(() => {
-      changeSlide((activeIndex + 1) % slideCount);
-    }, AUTO_ADVANCE_MS);
+    const countdown = gsap.to(progressRef, {
+      current: 1,
+      duration: AUTO_ADVANCE_MS / 1000,
+      ease: "none",
+      onUpdate: () => setProgress(progressRef.current),
+      onComplete: () => changeSlide(activeIndex + 1),
+    });
 
     return () => {
-      window.clearInterval(intervalId);
+      countdown.kill();
     };
-  }, [activeIndex, changeSlide, isInView, reducedMotion, slideCount]);
+  }, [activeIndex, changeSlide, isInView, reducedMotion, slideCount, transition]);
 
   useEffect(() => {
     if (!transition) return;
 
     const currentPanel = currentPanelRef.current;
     const incomingPanel = incomingPanelRef.current;
-    const imageCurtain = imageCurtainRef.current;
     const currentText = currentTextRef.current;
     const incomingText = incomingTextRef.current;
-    if (!currentPanel || !incomingPanel || !imageCurtain || !currentText || !incomingText) return;
+    if (!currentPanel || !incomingPanel || !currentText || !incomingText) return;
 
     if (reducedMotion) {
-      gsap.set([incomingPanel, incomingText], { opacity: 0 });
+      gsap.set(incomingPanel, { x: `${transition.direction * 100}%` });
       const timeline = gsap.timeline({
         defaults: { duration: 0.12, ease: "power1.out" },
         onComplete: () => {
@@ -217,34 +259,23 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         },
       });
       timeline
-        .to([currentPanel, currentText], { opacity: 0 })
-        .set([incomingPanel, incomingText], { opacity: 1 });
+        .to(currentPanel, { x: `${-transition.direction * 100}%` })
+        .to(incomingPanel, { x: "0%" }, "<")
+        .to(currentText, { opacity: 0 })
+        .set(incomingText, { opacity: 1 });
       return () => {
         timeline.kill();
-        gsap.set([currentPanel, incomingPanel, imageCurtain, currentText, incomingText], { clearProps: "all" });
+        gsap.set([currentPanel, incomingPanel, currentText, incomingText], { clearProps: "all" });
       };
     }
 
     const context = gsap.context(() => {
       const currentElements = currentText.querySelectorAll<HTMLElement>("[data-slide-element]");
       const incomingElements = incomingText.querySelectorAll<HTMLElement>("[data-slide-element]");
-      const currentLabel = currentElements[0];
-      const currentDescription = currentElements[2];
-      const currentAction = currentElements[3];
-      const incomingLabel = incomingElements[0];
-      const incomingDescription = incomingElements[2];
-      const incomingAction = incomingElements[3];
-      const currentWords = currentText.querySelectorAll<HTMLElement>("[data-headline-word]");
-      const incomingWords = incomingText.querySelectorAll<HTMLElement>("[data-headline-word]");
-      const exitHeadlineEnd = 0.08 + 0.14 + Math.max(0, currentWords.length - 1) * 0.05;
-      const blankStart = Math.max(0.5, exitHeadlineEnd);
-      const boxStart = blankStart + 0.5;
-      const headlineDuration = 0.18 + Math.max(0, incomingWords.length - 1) * 0.05;
-      const headlineStart = boxStart;
-      const descriptionStart = boxStart;
-      const actionStart = boxStart + headlineDuration + 0.06;
+      const incomingImage = incomingPanel.querySelector<HTMLElement>("[data-panel-image]");
+      const incomingHeadline = incomingElements[1];
       const timeline = gsap.timeline({
-        defaults: { ease: "power2.inOut" },
+        defaults: { ease: "cubic-bezier(0.65, 0, 0.35, 1)" },
         onComplete: () => {
           setActiveIndex(transition.to);
           transitionRef.current = null;
@@ -252,33 +283,32 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         },
       });
 
-      gsap.set(imageCurtain, { scaleX: 1, opacity: 1, transformOrigin: "100% 50%" });
-      gsap.set(incomingPanel, { opacity: 0 });
-      gsap.set([incomingLabel, incomingDescription, incomingAction, ...incomingWords], { opacity: 0 });
+      gsap.set(currentPanel, { x: "0%" });
+      gsap.set(incomingPanel, { x: `${transition.direction * 100}%` });
+      gsap.set(incomingImage, { scale: 1.08, transformOrigin: "50% 50%" });
+      gsap.set(incomingElements, { opacity: 0, y: 24 });
+      gsap.set(incomingHeadline, { clipPath: "inset(0 0 100% 0)" });
       timeline
-        .to(currentPanel, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0)
-        .to(imageCurtain, { scaleX: 0.08, duration: 0.24, ease: "power2.inOut" }, 0.16)
-        .to(imageCurtain, { opacity: 0, duration: 0.08, ease: "power1.out" }, 0.4)
-        .set(imageCurtain, { opacity: 1, transformOrigin: "0% 50%" }, boxStart)
-        .to(imageCurtain, { scaleX: 1, duration: 0.3, ease: "power2.out" }, boxStart)
-        .to(incomingPanel, { opacity: 1, duration: 0.16, ease: "power1.out" }, actionStart)
-        .to(currentAction, { opacity: 0, duration: 0.12, ease: "power1.out" }, 0)
-        .to([currentLabel, ...currentWords], { opacity: 0, duration: 0.14, stagger: 0.05, ease: "power1.out" }, 0.08)
-        .to(currentDescription, { opacity: 0, duration: 0.16, ease: "power1.out" }, 0.28)
-        .to(incomingLabel, { opacity: 1, duration: 0.12, ease: "power1.out" }, boxStart)
-        .to(incomingWords, { opacity: 1, duration: 0.18, stagger: 0.05, ease: "power1.out" }, headlineStart)
-        .to(incomingDescription, { opacity: 1, duration: Math.max(0.1, headlineDuration - 0.04), ease: "power1.out" }, descriptionStart)
-        .to(incomingAction, { opacity: 1, duration: 0.18, ease: "power1.out" }, actionStart);
+        .to(currentElements, { opacity: 0, y: -15, duration: 0.28, stagger: 0.04, ease: "power2.in" }, 0)
+        .to(currentPanel, { x: `${-transition.direction * 100}%`, duration: 0.65 }, 0)
+        .to(incomingPanel, { x: "0%", duration: 0.65 }, 0)
+        .to(incomingImage, { scale: 1, duration: 0.65 }, 0)
+        .to(incomingElements[0], { opacity: 1, y: 0, duration: 0.18 }, 0.25)
+        .to(incomingHeadline, { opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)", duration: 0.2 }, 0.32)
+        .to(incomingElements[2], { opacity: 1, y: 0, duration: 0.18 }, 0.43)
+        .to(incomingElements[3], { opacity: 1, y: 0, duration: 0.18 }, 0.47);
     }, sectionRef);
 
     return () => context.revert();
   }, [reducedMotion, transition]);
 
   return (
+    <>
+      {isNearViewport ? preloadImages.map((href) => <link key={href} rel="preload" as="image" href={href} />) : null}
     <section
       ref={sectionRef}
       tabIndex={0}
-      aria-label="Vision and goals carousel"
+      aria-label={dictionary.ui.visionCarousel}
       className="border-y border-white/10 bg-[var(--color-bg-elevated)] px-5 py-16 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/60 md:px-8 md:py-24"
     >
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-center md:gap-16">
@@ -293,11 +323,11 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
 
         <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-transparent">
           {transition ? (
-            <div ref={imageCurtainRef} className="absolute inset-0 origin-center bg-[#d2d2d2]">
-              <PanelSlide ref={currentPanelRef} slide={slides[transition.from]} />
-              <PanelSlide ref={incomingPanelRef} slide={slides[transition.to]} isIncoming />
+            <div className="absolute inset-0">
+              <PanelSlide ref={currentPanelRef} slide={slides[transition.from]} placeholderImageLabel={dictionary.ui.placeholderVisionImage} imagePlaceholderLabel={dictionary.ui.imagePlaceholder} />
+              <PanelSlide ref={incomingPanelRef} slide={slides[transition.to]} isIncoming placeholderImageLabel={dictionary.ui.placeholderVisionImage} imagePlaceholderLabel={dictionary.ui.imagePlaceholder} />
             </div>
-          ) : <PanelSlide ref={currentPanelRef} slide={activeSlide} />}
+          ) : <PanelSlide ref={currentPanelRef} slide={activeSlide} placeholderImageLabel={dictionary.ui.placeholderVisionImage} imagePlaceholderLabel={dictionary.ui.imagePlaceholder} />}
         </div>
       </div>
 
@@ -305,47 +335,27 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         <button type="button" onClick={() => changeSlide(activeIndex - 1)} disabled={Boolean(transition)} aria-label={previousLabel} className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors duration-300 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none">
           <ArrowIcon direction="left" className="h-[55%] w-[55%]" />
         </button>
-        <div className="flex items-center gap-3" role="tablist" aria-label="Vision slides">
+        <div className="flex items-center gap-2.5" role="tablist" aria-label={dictionary.ui.visionSlides}>
           {slides.map((slide, index) => {
             const isActive = index === activeIndex;
-            const progressStyle = reducedMotion
-              ? { strokeDashoffset: 0 }
-              : { animationDuration: `${AUTO_ADVANCE_MS}ms` };
-
             return (
               <button
                 key={slide.label}
                 type="button"
                 role="tab"
                 aria-selected={isActive}
-                aria-label={`Show slide ${index + 1}`}
+                aria-label={`${dictionary.ui.showSlide} ${index + 1}`}
                 onClick={() => changeSlide(index)}
                 disabled={Boolean(transition)}
                 className="flex h-6 w-6 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-40"
               >
-                {isActive ? (
-                  <span className="relative flex h-5 w-5 items-center justify-center" aria-hidden="true">
-                    <svg key={`progress-${activeIndex}`} viewBox="0 0 24 24" className="absolute inset-0 h-full w-full -rotate-90">
-                      <circle cx="12" cy="12" r={dotRadius} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.6" />
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r={dotRadius}
-                        fill="none"
-                        stroke="var(--color-accent-progress)"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeDasharray={dotCircumference}
-                        strokeDashoffset={dotCircumference}
-                        className={reducedMotion || !isInView ? "" : "dot-progress-ring"}
-                        style={progressStyle}
-                      />
-                    </svg>
-                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                  </span>
-                ) : (
-                  <span className="h-2.5 w-2.5 rounded-full border border-white/25 bg-white/80" />
-                )}
+                <CarouselDot
+                  active={isActive}
+                  passed={index < activeIndex}
+                  progress={progress}
+                  reducedMotion={reducedMotion}
+                  resetKey={`progress-${activeIndex}`}
+                />
               </button>
             );
           })}
@@ -355,5 +365,6 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         </button>
       </div>
     </section>
+    </>
   );
 }
