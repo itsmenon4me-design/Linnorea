@@ -53,18 +53,14 @@ export default async function HomePage({ params }: HomePageProps) {
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
       <Hero dictionary={dictionary} locale={safeLocale} slides={heroSlides} />
-      <ScrollReveal as="section">
-        <div data-reveal>
-          <LazyVisionCarousel
-            slides={visionSlides}
-            locale={safeLocale}
-            readMoreLabel={dictionary.ui.readMore}
-            previousLabel={dictionary.ui.previous}
-            nextLabel={dictionary.ui.next}
-            dictionary={dictionary}
-          />
-        </div>
-      </ScrollReveal>
+      <LazyVisionCarousel
+        slides={visionSlides}
+        locale={safeLocale}
+        readMoreLabel={dictionary.ui.readMore}
+        previousLabel={dictionary.ui.previous}
+        nextLabel={dictionary.ui.next}
+        dictionary={dictionary}
+      />
 
       <ScrollReveal as="section" className="px-5 py-20 md:px-8 md:py-28">
         <div id="collections" className="scroll-mt-20" />

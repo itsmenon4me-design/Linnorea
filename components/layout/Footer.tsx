@@ -51,7 +51,7 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
         </div>
 
         <div>
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">Navigate</p>
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">{dictionary.ui.navigate}</p>
           <nav className="mt-5 flex flex-col gap-3 text-sm text-white/70">
             {secondaryLinks.map((link) => (
               <Link key={link.href} href={link.href} className="transition-opacity hover:text-white">
@@ -62,7 +62,7 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
         </div>
 
         <div>
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">Connect</p>
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">{dictionary.ui.connect}</p>
           <ul className="mt-5 space-y-3 text-sm text-white/70">
             {socialLinks.map((link) => (
               <li key={`${link.platform}-${link.url}`}>

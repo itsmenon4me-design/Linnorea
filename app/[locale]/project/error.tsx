@@ -1,13 +1,20 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+
 export default function ProjectError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const { locale } = useParams<{ locale: string }>();
+  const safeLocale = locales.includes(locale as Locale) ? locale as Locale : defaultLocale;
+  const dictionary = getDictionary(safeLocale);
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--color-bg-base)] px-5 text-white">
       <div className="max-w-md">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent-gold)]">Project tidak tersedia</p>
-        <h1 className="mt-5 text-3xl font-medium">Sanity tidak dapat memuat halaman ini.</h1>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent-gold)]">{dictionary.ui.projectUnavailable}</p>
+        <h1 className="mt-5 text-3xl font-medium">{dictionary.ui.sanityPageError}</h1>
         <button type="button" onClick={reset} className="mt-8 min-h-11 border border-white/25 px-5 text-[10px] uppercase tracking-[0.2em] transition hover:bg-white hover:text-[var(--color-bg-base)]">
-          Coba lagi
+          {dictionary.ui.tryAgain}
         </button>
       </div>
     </main>

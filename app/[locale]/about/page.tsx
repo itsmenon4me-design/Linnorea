@@ -35,7 +35,7 @@ export default async function AboutPage({ params }: AboutProps) {
     sanityClient.fetch<ApproachItem[]>(approachItemsQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<TeamMember[]>(teamMembersQuery, {}, { next: { revalidate } }),
   ]);
-  const story = localizedValue(settings?.brandStatement, safeLocale) || "[Placeholder brand story, awaiting approved copy]";
+  const story = localizedValue(settings?.brandStatement, safeLocale) || dictionary.ui.placeholderBrandStory;
   const whatsappNumber = settings?.whatsappNumber;
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
 
@@ -43,7 +43,7 @@ export default async function AboutPage({ params }: AboutProps) {
     <main className="bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
       <section className="relative flex min-h-[72vh] items-end overflow-hidden bg-[var(--color-bg-elevated)]">
-        <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} />
+        <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} placeholderLabel={dictionary.ui.placeholderHeroImage} videoLabel={dictionary.ui.studioVideo} />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/20 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-40 md:px-8 md:pb-20">
           <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">Linnorea Design Works</p>
@@ -53,7 +53,7 @@ export default async function AboutPage({ params }: AboutProps) {
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
         <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Our philosophy</p>
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.ourPhilosophy}</p>
           <div className="space-y-6 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">
             {story.split(/\n\n+/).map((paragraph, index) => <p key={`${paragraph}-${index}`}>{paragraph}</p>)}
           </div>
@@ -62,12 +62,12 @@ export default async function AboutPage({ params }: AboutProps) {
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
         <div className="border-t border-white/15 pt-6">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Approach</p>
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.approach}</p>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
             {(approachItems.length ? approachItems : [
-              { _id: "fallback-1", title: { id: "Listen before designing." }, description: { id: "[Placeholder approach copy, awaiting final content]" } },
-              { _id: "fallback-2", title: { id: "Let the room lead." }, description: { id: "[Placeholder approach copy, awaiting final content]" } },
-              { _id: "fallback-3", title: { id: "Make daily rituals feel considered." }, description: { id: "[Placeholder approach copy, awaiting final content]" } },
+              { _id: "fallback-1", title: { id: "Listen before designing." }, description: { id: dictionary.ui.placeholderApproachCopy } },
+              { _id: "fallback-2", title: { id: "Let the room lead." }, description: { id: dictionary.ui.placeholderApproachCopy } },
+              { _id: "fallback-3", title: { id: "Make daily rituals feel considered." }, description: { id: dictionary.ui.placeholderApproachCopy } },
             ]).map((item, index) => (
               <ScrollReveal key={item._id} className="border-b border-white/15 pb-8">
                 <div data-reveal>
@@ -83,7 +83,7 @@ export default async function AboutPage({ params }: AboutProps) {
 
       <section className="mx-5 border-y border-white/15 py-16 md:mx-8 md:py-24">
         <div className="mx-auto max-w-7xl">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Team</p>
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.team}</p>
           {teamMembers.length ? (
             <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
               {teamMembers.map((member) => (
@@ -95,12 +95,12 @@ export default async function AboutPage({ params }: AboutProps) {
                 </article>
               ))}
             </div>
-          ) : <p className="mt-6 text-sm text-white/65">Team and founder information has not been confirmed yet.</p>}
+          ) : <p className="mt-6 text-sm text-white/65">{dictionary.ui.teamPending}</p>}
         </div>
       </section>
 
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
-        <h2 className="max-w-xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">See how the thinking becomes space.</h2>
+        <h2 className="max-w-xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.ui.seeThinking}</h2>
         <div className="flex flex-wrap gap-3">
           <Link href={`/${safeLocale}/project`} className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[var(--color-bg-base)]">{dictionary.ui.viewProjects}</Link>
           {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{localizedValue(settings?.whatsappCtaText, safeLocale) || dictionary.home.cta}</a> : null}

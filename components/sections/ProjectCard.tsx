@@ -3,14 +3,16 @@ import Link from "next/link";
 import { urlFor } from "@/lib/sanity/image";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedValue, type Project } from "@/lib/sanity/types";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 type ProjectCardProps = {
   project: Project;
   locale: Locale;
+  dictionary: Dictionary;
 };
 
-export function ProjectCard({ project, locale }: ProjectCardProps) {
-  const title = localizedValue(project.title, locale) || "Untitled project";
+export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
+  const title = localizedValue(project.title, locale) || dictionary.home.untitledProject;
   const style = localizedValue(project.styleTag, locale);
   const slug = project.slug?.current;
   const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").url() : null;
@@ -31,11 +33,11 @@ export function ProjectCard({ project, locale }: ProjectCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">
-              [Placeholder cover image]
+              {dictionary.ui.placeholderHeroImage}
             </div>
           )}
           <div className="absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-black/80 to-transparent px-5 pb-5 pt-16 opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-            <p className="text-sm text-white/80">{project.category || "Project"}</p>
+            <p className="text-sm text-white/80">{project.category || dictionary.ui.projectCategory}</p>
           </div>
         </div>
         <div className="flex items-start justify-between gap-4 border-b border-white/15 py-4">

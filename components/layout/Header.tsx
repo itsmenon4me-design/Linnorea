@@ -8,6 +8,10 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { sanityClient } from "@/lib/sanity/client";
+import { urlFor } from "@/lib/sanity/image";
+import { siteSettingsQuery } from "@/lib/sanity/queries";
+import type { SanityImage } from "@/lib/sanity/types";
 import { LangSwitcher } from "./LangSwitcher";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -22,7 +26,27 @@ const headerContentClassName = "relative z-10 m-0 mt-[7px] mb-[8px] flex h-[25px
 export function Header({ dictionary, currentLocale }: HeaderProps) {
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logo, setLogo] = useState<SanityImage | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    sanityClient
+      .fetch<{ logo?: SanityImage } | null>(siteSettingsQuery)
+      .then((settings) => {
+        if (isMounted) {
+          setLogo(settings?.logo ?? null);
+        }
+      })
+      .catch((error: unknown) => {
+        console.warn("Sanity logo could not be loaded. Using the static fallback.", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const hero = document.querySelector("[data-home-hero]");
@@ -67,8 +91,8 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
       ].join(" ")}
     >
       <div className={headerContentClassName}>
-        <Link href={`/${currentLocale}`} aria-label="Linnorea home" className="shrink-0">
-          <Image src="/assets/logo-mark.png" alt="Linnorea" width={24} height={24} priority className="h-6 w-6 object-contain" />
+        <Link href={`/${currentLocale}`} aria-label={dictionary.ui.linnoreaHome} className="inline-flex h-6 w-6 shrink-0">
+          <Image src={logo ? urlFor(logo).width(48).height(48).fit("crop").auto("format").url() : "/assets/logo-mark.png"} alt="Linnorea" width={24} height={24} priority className="block h-6 w-6 object-contain" />
         </Link>
 
         <nav className="header-desktop-nav ml-8 hidden items-center gap-7 text-[10px] font-medium uppercase tracking-[0.2em] text-white/80">
@@ -80,12 +104,12 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
         </nav>
 
         <div className="header-desktop-language ml-auto hidden">
-          <LangSwitcher currentLocale={currentLocale} />
+          <LangSwitcher currentLocale={currentLocale} dictionary={dictionary} />
         </div>
 
         <button
           type="button"
-          aria-label="Toggle navigation menu"
+          aria-label={dictionary.ui.toggleNavigation}
           aria-expanded={isMenuOpen}
           onClick={() => setIsMenuOpen((open) => !open)}
           className="header-mobile-toggle inline-flex h-11 w-11 items-center justify-center text-white transition-opacity hover:opacity-70 active:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -107,7 +131,7 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
               </Link>
             ))}
             <div className="pt-2">
-              <LangSwitcher currentLocale={currentLocale} />
+              <LangSwitcher currentLocale={currentLocale} dictionary={dictionary} />
             </div>
           </nav>
         </div>

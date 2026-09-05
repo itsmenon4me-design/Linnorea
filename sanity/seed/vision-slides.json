@@ -1,0 +1,53 @@
+[
+  {
+    "_type": "visionSlide",
+    "_id": "vision-slide-vision-01",
+    "label": {
+      "id": "VISION / 01",
+      "en": "VISION / 01"
+    },
+    "headline": {
+      "id": "[Placeholder Vision Statement 1]",
+      "en": "[Placeholder Vision Statement 1]"
+    },
+    "description": {
+      "id": "[Placeholder description for the first vision statement. Final storytelling copy will be added here.]",
+      "en": "[Placeholder description for the first vision statement. Final storytelling copy will be added here.]"
+    },
+    "order": 1
+  },
+  {
+    "_type": "visionSlide",
+    "_id": "vision-slide-goals-02",
+    "label": {
+      "id": "GOALS / 02",
+      "en": "GOALS / 02"
+    },
+    "headline": {
+      "id": "[Placeholder Goal Statement 2]",
+      "en": "[Placeholder Goal Statement 2]"
+    },
+    "description": {
+      "id": "[Placeholder description for the second storytelling slide. Final goals copy will be added here.]",
+      "en": "[Placeholder description for the second storytelling slide. Final goals copy will be added here.]"
+    },
+    "order": 2
+  },
+  {
+    "_type": "visionSlide",
+    "_id": "vision-slide-approach-03",
+    "label": {
+      "id": "APPROACH / 03",
+      "en": "APPROACH / 03"
+    },
+    "headline": {
+      "id": "[Placeholder Approach Statement 3]",
+      "en": "[Placeholder Approach Statement 3]"
+    },
+    "description": {
+      "id": "[Placeholder description for the third storytelling slide. Final approach copy will be added here.]",
+      "en": "[Placeholder description for the third storytelling slide. Final approach copy will be added here.]"
+    },
+    "order": 3
+  }
+]

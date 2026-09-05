@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId, useRef, useState } from "react";
 import { localeLabels, locales, type Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 type LangSwitcherProps = {
   currentLocale: Locale;
+  dictionary: Dictionary;
 };
 
-export function LangSwitcher({ currentLocale }: LangSwitcherProps) {
+export function LangSwitcher({ currentLocale, dictionary }: LangSwitcherProps) {
   const pathname = usePathname();
   const optionsId = useId();
   const isTouchRef = useRef(false);
@@ -37,13 +39,13 @@ export function LangSwitcher({ currentLocale }: LangSwitcherProps) {
         }
       }}
       role="group"
-      aria-label="Language selection"
+      aria-label={dictionary.ui.languageSelection}
     >
       <button
         type="button"
         aria-expanded={isExpanded}
         aria-controls={optionsId}
-        aria-label={`Current language: ${localeLabels[currentLocale]}. ${isExpanded ? "Collapse" : "Expand"} language selection`}
+        aria-label={`${dictionary.ui.currentLanguage}: ${localeLabels[currentLocale]}. ${isExpanded ? dictionary.ui.collapse : dictionary.ui.expand} ${dictionary.ui.languageSelection}`}
         onClick={() => setIsExpanded((expanded) => !expanded)}
         className="rounded-full bg-white px-2 py-1 text-[#0b0b0d] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)]"
       >

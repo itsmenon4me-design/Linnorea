@@ -38,10 +38,10 @@ export default async function ProjectListingPage({ params }: ProjectListingProps
           <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.project}</h1>
         </div>
         {projects.length === 0 ? (
-          <div className="border-b border-white/15 py-20 text-sm text-white/65">Belum ada project yang dipublikasikan di Sanity.</div>
+          <div className="border-b border-white/15 py-20 text-sm text-white/65">{dictionary.ui.projectEmpty}</div>
         ) : (
           <div className="grid gap-x-8 gap-y-16 pt-12 md:grid-cols-2">
-            {projects.map((project) => <ProjectCard key={project._id} project={project} locale={safeLocale} />)}
+            {projects.map((project) => <ProjectCard key={project._id} project={project} locale={safeLocale} dictionary={dictionary} />)}
           </div>
         )}
       </section>

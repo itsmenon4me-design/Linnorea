@@ -10,11 +10,13 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "optional",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "optional",
 });
 
 type RootLayoutProps = Readonly<{
@@ -48,6 +50,12 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
 
   return (
     <html lang={safeLocale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://stream.mux.com" />
+        <link rel="preconnect" href="https://image.mux.com" />
+        <link rel="dns-prefetch" href="//stream.mux.com" />
+        <link rel="dns-prefetch" href="//image.mux.com" />
+      </head>
       <body className="min-h-full bg-[var(--color-bg-base)] text-white">
         <SplashScreen />
         <NavigationSplash />
