@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { NavigationSplash } from "@/components/layout/NavigationSplash";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,9 +23,17 @@ export const metadata: Metadata = {
   description: "Placeholder foundation for the Linnorea Design Works website rebuild.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+type RootLayoutProps = Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ locale?: string }>;
+}>;
+
+export default async function RootLayout({ children, params }: RootLayoutProps) {
+  const { locale } = await params;
+  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
+
   return (
-    <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={safeLocale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full bg-[var(--color-bg-base)] text-white">
         <SplashScreen />
         <NavigationSplash />
