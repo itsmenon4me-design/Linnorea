@@ -21,6 +21,11 @@ export type MuxVideo = {
   };
 };
 
+export type LocalizedSeo = Partial<Record<Locale, {
+  title?: string;
+  description?: string;
+}>>;
+
 export type HeroSlide = {
   _id: string;
   _type?: string;
@@ -73,6 +78,7 @@ export type SiteSettings = {
   googleMapsUrl?: string;
   whatsappNumber?: string;
   whatsappCtaText?: LocalizedString;
+  seoDefaults?: LocalizedSeo;
 };
 
 export type ApproachItem = {
@@ -109,6 +115,10 @@ export type Product = {
 
 export function localizedValue(value: LocalizedString | undefined, locale: Locale) {
   return value?.[locale] ?? value?.en ?? value?.id ?? "";
+}
+
+export function localizedSeoValue(value: LocalizedSeo | undefined, key: "title" | "description", locale: Locale) {
+  return value?.[locale]?.[key] ?? value?.en?.[key] ?? value?.id?.[key] ?? "";
 }
 
 export function plainText(value: string | undefined) {

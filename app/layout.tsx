@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { NavigationSplash } from "@/components/layout/NavigationSplash";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
+import { sanityClient } from "@/lib/sanity/client";
+import { siteSettingsQuery } from "@/lib/sanity/queries";
+import { localizedSeoValue, type SiteSettings } from "@/lib/sanity/types";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,18 +18,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Linnorea Design Works",
-    template: "%s | Linnorea Design Works",
-  },
-  description: "Placeholder foundation for the Linnorea Design Works website rebuild.",
-};
-
 type RootLayoutProps = Readonly<{
   children: React.ReactNode;
   params: Promise<{ locale?: string }>;
 }>;
+
+export async function generateMetadata({ params }: Omit<RootLayoutProps, "children">): Promise<Metadata> {
+  const { locale } = await params;
+  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
+  const settings = await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery);
+  const title = localizedSeoValue(settings?.seoDefaults, "title", safeLocale) || "Linnorea Design Works";
+  const description = localizedSeoValue(settings?.seoDefaults, "description", safeLocale) || "Placeholder foundation for the Linnorea Design Works website rebuild.";
+
+  return {
+    title: {
+      default: title,
+      template: `%s | ${title}`,
+    },
+    description,
+  };
+}
 
 export default async function RootLayout({ children, params }: RootLayoutProps) {
   const { locale } = await params;
