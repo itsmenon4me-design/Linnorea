@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { serviceListQuery } from "@/lib/sanity/queries";
@@ -16,7 +17,8 @@ export function generateStaticParams() { return locales.map((locale) => ({ local
 export async function generateMetadata({ params }: ServiceProps): Promise<Metadata> {
   const { locale } = await params;
   const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  return { title: getDictionary(safeLocale).nav.service };
+  const seo = await getSiteSeo(safeLocale);
+  return { title: { absolute: `${getDictionary(safeLocale).nav.service} | ${seo.title}` }, description: seo.description };
 }
 
 export default async function ServicePage({ params }: ServiceProps) {

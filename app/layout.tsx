@@ -3,9 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { NavigationSplash } from "@/components/layout/NavigationSplash";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { sanityClient } from "@/lib/sanity/client";
-import { siteSettingsQuery } from "@/lib/sanity/queries";
-import { localizedSeoValue, type SiteSettings } from "@/lib/sanity/types";
+import { getSiteSeo } from "@/lib/sanity/metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,16 +24,14 @@ type RootLayoutProps = Readonly<{
 export async function generateMetadata({ params }: Omit<RootLayoutProps, "children">): Promise<Metadata> {
   const { locale } = await params;
   const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const settings = await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery);
-  const title = localizedSeoValue(settings?.seoDefaults, "title", safeLocale) || "Linnorea Design Works";
-  const description = localizedSeoValue(settings?.seoDefaults, "description", safeLocale) || "Placeholder foundation for the Linnorea Design Works website rebuild.";
+  const seo = await getSiteSeo(safeLocale);
 
   return {
     title: {
-      default: title,
-      template: `%s | ${title}`,
+      default: seo.title,
+      template: `%s | ${seo.title}`,
     },
-    description,
+    description: seo.description,
   };
 }
 

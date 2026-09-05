@@ -26,6 +26,11 @@ export type LocalizedSeo = Partial<Record<Locale, {
   description?: string;
 }>>;
 
+export type SocialLink = {
+  platform?: string;
+  url?: string;
+};
+
 export type HeroSlide = {
   _id: string;
   _type?: string;
@@ -78,6 +83,7 @@ export type SiteSettings = {
   googleMapsUrl?: string;
   whatsappNumber?: string;
   whatsappCtaText?: LocalizedString;
+  socialLinks?: SocialLink[];
   seoDefaults?: LocalizedSeo;
 };
 

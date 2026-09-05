@@ -9,11 +9,6 @@ type FooterProps = {
   currentLocale: Locale;
   dictionary: Dictionary;
 };
-type SocialLink = {
-  platform?: string;
-  url?: string;
-};
-
 export async function Footer({ currentLocale, dictionary }: FooterProps) {
   const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
   const brandText = localizedValue(settings?.brandStatement, currentLocale) || "Linnorea Design Works";

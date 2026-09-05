@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { ProjectCard } from "@/components/sections/ProjectCard";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { projectListQuery } from "@/lib/sanity/queries";
 import type { Project } from "@/lib/sanity/types";
@@ -18,7 +19,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: ProjectListingProps): Promise<Metadata> {
   const { locale } = await params;
   const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  return { title: getDictionary(safeLocale).nav.project };
+  const seo = await getSiteSeo(safeLocale);
+  return { title: { absolute: `${getDictionary(safeLocale).nav.project} | ${seo.title}` }, description: seo.description };
 }
 
 export default async function ProjectListingPage({ params }: ProjectListingProps) {

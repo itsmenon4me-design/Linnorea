@@ -7,6 +7,7 @@ import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { ArrowAction } from "@/components/ui/ArrowAction";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { projectBySlugQuery, projectListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
@@ -15,6 +16,31 @@ import { localizedValue, portableTextToPlainText, type Project, type SiteSetting
 export const revalidate = 60;
 
 type ProjectDetailProps = { params: Promise<{ locale: string; slug: string }> };
+
+type ProjectNavLinkProps = {
+  project: Project;
+  locale: Locale;
+  label: string;
+  direction: "left" | "right";
+  side: "previous" | "next";
+};
+
+function ProjectNavLink({ project, locale, label, direction, side }: ProjectNavLinkProps) {
+  const isPrevious = side === "previous";
+  const title = localizedValue(project.title, locale);
+
+  return (
+    <Link
+      href={`/${locale}/project/${project.slug?.current}`}
+      className={`group min-w-0 flex items-start gap-4 focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)] ${isPrevious ? "border-r border-white/15 pr-8" : "ml-auto pl-8 text-right"}`}
+    >
+      <span className={`block min-w-0 ${isPrevious ? "" : "text-right"}`}>
+        <ArrowAction label={label} direction={direction} />
+        <span className="mt-4 block min-w-0 break-words text-xl text-white/85 group-hover:text-[var(--color-accent-gold-light)]">{title}</span>
+      </span>
+    </Link>
+  );
+}
 
 export async function generateStaticParams() {
   const projects = await sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } });
@@ -25,9 +51,10 @@ export async function generateMetadata({ params }: ProjectDetailProps): Promise<
   const { locale, slug } = await params;
   const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
   const project = await sanityClient.fetch<Project | null>(projectBySlugQuery, { slug }, { next: { revalidate } });
-  if (!project) return { title: getDictionary(safeLocale).nav.project };
+  const seo = await getSiteSeo(safeLocale);
+  if (!project) return { title: { absolute: `${getDictionary(safeLocale).nav.project} | ${seo.title}` }, description: seo.description };
   const title = localizedValue(project.title, safeLocale);
-  return { title, description: portableTextToPlainText(project.description?.[safeLocale]) };
+  return { title: { absolute: `${title} | ${seo.title}` }, description: seo.description };
 }
 
 export default async function ProjectDetailPage({ params }: ProjectDetailProps) {
@@ -125,29 +152,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
       {whatsappHref ? (
         <section className="mx-5 border-y border-white/15 py-20 md:mx-8 md:py-28">
           <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-end">
-            <h2 className="max-w-2xl text-4xl font-medium tracking-[-0.055em] md:text-6xl">Punya ruang yang ingin diwujudkan?</h2>
+            <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">Punya ruang yang ingin diwujudkan?</h2>
             <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{whatsappText}</a>
           </div>
         </section>
       ) : null}
 
       <nav aria-label="Project navigation" className="mx-auto grid max-w-7xl grid-cols-2 px-5 py-20 md:px-8 md:py-28">
-        {previous ? (
-          <Link href={`/${safeLocale}/project/${previous.slug?.current}`} className="group flex items-start gap-4 border-r border-white/15 pr-5 focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)]">
-            <span className="block">
-              <ArrowAction label={dictionary.ui.previous} direction="left" />
-              <span className="mt-4 block text-xl text-white/85 transition group-hover:text-[var(--color-accent-gold-light)]">{localizedValue(previous.title, safeLocale)}</span>
-            </span>
-          </Link>
-        ) : <span />}
-        {next ? (
-          <Link href={`/${safeLocale}/project/${next.slug?.current}`} className="group ml-auto flex items-start justify-end gap-4 pl-5 text-right focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)]">
-            <span className="block text-right">
-              <span className="mt-4 block text-xl text-white/85 transition group-hover:text-[var(--color-accent-gold-light)]">{localizedValue(next.title, safeLocale)}</span>
-            </span>
-            <ArrowAction label={dictionary.ui.next} />
-          </Link>
-        ) : <span />}
+        {previous ? <ProjectNavLink project={previous} locale={safeLocale} label={dictionary.ui.previous} direction="left" side="previous" /> : <span />}
+        {next ? <ProjectNavLink project={next} locale={safeLocale} label={dictionary.ui.next} direction="right" side="next" /> : <span />}
       </nav>
     </main>
   );
