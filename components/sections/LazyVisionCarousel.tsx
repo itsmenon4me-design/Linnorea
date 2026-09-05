@@ -43,8 +43,18 @@ export function LazyVisionCarousel(props: LazyVisionCarouselProps) {
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-[620px]">
-      {isNearViewport ? <DeferredVisionCarousel {...props} /> : null}
+    <div ref={containerRef}>
+      {isNearViewport ? (
+        <DeferredVisionCarousel {...props} />
+      ) : (
+        <section aria-hidden="true" className="border-y border-white/10 bg-[var(--color-bg-elevated)] px-5 py-16 md:px-8 md:py-24">
+          <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-center md:gap-16">
+            <div className="min-h-[300px] md:min-h-[340px]" />
+            <div className="aspect-[4/3] border border-white/10" />
+          </div>
+          <div className="mx-auto mt-10 h-8 max-w-7xl" />
+        </section>
+      )}
     </div>
   );
 }
