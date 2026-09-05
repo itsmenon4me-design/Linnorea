@@ -120,6 +120,11 @@ button {
   transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
 }
 
+[data-home-hero] {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
 [data-home-hero] mux-player {
   position: absolute;
   inset: 0;
@@ -127,6 +132,8 @@ button {
   width: 100%;
   height: 100%;
   aspect-ratio: auto;
+  --media-object-fit: cover;
+  --media-object-position: center center;
   --media-control-display: none;
   --media-play-button-display: none;
   --media-loading-indicator-display: none;
@@ -137,7 +144,8 @@ button {
   inset: 0;
   width: 100%;
   height: 100%;
-  aspect-ratio: 16 / 9;
+  min-height: 100vh;
+  min-height: 100svh;
   contain: layout paint size;
   overflow: hidden;
 }
