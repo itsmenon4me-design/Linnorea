@@ -89,7 +89,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
           <LazyAutoplayVideo
             src={project.heroVideo.asset.url}
             poster={project.coverImage ? urlFor(project.coverImage).width(1920).height(1280).fit("crop").auto("format").url() : undefined}
-            aria-label={`${title} project video`}
+            ariaLabel={`${title} project video`}
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : project.coverImage ? (
