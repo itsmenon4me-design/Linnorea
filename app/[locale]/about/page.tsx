@@ -43,7 +43,7 @@ export default async function AboutPage({ params }: AboutProps) {
     <main className="bg-[var(--color-bg-base)] text-white">
       <Header currentLocale={safeLocale} dictionary={dictionary} />
       <section className="relative flex min-h-[72vh] items-end overflow-hidden bg-[var(--color-bg-elevated)]">
-        <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} placeholderLabel={dictionary.ui.placeholderHeroImage} videoLabel={dictionary.ui.studioVideo} />
+        <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} placeholderLabel={dictionary.ui.placeholderStudioImage} videoLabel={dictionary.ui.studioVideo} />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/20 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-40 md:px-8 md:pb-20">
           <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">Linnorea Design Works</p>

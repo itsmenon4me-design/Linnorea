@@ -33,7 +33,7 @@ export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">
-              {dictionary.ui.placeholderHeroImage}
+              {dictionary.ui.placeholderProjectImage}
             </div>
           )}
           <div className="absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-black/80 to-transparent px-5 pb-5 pt-16 opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">

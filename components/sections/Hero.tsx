@@ -404,8 +404,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                     className={`object-cover transition-opacity duration-300 motion-reduce:transition-none ${slidePlaybackId && isActive && readyVideoIndexes.has(index) ? "opacity-0" : "opacity-100"}`}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
-                    Placeholder Hero Image
+                <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] px-6 text-center text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
+                  {dictionary.ui.placeholderHeroImage}
                   </div>
                 )}
                 {slidePlaybackId && mounted ? (
