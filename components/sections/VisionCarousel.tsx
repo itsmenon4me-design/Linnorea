@@ -80,7 +80,7 @@ const PanelSlide = forwardRef<HTMLDivElement, PanelSlideProps>(function PanelSli
   return (
     <div ref={ref} className={`absolute inset-0 ${isIncoming ? "z-10" : "z-0"}`}>
       {slide.image ? (
-        <Image data-panel-image src={urlFor(slide.image).width(1400).height(1000).fit("crop").auto("format").url()} alt={slide.headline} fill sizes="(min-width: 768px) 60vw, 100vw" loading={isIncoming ? "eager" : undefined} className="object-cover" />
+        <Image data-panel-image src={urlFor(slide.image).width(1400).height(1000).fit("crop").auto("format").quality(78).url()} alt={slide.headline} fill sizes="(min-width: 768px) 60vw, 100vw" loading={isIncoming ? "eager" : undefined} className="object-cover" />
       ) : (
         <div data-panel-image className="absolute inset-0 flex items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.35em] text-white/40">{placeholderImageLabel}</div>
       )}
@@ -133,7 +133,7 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
     return Array.from(adjacentIndexes)
       .map((index) => slides[index].image)
       .filter((image): image is NonNullable<SlideData["image"]> => Boolean(image))
-      .map((image) => urlFor(image).width(1400).height(1000).fit("crop").auto("format").url());
+      .map((image) => urlFor(image).width(1400).height(1000).fit("crop").auto("format").quality(78).url());
   }, [activeIndex, slideCount, slides]);
 
   const changeSlide = useCallback((nextIndex: number) => {

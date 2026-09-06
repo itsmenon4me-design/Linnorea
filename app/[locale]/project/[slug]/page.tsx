@@ -88,12 +88,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         {project.heroVideo?.asset?.url ? (
           <LazyAutoplayVideo
             src={project.heroVideo.asset.url}
-            poster={project.coverImage ? urlFor(project.coverImage).width(1920).height(1280).fit("crop").auto("format").url() : undefined}
+            poster={project.coverImage ? urlFor(project.coverImage).width(1920).height(1280).fit("crop").auto("format").quality(78).url() : undefined}
             ariaLabel={`${title} project video`}
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : project.coverImage ? (
-          <Image src={urlFor(project.coverImage).width(1920).height(1280).fit("crop").auto("format").url()} alt={title} fill priority sizes="100vw" className="object-cover" />
+          <Image src={urlFor(project.coverImage).width(1920).height(1280).fit("crop").auto("format").quality(78).url()} alt={title} fill priority sizes="100vw" className="object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.ui.placeholderHeroImage}</div>
         )}
@@ -121,7 +121,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
       {project.gallery?.length ? (
         <section className="space-y-4 px-3 md:space-y-8 md:px-8">
           {project.gallery.map((image, index) => {
-            const imageUrl = urlFor(image).width(2200).height(index % 3 === 1 ? 1300 : 1500).fit("crop").auto("format").url();
+            const imageUrl = urlFor(image).width(2200).height(index % 3 === 1 ? 1300 : 1500).fit("crop").auto("format").quality(78).url();
             return (
               <ScrollReveal key={image._key ?? `${project._id}-${index}`} as="div">
                 <div data-reveal className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)] md:aspect-[16/9]">

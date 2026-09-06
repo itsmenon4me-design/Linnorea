@@ -15,7 +15,7 @@ export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
   const title = localizedValue(project.title, locale) || dictionary.home.untitledProject;
   const style = localizedValue(project.styleTag, locale);
   const slug = project.slug?.current;
-  const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").url() : null;
+  const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
 
   if (!slug) return null;
 

@@ -36,7 +36,7 @@ export default async function ServicePage({ params }: ServiceProps) {
       {services.length ? services.map((service, index) => {
         const title = localizedValue(service.title, safeLocale) || dictionary.ui.untitledService;
         const description = localizedValue(service.description, safeLocale) || dictionary.ui.placeholderServiceDescription;
-        const imageUrl = service.image ? urlFor(service.image).width(1800).height(1200).fit("crop").auto("format").url() : null;
+        const imageUrl = service.image ? urlFor(service.image).width(1800).height(1200).fit("crop").auto("format").quality(78).url() : null;
         return (
           <ScrollReveal key={service._id} as="section" className="border-t border-white/15">
             <div data-reveal className={`mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-2 md:gap-16 md:px-8 md:py-20 ${index % 2 ? "md:[&>div:first-child]:order-2" : ""}`}>

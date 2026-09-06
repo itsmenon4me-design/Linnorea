@@ -37,7 +37,7 @@ export default async function ProductPage({ params }: ProductProps) {
           const name = localizedValue(product.name, safeLocale) || dictionary.ui.untitledProduct;
           const description = plainText(localizedValue(product.description, safeLocale)) || dictionary.ui.placeholderProductDescription;
           const image = product.images?.find((item) => Boolean(item.asset?._ref));
-          const imageUrl = image ? urlFor(image).width(1400).height(1400).fit("crop").auto("format").url() : null;
+          const imageUrl = image ? urlFor(image).width(1400).height(1400).fit("crop").auto("format").quality(78).url() : null;
           return <ScrollReveal key={product._id}><article data-reveal className="border-b border-white/15 pb-6">
             <div className="relative aspect-square overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition duration-700 hover:scale-105" /> : <div className="flex h-full items-center justify-center text-center text-[10px] uppercase tracking-[0.3em] text-white/40">{dictionary.ui.placeholderProductImage}</div>}</div>
             <h2 className="mt-5 text-2xl font-medium tracking-[-0.04em] md:text-3xl">{name}</h2>

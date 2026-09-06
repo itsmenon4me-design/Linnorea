@@ -387,7 +387,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       <div className="absolute inset-0">
         {resolvedSlides.map((slide, index) => {
           const slidePlaybackId = playbackIds[index];
-          const slideMediaUrl = slide.image ? urlFor(slide.image).width(1800).height(1100).fit("crop").auto("format").url() : null;
+          const slideMediaUrl = slide.image ? urlFor(slide.image).width(1800).height(1100).fit("crop").auto("format").quality(78).url() : null;
           const isActive = index === activeIndex;
 
           return (

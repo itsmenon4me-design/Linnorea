@@ -73,7 +73,7 @@ export function StudioVisual({ image, video, placeholderLabel, videoLabel }: Stu
   }
 
   if (image) {
-    return <Image src={urlFor(image).width(1920).height(1280).fit("crop").auto("format").url()} alt="Linnorea studio" fill sizes="100vw" className="object-cover" />;
+    return <Image src={urlFor(image).width(1920).height(1280).fit("crop").auto("format").quality(78).url()} alt="Linnorea studio" fill sizes="100vw" className="object-cover" />;
   }
 
   return <div className="absolute inset-0 flex items-center justify-center text-center text-[10px] uppercase tracking-[0.32em] text-white/40">{placeholderLabel}</div>;

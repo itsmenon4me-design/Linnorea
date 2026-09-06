@@ -75,11 +75,11 @@ export default async function HomePage({ params }: HomePageProps) {
           {mosaicTiles.map((project, index) => {
             const title = project ? localizedValue(project.title, safeLocale) || dictionary.home.untitledProject : dictionary.home.featuredProjectPlaceholder;
             const style = project ? localizedValue(project.styleTag, safeLocale) : dictionary.home.awaitingFeaturedProject;
-            const imageUrl = project?.coverImage ? urlFor(project.coverImage).width(1400).height(1000).fit("crop").auto("format").url() : null;
+            const imageUrl = project?.coverImage ? urlFor(project.coverImage).width(1400).height(1000).fit("crop").auto("format").quality(78).url() : null;
             const tile = (
               <article data-reveal className="group relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
                 <RevealCurtain>
-                  {imageUrl ? <Image src={imageUrl} alt={title} width={1200} height={900} className="h-[116%] w-full origin-bottom object-cover transition-transform duration-[2400ms] ease-out motion-reduce:transition-none group-hover:scale-[1.1]" /> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#171b1f,var(--color-bg-base))] px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.home.featuredImagePlaceholder}</div>}
+                  {imageUrl ? <Image src={imageUrl} alt={title} width={1200} height={900} sizes="(max-width: 768px) 100vw, 50vw" className="h-[116%] w-full origin-bottom object-cover transition-transform duration-[2400ms] ease-out motion-reduce:transition-none group-hover:scale-[1.1]" /> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#171b1f,var(--color-bg-base))] px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.home.featuredImagePlaceholder}</div>}
                 </RevealCurtain>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">

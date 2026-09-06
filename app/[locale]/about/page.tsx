@@ -88,7 +88,7 @@ export default async function AboutPage({ params }: AboutProps) {
             <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
               {teamMembers.map((member) => (
                 <article key={member._id} className="border-b border-white/15 pb-6">
-                  {member.photo ? <Image src={urlFor(member.photo).width(800).height(800).fit("crop").auto("format").url()} alt={member.name ?? ""} width={800} height={800} className="mb-5 aspect-square w-full object-cover" /> : null}
+                  {member.photo ? <Image src={urlFor(member.photo).width(800).height(800).fit("crop").auto("format").quality(78).url()} alt={member.name ?? ""} width={800} height={800} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="mb-5 aspect-square w-full object-cover" /> : null}
                   <h2 className="text-2xl tracking-[-0.04em]">{member.name}</h2>
                   <p className="mt-2 text-sm text-[var(--color-accent-gold)]">{localizedValue(member.role, safeLocale)}</p>
                   {localizedValue(member.bio, safeLocale) ? <p className="mt-4 text-sm leading-6 text-white/65">{localizedValue(member.bio, safeLocale)}</p> : null}
