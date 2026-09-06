@@ -225,14 +225,17 @@ ul.footer-connect-list {
 }
 
 @media (max-width: 959.99px) {
-  ul.footer-connect-list,
+  ul.footer-connect-list {
+    flex-direction: column;
+  }
+
   ul.footer-connect-list > li,
   ul.footer-connect-list .footer-social-item {
-    flex-direction: column;
     width: 100% !important;
   }
 
   ul.footer-connect-list .footer-social-item {
+    flex-direction: row;
     justify-content: space-between;
   }
 }

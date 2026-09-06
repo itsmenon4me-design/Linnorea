@@ -71,13 +71,13 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
               style={{ columnGap: "5rem", rowGap: "1rem" }}
             >
               {socialLinks.map((link) => (
-                <li key={`${link.platform}-${link.url}`} className="w-full min-w-0 md:w-auto" style={{ width: "max-content" }}>
+                <li key={`${link.platform}-${link.url}`} className="w-full min-w-0 md:w-auto">
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noreferrer"
                     className="footer-social-item inline-flex w-full items-center justify-between gap-2 whitespace-nowrap text-lg transition-colors hover:text-white md:w-auto md:justify-start"
-                    style={{ columnGap: "0.5rem", whiteSpace: "nowrap", width: "max-content" }}
+                    style={{ columnGap: "0.5rem", whiteSpace: "nowrap" }}
                   >
                     <SocialIcon platform={link.platform} />
                     <span className="text-lg">{link.platform}</span>
