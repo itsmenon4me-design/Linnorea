@@ -383,7 +383,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   };
 
   return (
-    <section ref={rootRef} data-home-hero className="relative isolate flex min-h-screen items-end overflow-hidden bg-[var(--color-bg-base)] text-white">
+    <section
+      ref={rootRef}
+      data-home-hero
+      className="hero-section relative isolate flex flex-col overflow-hidden bg-[var(--color-bg-base)] text-white"
+      style={{ height: "100svh", minHeight: 640 }}
+    >
       <div className="absolute inset-0">
         {resolvedSlides.map((slide, index) => {
           const slidePlaybackId = playbackIds[index];
@@ -448,26 +453,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         })}
       </div>
       <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,8,10,0.9),rgba(7,8,10,0.3),rgba(7,8,10,0.7))]" />
-      <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center pb-6 md:pb-10">
-        <div className="flex items-center gap-2.5">
-          {resolvedSlides.map((slide, index) => {
-            const isActive = index === activeIndex;
-            const buttonSizeClass = isActive ? "h-5 w-5" : "h-2.5 w-2.5";
-            return (
-              <button
-                key={slide._id ?? `hero-slide-${index}`}
-                type="button"
-                aria-label={`${dictionary.ui.showSlide} ${index + 1}`}
-                aria-pressed={isActive}
-                onClick={() => goToSlide(index, true)}
-                className={`relative m-0 flex ${buttonSizeClass} items-center justify-center rounded-full border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
-              >
-                <CarouselDot active={isActive} passed={index < activeIndex} progress={progress} resetKey={`hero-dot-${activeIndex}`} />
-              </button>
-            );
-          })}
-        </div>
-      </div>
       <button
         type="button"
         aria-label={isPaused ? dictionary.ui.playHeroMedia : dictionary.ui.pauseHeroMedia}
@@ -486,25 +471,48 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         )}
       </button>
 
-      <a
-        href="#collections"
-        data-animate
-        className="group pointer-events-auto absolute bottom-[12%] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]"
-        aria-label={`${dictionary.home.discover} collections`}
+      <div
+        className="hero-content-layer relative z-10 flex flex-col items-center px-5 pb-10 pt-28 text-center md:pb-12 md:pt-36"
+        style={{ flex: "1 1 auto", minHeight: 0, justifyContent: "flex-end" }}
       >
-        <ArrowAction label={dictionary.home.discover} size="md" className="text-[10px] uppercase tracking-[0.35em] md:text-xs" />
-      </a>
-
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-5 pb-20 pt-32 md:px-8 md:pb-24">
-        <p data-animate className="text-[10px] uppercase tracking-[0.45em] text-white/70">
-          {eyebrow}
-        </p>
-        <h1 className="max-w-4xl text-4xl font-medium leading-[0.9] tracking-[-0.06em] md:text-6xl lg:text-7xl">
-          {headline}
-        </h1>
-        <p data-animate className="max-w-xl text-base text-white/70 md:text-lg">
-          {subheadline}
-        </p>
+        <div className="flex w-full max-w-[526.7px] flex-col items-center">
+          <p
+            data-animate
+            className="hero-eyebrow mb-6 text-[13px] uppercase leading-none tracking-[0.35em] text-white/70"
+            style={{ marginBottom: 24 }}
+          >
+            {eyebrow}
+          </p>
+          <h1 className="mb-10 text-[32px] font-medium leading-[0.95] tracking-[-0.04em]" style={{ marginBottom: 40, fontSize: 32 }}>
+            {headline}
+          </h1>
+          <a
+            href="#collections"
+            data-animate
+            className="group pointer-events-auto flex items-center gap-1 text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]"
+            aria-label={`${dictionary.home.discover} collections`}
+          >
+            <ArrowAction label={dictionary.home.discover} size="md" className="text-[10px] uppercase tracking-[0.35em] md:text-xs" />
+          </a>
+        </div>
+        <div className="mt-4 flex items-center gap-2.5 md:mt-4">
+          {resolvedSlides.map((slide, index) => {
+            const isActive = index === activeIndex;
+            const buttonSizeClass = isActive ? "h-5 w-5" : "h-2.5 w-2.5";
+            return (
+              <button
+                key={slide._id ?? `hero-slide-${index}`}
+                type="button"
+                aria-label={`${dictionary.ui.showSlide} ${index + 1}`}
+                aria-pressed={isActive}
+                onClick={() => goToSlide(index, true)}
+                className={`relative m-0 flex ${buttonSizeClass} items-center justify-center rounded-full border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
+              >
+                <CarouselDot active={isActive} passed={index < activeIndex} progress={progress} resetKey={`hero-dot-${activeIndex}`} />
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
