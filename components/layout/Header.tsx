@@ -4,8 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
@@ -13,8 +11,6 @@ import { urlFor } from "@/lib/sanity/image";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
 import type { SanityImage } from "@/lib/sanity/types";
 import { LangSwitcher } from "./LangSwitcher";
-
-gsap.registerPlugin(ScrollTrigger);
 
 type HeaderProps = {
   dictionary: Dictionary;
@@ -52,15 +48,16 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
     const hero = document.querySelector("[data-home-hero]");
     if (!hero) return;
 
-    const trigger = ScrollTrigger.create({
-      trigger: hero,
-      start: "bottom top",
-      onEnter: () => setIsHidden(true),
-      onLeaveBack: () => setIsHidden(false),
-    });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHidden(!entry.isIntersecting);
+      },
+      { threshold: 0 },
+    );
+    observer.observe(hero);
 
     return () => {
-      trigger.kill();
+      observer.disconnect();
     };
   }, []);
 
