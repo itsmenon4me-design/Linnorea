@@ -140,55 +140,6 @@ button {
   margin-bottom: 24px;
 }
 
-.footer-mobile-toggle {
-  display: inline-flex !important;
-}
-
-.footer-mobile-separator {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.footer-navigate-links,
-ul.footer-connect-list {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 4rem;
-  row-gap: 1rem;
-}
-
-.footer-navigate-links > a,
-.footer-social-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-}
-
-@media (max-width: 959.99px) {
-  ul.footer-connect-list {
-    flex-direction: column !important;
-  }
-}
-
-@media (min-width: 960px) {
-  .footer-mobile-toggle {
-    display: none !important;
-  }
-
-  .footer-mobile-separator {
-    border-bottom: 0 !important;
-  }
-
-  ul.footer-connect-list {
-    flex-direction: row !important;
-  }
-
-  ul.footer-connect-list > li,
-  .footer-social-item {
-    width: auto !important;
-  }
-}
-
 [data-home-hero] mux-player {
   position: absolute;
   inset: 0;
@@ -224,36 +175,35 @@ ul.footer-connect-list {
   display: block;
 }
 
-@media (max-width: 959.99px) {
-  ul.footer-connect-list {
-    flex-direction: column;
-  }
-
-  ul.footer-connect-list > li,
-  ul.footer-connect-list .footer-social-item {
-    width: 100% !important;
-  }
-
-  ul.footer-connect-list .footer-social-item {
-    flex-direction: row;
-    justify-content: space-between;
-  }
+section[aria-label="Connect"] svg {
+  width: 1rem;
+  height: 1rem;
 }
 
-@media (min-width: 960px) {
-  ul.footer-connect-list {
+section[aria-label="Connect"] > div {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  column-gap: 4rem;
+  row-gap: 0.5rem;
+}
+
+section[aria-label="Connect"] > div > a {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  section[aria-label="Connect"] > div {
     flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: 1rem;
   }
 
-  ul.footer-connect-list > li,
-  ul.footer-connect-list .footer-social-item {
-    width: auto !important;
-    flex: 0 0 auto !important;
-  }
-
-  ul.footer-connect-list .footer-social-item {
-    flex-direction: row;
-    justify-content: flex-start;
+  section[aria-label="Connect"] > div > a {
+    width: auto;
+    border-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 

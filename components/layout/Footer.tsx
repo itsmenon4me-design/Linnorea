@@ -11,14 +11,12 @@ type FooterProps = {
 
 type SocialPlatform = "Facebook" | "Instagram" | "LinkedIn" | "TikTok" | "X";
 
-function SocialIcon({ platform }: { platform?: string }) {
+function SocialIcon({ platform, className }: { platform?: string; className?: string }) {
   const iconProps = {
     "aria-hidden": true,
-    className: "w-6 h-6 shrink-0 fill-current",
-    height: 24,
-    style: { width: "24px", height: "24px" },
+    className: `${className ?? ""} shrink-0 fill-current`,
+    style: { width: "1rem", height: "1rem" },
     viewBox: "0 0 24 24",
-    width: 24,
   };
 
   switch (platform as SocialPlatform) {
@@ -37,6 +35,14 @@ function SocialIcon({ platform }: { platform?: string }) {
   }
 }
 
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <span className={className} aria-hidden="true">
+      +
+    </span>
+  );
+}
+
 export async function Footer({ currentLocale, dictionary }: FooterProps) {
   const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
   const brandText = localizedValue(settings?.brandStatement, currentLocale) || "Linnorea Design Works";
@@ -53,6 +59,8 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
     (settings?.socialLinks ?? []).map((link) => [link.platform, link.url]),
   );
   const socialLinks = defaultSocialLinks.map((link) => ({
+    icon: (props: { className?: string }) => <SocialIcon platform={link.platform} {...props} />,
+    label: link.platform,
     platform: link.platform,
     url: configuredSocialLinks.get(link.platform) || link.url,
   }));
@@ -66,31 +74,23 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
             style={{ paddingTop: "2.5rem", paddingBottom: "2.5rem" }}
             aria-label="Connect"
           >
-            <ul
-              className="footer-connect-list flex flex-col flex-wrap gap-x-20 gap-y-4 text-lg text-white/70 md:flex-row md:flex-wrap"
-              style={{ columnGap: "5rem", rowGap: "1rem" }}
-            >
+            <div className="flex flex-col md:flex-row md:flex-wrap gap-x-16 gap-y-2 md:gap-y-4">
               {socialLinks.map((link) => (
-                <li key={`${link.platform}-${link.url}`} className="w-full min-w-0 md:w-auto">
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="footer-social-item inline-flex w-full items-center justify-between gap-2 whitespace-nowrap text-lg transition-colors hover:text-white md:w-auto md:justify-start"
-                    style={{ columnGap: "0.5rem", whiteSpace: "nowrap" }}
-                  >
-                    <SocialIcon platform={link.platform} />
-                    <span className="text-lg">{link.platform}</span>
-                    <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center p-2.5 text-[10px] leading-none"
-                      aria-hidden="true"
-                    >
-                      +
-                    </span>
-                  </a>
-                </li>
+                <a
+                  key={link.platform}
+                  href={link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex w-full md:w-auto items-center justify-between md:justify-start gap-3 border-b border-white/10 md:border-none py-4 md:py-0"
+                >
+                  <span className="flex items-center gap-3">
+                    <link.icon className="w-4 h-4" />
+                    <span className="text-sm md:text-base">{link.label}</span>
+                  </span>
+                  <PlusIcon className="w-4 h-4 p-2.5" />
+                </a>
               ))}
-            </ul>
+            </div>
           </section>
 
           <section
