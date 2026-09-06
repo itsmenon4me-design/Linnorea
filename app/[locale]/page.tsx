@@ -85,7 +85,7 @@ export default async function HomePage({ params }: HomePageProps) {
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/60">{style}</p>
                   <h3 className="mt-3 text-2xl font-medium tracking-[-0.04em] text-white md:text-4xl">{title}</h3>
-                  <ArrowAction label={project ? dictionary.home.discover : dictionary.ui.comingSoon} className="mt-5 text-[10px] uppercase tracking-[0.25em] text-white" />
+                  <ArrowAction label={project ? dictionary.home.discover : dictionary.ui.comingSoon} className={`mt-5 uppercase tracking-[0.25em] text-white ${project ? "text-[10px]" : "text-xs"}`} />
                 </div>
               </article>
             );
