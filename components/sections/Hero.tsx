@@ -85,7 +85,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     player: MuxPlayerElement,
     operation: (media: HTMLMediaElement) => Promise<void> | void,
   ) => {
-    const media = player.mediaController?.media ?? player;
+    const media = player.mediaController?.media;
+    if (!media) {
+      return Promise.reject(new Error(`Hero media instance is unavailable for slide ${index}.`));
+    }
     const previous = lifecycleQueuesRef.current.get(index) ?? Promise.resolve();
     const next = previous.catch(() => undefined).then(() => operation(media));
     lifecycleQueuesRef.current.set(index, next);
@@ -97,9 +100,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     return next;
   };
   const playActiveVideo = (player: MuxPlayerElement) => {
-    const media = player.mediaController?.media ?? player;
+    const media = player.mediaController?.media;
     const playerIndex = muxPlayerRefs.current.indexOf(player);
     const generation = playbackGenerationRef.current;
+    if (!media) {
+      return;
+    }
     const startPlayback = () => {
       pendingPlayCleanupRef.current?.();
       pendingPlayCleanupRef.current = null;
@@ -181,11 +187,18 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       const eventTarget = errorEvent.currentTarget as (HTMLMediaElement | MuxPlayerElement);
       const eventMedia = eventTarget instanceof HTMLMediaElement ? eventTarget : null;
       const media = player.mediaController?.media ?? eventMedia;
+      const playbackId = player.getAttribute("playback-id");
+      if (!media) {
+        console.warn("Hero video retry skipped because the media instance is unavailable.", {
+          index,
+          playbackId,
+        });
+        return;
+      }
       const eventError = eventMedia?.error ?? ("error" in eventTarget ? eventTarget.error : null);
       const mediaError = eventError ?? media.error;
       const isActive = index === activeIndexRef.current;
       const isNext = index === nextIndexRef.current;
-      const playbackId = player.getAttribute("playback-id");
       const errorKey = `${playbackId ?? "unknown"}:${index}:${mediaError?.code ?? "unknown"}:${mediaError?.message ?? "unknown"}`;
       const now = performance.now();
       const previousErrorAt = mediaErrorLogRef.current.get(errorKey);
