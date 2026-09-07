@@ -75,6 +75,13 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         return;
       }
 
+      if (
+        player.ended ||
+        (Number.isFinite(player.duration) && player.duration > 0 && player.currentTime >= player.duration - 0.05)
+      ) {
+        player.currentTime = 0;
+      }
+
       void player.play().catch((error: unknown) => {
         if (generation === playbackGenerationRef.current) {
           console.warn("Hero video could not be played.", error);
@@ -150,7 +157,11 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
             media.preload = "auto";
             media.load();
             void media.play()
-              .then(() => undefined)
+              .then(() => {
+                if (index !== activeIndex) {
+                  media.pause();
+                }
+              })
               .catch((error: unknown) => {
                 console.warn("Hero next-slide preload could not start.", error);
               });
