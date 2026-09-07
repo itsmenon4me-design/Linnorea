@@ -71,7 +71,6 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
         <div className="min-w-0">
           <section
             className="min-w-0 border-t border-b border-white/10 py-10 md:py-12"
-            style={{ paddingTop: "2.5rem", paddingBottom: "2.5rem" }}
             aria-label="Connect"
           >
             <div className="flex flex-col md:flex-row md:flex-wrap gap-x-16 gap-y-2 md:gap-y-4">
@@ -95,7 +94,6 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
 
           <section
             className="min-w-0 w-full border-b border-white/25 pt-8 pb-10 text-center md:pt-10 md:pb-12"
-            style={{ paddingTop: "2.5rem", paddingBottom: "2.5rem" }}
             aria-labelledby="footer-brand"
           >
             <p

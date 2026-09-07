@@ -175,38 +175,6 @@ button {
   display: block;
 }
 
-section[aria-label="Connect"] svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-section[aria-label="Connect"] > div {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  column-gap: 4rem;
-  row-gap: 0.5rem;
-}
-
-section[aria-label="Connect"] > div > a {
-  width: 100%;
-}
-
-@media (min-width: 768px) {
-  section[aria-label="Connect"] > div {
-    flex-direction: row;
-    flex-wrap: wrap;
-    row-gap: 1rem;
-  }
-
-  section[aria-label="Connect"] > div > a {
-    width: auto;
-    border-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-}
-
 .arrow-circle-button:hover,
 .arrow-circle-button:focus-visible {
   border-color: rgba(255, 255, 255, 0.9);
