@@ -277,7 +277,16 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         return;
       }
 
-      player.setAttribute("preload", index === activeIndex || index === nextIndex ? "auto" : "none");
+      const shouldPreload = index === activeIndex || index === nextIndex;
+      player.preload = shouldPreload ? "auto" : "none";
+      if (index === nextIndex) {
+        player.minPreloadSegments = 1;
+        if (player.readyState === 0) {
+          player.load();
+        }
+      } else {
+        player.minPreloadSegments = undefined;
+      }
     });
   }, [activeIndex, nextIndex]);
 
@@ -435,6 +444,14 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                   <MuxPlayer
                     ref={(player) => {
                       muxPlayerRefs.current[index] = player;
+                      if (player) {
+                        const shouldPreload = isActive || index === nextIndex;
+                        player.preload = shouldPreload ? "auto" : "none";
+                        if (index === nextIndex) {
+                          player.minPreloadSegments = 1;
+                          player.load();
+                        }
+                      }
                     }}
                     playbackId={slidePlaybackId}
                     autoPlay={false}
