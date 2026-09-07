@@ -159,9 +159,13 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     };
 
     syncPlayers();
+    const syncTimeoutId = window.setTimeout(syncPlayers, 100);
     const observer = new MutationObserver(syncPlayers);
     observer.observe(node, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return () => {
+      window.clearTimeout(syncTimeoutId);
+      observer.disconnect();
+    };
   }, [activeIndex, isHeroInView, isPaused, isTabVisible, nextIndex]);
 
   useEffect(() => {
