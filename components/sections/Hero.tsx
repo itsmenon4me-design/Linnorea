@@ -36,7 +36,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const [autoAdvanceResetKey, setAutoAdvanceResetKey] = useState(0);
   const [readyVideoIndexes, setReadyVideoIndexes] = useState<Set<number>>(() => new Set());
   const playbackGenerationRef = useRef(0);
-  const previousActiveIndexRef = useRef<number | null>(null);
   const pendingPlayCleanupRef = useRef<(() => void) | null>(null);
 
   const resolvedSlides = useMemo<HeroSlide[]>(
@@ -280,8 +279,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     }
 
     playbackGenerationRef.current += 1;
-    const isSlideChange = previousActiveIndexRef.current !== activeIndex;
-    previousActiveIndexRef.current = activeIndex;
 
     muxPlayerRefs.current.forEach((player, index) => {
       if (!player) {
@@ -292,12 +289,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         player.pause();
         player.currentTime = 0;
         player.setAttribute("preload", "none");
-      } else if (index === activeIndex) {
-        player.setAttribute("preload", "auto");
-        if (isSlideChange) {
-          player.pause();
-          player.currentTime = 0;
-        }
       } else {
         player.setAttribute("preload", "auto");
       }
