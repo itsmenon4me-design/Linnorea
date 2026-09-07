@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://cdn.sanity.io https://*.apicdn.sanity.io https://image.mux.com",
               "media-src 'self' blob: https://stream.mux.com https://*.mux.com",
-              "connect-src 'self' https://api.sanity.io https://*.api.sanity.io https://*.mux.com",
+              "connect-src 'self' https://api.sanity.io https://*.api.sanity.io https://*.mux.com https://inferred.litix.io",
               "worker-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'",

@@ -19,8 +19,8 @@ type HeroProps = {
 };
 
 const AUTO_ADVANCE_MS = 6000;
-const MEDIA_ERROR_RETRY_DELAY_MS = 400;
-const MEDIA_ERROR_RETRY_TIMEOUT_MS = 3500;
+const MEDIA_ERROR_RETRY_DELAY_MS = 900;
+const MEDIA_ERROR_RETRY_TIMEOUT_MS = 6500;
 const MAX_MEDIA_ERROR_RETRIES = 3;
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
