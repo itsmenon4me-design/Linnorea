@@ -148,6 +148,15 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           player.minPreloadSegments = 1;
           if (player.readyState === 0) {
             player.load();
+            void player.play()
+              .then(() => {
+                if (index !== activeIndex) {
+                  player.pause();
+                }
+              })
+              .catch((error: unknown) => {
+                console.warn("Hero next-slide preload could not start.", error);
+              });
           }
         }
       });
