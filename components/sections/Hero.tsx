@@ -37,6 +37,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const [readyVideoIndexes, setReadyVideoIndexes] = useState<Set<number>>(() => new Set());
   const playbackGenerationRef = useRef(0);
   const previousActiveIndexRef = useRef<number | null>(null);
+  const pendingPlayCleanupRef = useRef<(() => void) | null>(null);
 
   const resolvedSlides = useMemo<HeroSlide[]>(
     () =>
@@ -67,16 +68,38 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const activePlaybackId = playbackIds[activeIndex] ?? null;
   const nextIndex = resolvedSlides.length > 1 ? (activeIndex + 1) % resolvedSlides.length : null;
   const playActiveVideo = (player: MuxPlayerElement) => {
-    if (player.readyState < 3) {
+    const generation = playbackGenerationRef.current;
+    const startPlayback = () => {
+      pendingPlayCleanupRef.current?.();
+      pendingPlayCleanupRef.current = null;
+      if (generation !== playbackGenerationRef.current) {
+        return;
+      }
+
+      void player.play().catch((error: unknown) => {
+        if (generation === playbackGenerationRef.current) {
+          console.warn("Hero video could not be played.", error);
+        }
+      });
+    };
+
+    if (player.readyState >= 3) {
+      startPlayback();
       return;
     }
 
-    const generation = playbackGenerationRef.current;
-    void player.play().catch((error: unknown) => {
-      if (generation === playbackGenerationRef.current) {
-        console.warn("Hero video could not be played.", error);
+    pendingPlayCleanupRef.current?.();
+    const handleReady = () => startPlayback();
+    const cleanup = () => {
+      player.removeEventListener("canplay", handleReady);
+      player.removeEventListener("loadeddata", handleReady);
+      if (pendingPlayCleanupRef.current === cleanup) {
+        pendingPlayCleanupRef.current = null;
       }
-    });
+    };
+    pendingPlayCleanupRef.current = cleanup;
+    player.addEventListener("canplay", handleReady, { once: true });
+    player.addEventListener("loadeddata", handleReady, { once: true });
   };
 
   const handleVideoCanPlay = (index: number) => {
@@ -111,6 +134,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   }, [progress]);
 
   useEffect(() => {
+    pendingPlayCleanupRef.current?.();
+    playbackGenerationRef.current += 1;
     const player = muxPlayerRefs.current[activeIndex];
     if (!mounted || !player) {
       return;
@@ -128,6 +153,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     handleCanPlay();
 
     return () => {
+      pendingPlayCleanupRef.current?.();
       player.removeEventListener("play", handlePlay);
       player.removeEventListener("canplay", handleCanPlay);
     };
