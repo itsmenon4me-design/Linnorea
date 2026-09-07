@@ -229,7 +229,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       }
     });
 
-  }, [activeIndex, activePlaybackId, mounted, playbackIds]);
+  }, [activeIndex, activePlaybackId, mounted, nextIndex, playbackIds]);
 
   useEffect(() => {
     const activePlayer = muxPlayerRefs.current[activeIndex];
@@ -266,7 +266,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     const advance = () => {
       setProgress(1);
       const nextActiveIndex = (activeIndex + 1) % resolvedSlides.length;
-      setReadyVideoIndexes(new Set([nextActiveIndex]));
       setActiveIndex(nextActiveIndex);
     };
 
@@ -296,7 +295,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const goToSlide = (index: number, isManualNavigation = false) => {
     const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
     const currentPlayer = muxPlayerRefs.current[activeIndex];
-    setReadyVideoIndexes(new Set([normalizedIndex]));
 
     if (normalizedIndex !== activeIndex && currentPlayer) {
       currentPlayer.pause();
