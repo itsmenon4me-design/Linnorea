@@ -146,12 +146,14 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         player.preload = shouldPreload ? "auto" : "none";
         if (index === nextIndex) {
           player.minPreloadSegments = 1;
-          if (player.readyState === 0) {
-            player.load();
-            void player.play()
+          const media = player.mediaController?.media;
+          if (media && media.readyState === 0) {
+            media.preload = "auto";
+            media.load();
+            void media.play()
               .then(() => {
                 if (index !== activeIndex) {
-                  player.pause();
+                  media.pause();
                 }
               })
               .catch((error: unknown) => {
