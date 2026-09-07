@@ -171,10 +171,16 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
     syncPlayers();
     const syncTimeoutId = window.setTimeout(syncPlayers, 100);
+    const syncRetryId = window.setInterval(syncPlayers, 250);
+    const stopSyncRetryId = window.setTimeout(() => {
+      window.clearInterval(syncRetryId);
+    }, 5000);
     const observer = new MutationObserver(syncPlayers);
     observer.observe(node, { childList: true, subtree: true });
     return () => {
       window.clearTimeout(syncTimeoutId);
+      window.clearTimeout(stopSyncRetryId);
+      window.clearInterval(syncRetryId);
       observer.disconnect();
     };
   }, [activeIndex, isHeroInView, isPaused, isTabVisible, nextIndex]);
