@@ -24,6 +24,35 @@ const MEDIA_ERROR_RETRY_TIMEOUT_MS = 3500;
 const MAX_MEDIA_ERROR_RETRIES = 3;
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
+const waitForMediaReady = (media: HTMLMediaElement, timeoutMs: number) => {
+  if (media.readyState >= 3) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const timeoutId = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error("Hero media readiness timeout."));
+    }, timeoutMs);
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      media.removeEventListener("canplay", handleReady);
+      media.removeEventListener("loadeddata", handleReady);
+    };
+    const handleReady = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve();
+    };
+    media.addEventListener("canplay", handleReady, { once: true });
+    media.addEventListener("loadeddata", handleReady, { once: true });
+  });
+};
+
 export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const rootRef = useRef<HTMLElement | null>(null);
   const muxPlayerRefs = useRef<Array<MuxPlayerElement | null>>([]);
@@ -76,6 +105,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const mediaErrorCleanupRef = useRef<Map<number, () => void>>(new Map());
   const mediaErrorLogRef = useRef<Map<string, number>>(new Map());
   const lifecycleQueuesRef = useRef<Map<number, Promise<void>>>(new Map());
+  const preloadStartedRef = useRef<Set<number>>(new Set());
   useEffect(() => {
     activeIndexRef.current = activeIndex;
     nextIndexRef.current = nextIndex;
@@ -265,32 +295,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         });
         void queueMediaOperation(index, currentPlayer, async (queuedMedia) => {
           queuedMedia.preload = "auto";
-          await new Promise<void>((resolve, reject) => {
-            let settled = false;
-            const timeoutId = window.setTimeout(() => {
-              if (settled) return;
-              settled = true;
-              cleanup();
-              reject(new Error("Hero video retry timeout waiting for media readiness."));
-            }, MEDIA_ERROR_RETRY_TIMEOUT_MS);
-            const cleanup = () => {
-              window.clearTimeout(timeoutId);
-              queuedMedia.removeEventListener("canplay", handleRetryReady);
-              queuedMedia.removeEventListener("loadeddata", handleRetryReady);
-            };
-            const handleRetryReady = () => {
-              if (settled) return;
-              settled = true;
-              cleanup();
-              resolve();
-            };
-            queuedMedia.addEventListener("canplay", handleRetryReady, { once: true });
-            queuedMedia.addEventListener("loadeddata", handleRetryReady, { once: true });
-            queuedMedia.load();
-            if (queuedMedia.readyState >= 3) {
-              handleRetryReady();
-            }
-          });
+          queuedMedia.load();
+          await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
 
           const currentlyActive = index === activeIndexRef.current;
           const currentlyNext = index === nextIndexRef.current;
@@ -381,13 +387,18 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         muxPlayerRefs.current[index] = player;
         const shouldPreload = index === activeIndex || index === nextIndex;
         player.preload = shouldPreload ? "auto" : "none";
+        if (!shouldPreload) {
+          preloadStartedRef.current.delete(index);
+        }
         if (index === nextIndex) {
           player.minPreloadSegments = 1;
           const media = player.mediaController?.media;
-          if (media && media.readyState === 0) {
+          if (media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
+            preloadStartedRef.current.add(index);
             void queueMediaOperation(index, player, async (queuedMedia) => {
               queuedMedia.preload = "auto";
               queuedMedia.load();
+              await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
               await queuedMedia.play();
               if (index !== activeIndex) {
                 queuedMedia.pause();
@@ -399,6 +410,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                 }
               })
               .catch((error: unknown) => {
+                preloadStartedRef.current.delete(index);
                 console.warn("Hero next-slide preload could not start.", error);
               });
           }
@@ -571,8 +583,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       player.preload = shouldPreload ? "auto" : "none";
       if (index === nextIndex) {
         player.minPreloadSegments = 1;
-        if (player.readyState === 0) {
-          void queueMediaOperation(index, player, (media) => media.load());
+        if (player.readyState === 0 && !preloadStartedRef.current.has(index)) {
+          preloadStartedRef.current.add(index);
+          void queueMediaOperation(index, player, (media) => media.load()).catch((error: unknown) => {
+            preloadStartedRef.current.delete(index);
+            console.warn("Hero next-slide preload load could not start.", error);
+          });
         }
       } else {
         player.minPreloadSegments = undefined;
