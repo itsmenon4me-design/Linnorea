@@ -66,7 +66,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     [resolvedSlides],
   );
   const activePlaybackId = playbackIds[activeIndex] ?? null;
-  const nextIndex = resolvedSlides.length > 1 ? (activeIndex + 1) % resolvedSlides.length : null;
+  const nextIndex = playbackIds.length > 1 ? (activeIndex + 1) % playbackIds.length : null;
   const playActiveVideo = (player: MuxPlayerElement) => {
     const generation = playbackGenerationRef.current;
     const startPlayback = () => {
