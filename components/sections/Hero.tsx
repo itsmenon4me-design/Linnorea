@@ -441,6 +441,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                     muted
                     playsInline
                     preload={isActive || index === nextIndex ? "auto" : "none"}
+                    minPreloadSegments={index === nextIndex ? 1 : undefined}
                     poster={slidePosterUrl ?? undefined}
                     theme="microvideo"
                     nohotkeys
