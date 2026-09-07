@@ -67,6 +67,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const activePlaybackId = playbackIds[activeIndex] ?? null;
   const nextIndex = playbackIds.length > 1 ? (activeIndex + 1) % playbackIds.length : null;
   const playActiveVideo = (player: MuxPlayerElement) => {
+    const media = player.mediaController?.media ?? player;
     const generation = playbackGenerationRef.current;
     const startPlayback = () => {
       pendingPlayCleanupRef.current?.();
@@ -76,20 +77,20 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       }
 
       if (
-        player.ended ||
-        (Number.isFinite(player.duration) && player.duration > 0 && player.currentTime >= player.duration - 0.05)
+        media.ended ||
+        (Number.isFinite(media.duration) && media.duration > 0 && media.currentTime >= media.duration - 0.05)
       ) {
-        player.currentTime = 0;
+        media.currentTime = 0;
       }
 
-      void player.play().catch((error: unknown) => {
+      void media.play().catch((error: unknown) => {
         if (generation === playbackGenerationRef.current) {
           console.warn("Hero video could not be played.", error);
         }
       });
     };
 
-    if (player.readyState >= 3) {
+    if (media.readyState >= 3) {
       startPlayback();
       return;
     }
@@ -97,15 +98,15 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     pendingPlayCleanupRef.current?.();
     const handleReady = () => startPlayback();
     const cleanup = () => {
-      player.removeEventListener("canplay", handleReady);
-      player.removeEventListener("loadeddata", handleReady);
+      media.removeEventListener("canplay", handleReady);
+      media.removeEventListener("loadeddata", handleReady);
       if (pendingPlayCleanupRef.current === cleanup) {
         pendingPlayCleanupRef.current = null;
       }
     };
     pendingPlayCleanupRef.current = cleanup;
-    player.addEventListener("canplay", handleReady, { once: true });
-    player.addEventListener("loadeddata", handleReady, { once: true });
+    media.addEventListener("canplay", handleReady, { once: true });
+    media.addEventListener("loadeddata", handleReady, { once: true });
   };
 
   const handleVideoCanPlay = (index: number) => {
