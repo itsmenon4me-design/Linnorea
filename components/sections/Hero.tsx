@@ -20,6 +20,7 @@ type HeroProps = {
 
 const AUTO_ADVANCE_MS = 6000;
 const MEDIA_ERROR_RETRY_DELAY_MS = 400;
+const MEDIA_ERROR_RETRY_TIMEOUT_MS = 3500;
 const MAX_MEDIA_ERROR_RETRIES = 3;
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
@@ -226,51 +227,64 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           playbackId,
           attempt: attempts,
         });
-        const handleRetryReady = () => {
-          currentMedia.removeEventListener("canplay", handleRetryReady);
-          currentMedia.removeEventListener("loadeddata", handleRetryReady);
+        void queueMediaOperation(index, currentPlayer, async (queuedMedia) => {
+          queuedMedia.preload = "auto";
+          await new Promise<void>((resolve, reject) => {
+            let settled = false;
+            const timeoutId = window.setTimeout(() => {
+              if (settled) return;
+              settled = true;
+              cleanup();
+              reject(new Error("Hero video retry timeout waiting for media readiness."));
+            }, MEDIA_ERROR_RETRY_TIMEOUT_MS);
+            const cleanup = () => {
+              window.clearTimeout(timeoutId);
+              queuedMedia.removeEventListener("canplay", handleRetryReady);
+              queuedMedia.removeEventListener("loadeddata", handleRetryReady);
+            };
+            const handleRetryReady = () => {
+              if (settled) return;
+              settled = true;
+              cleanup();
+              resolve();
+            };
+            queuedMedia.addEventListener("canplay", handleRetryReady, { once: true });
+            queuedMedia.addEventListener("loadeddata", handleRetryReady, { once: true });
+            queuedMedia.load();
+            if (queuedMedia.readyState >= 3) {
+              handleRetryReady();
+            }
+          });
+
           const currentlyActive = index === activeIndexRef.current;
           const currentlyNext = index === nextIndexRef.current;
           if (!currentlyActive && !currentlyNext) {
-            console.info("Hero video retry succeeded while no longer relevant.", { index, playbackId, attempt: attempts });
             return;
           }
-
-          void queueMediaOperation(index, currentPlayer, async (queuedMedia) => {
-            await queuedMedia.play();
-          })
-            .then(() => {
-              setReadyVideoIndexes((current) => {
-                const next = new Set(current);
-                next.add(index);
-                return next;
-              });
-              console.info("Hero video retry succeeded.", { index, playbackId, attempt: attempts });
-              if (!currentlyActive) {
-                void queueMediaOperation(index, currentPlayer, (queuedMedia) => queuedMedia.pause());
-              }
-              mediaRetryAttemptsRef.current.delete(index);
-            })
-            .catch((retryError: unknown) => {
-              console.warn("Hero video retry failed during play.", {
-                index,
-                playbackId,
-                attempt: attempts,
-                error: retryError,
-              });
-              retryVideoAfterError(index, currentPlayer, new Event("error"));
-            });
-        };
-
-        void queueMediaOperation(index, currentPlayer, (queuedMedia) => {
-          queuedMedia.preload = "auto";
-          queuedMedia.load();
-          queuedMedia.addEventListener("canplay", handleRetryReady, { once: true });
-          queuedMedia.addEventListener("loadeddata", handleRetryReady, { once: true });
-          if (queuedMedia.readyState >= 3) {
-            handleRetryReady();
+          await queuedMedia.play();
+          if (!currentlyActive) {
+            queuedMedia.pause();
           }
-        });
+        })
+          .then(() => {
+            setReadyVideoIndexes((current) => {
+              const next = new Set(current);
+              next.add(index);
+              return next;
+            });
+            console.info("Hero video retry succeeded.", { index, playbackId, attempt: attempts });
+            mediaRetryAttemptsRef.current.delete(index);
+          })
+          .catch((retryError: unknown) => {
+            const timeout = retryError instanceof Error && retryError.message.includes("timeout");
+            console.warn(timeout ? "Hero video retry timeout." : "Hero video retry failed.", {
+              index,
+              playbackId,
+              attempt: attempts,
+              error: retryError,
+            });
+            retryVideoAfterError(index, currentPlayer, new Event("error"));
+          });
       }, MEDIA_ERROR_RETRY_DELAY_MS);
       mediaRetryTimersRef.current.set(index, retryTimer);
     };
