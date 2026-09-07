@@ -134,6 +134,37 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   }, [progress]);
 
   useEffect(() => {
+    const node = rootRef.current;
+    if (!node) {
+      return;
+    }
+
+    const syncPlayers = () => {
+      node.querySelectorAll<MuxPlayerElement>("mux-player").forEach((player, index) => {
+        muxPlayerRefs.current[index] = player;
+        const shouldPreload = index === activeIndex || index === nextIndex;
+        player.preload = shouldPreload ? "auto" : "none";
+        if (index === nextIndex) {
+          player.minPreloadSegments = 1;
+          if (player.readyState === 0) {
+            player.load();
+          }
+        }
+      });
+
+      const activePlayer = muxPlayerRefs.current[activeIndex];
+      if (activePlayer && !isPaused && isHeroInView && isTabVisible) {
+        playActiveVideo(activePlayer);
+      }
+    };
+
+    syncPlayers();
+    const observer = new MutationObserver(syncPlayers);
+    observer.observe(node, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [activeIndex, isHeroInView, isPaused, isTabVisible, nextIndex]);
+
+  useEffect(() => {
     pendingPlayCleanupRef.current?.();
     playbackGenerationRef.current += 1;
     const player = muxPlayerRefs.current[activeIndex];
