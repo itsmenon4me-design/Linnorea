@@ -530,7 +530,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                     onCanPlay={() => handleVideoCanPlay(index)}
                     onError={() => handleVideoFailure(index)}
                     onStalled={() => handleVideoFailure(index)}
-                    className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && (!slideMediaUrl || readyVideoIndexes.has(index)) ? "visible opacity-100" : "invisible opacity-0"}`}
+                    className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive || index === nextIndex ? "visible" : "invisible"} ${isActive && (!slideMediaUrl || readyVideoIndexes.has(index)) ? "opacity-100" : "opacity-0"}`}
                   />
                 ) : null}
               </div>
