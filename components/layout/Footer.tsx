@@ -35,14 +35,6 @@ function SocialIcon({ platform, className }: { platform?: string; className?: st
   }
 }
 
-function PlusIcon({ className }: { className?: string }) {
-  return (
-    <span className={className} aria-hidden="true">
-      +
-    </span>
-  );
-}
-
 export async function Footer({ currentLocale, dictionary }: FooterProps) {
   const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
   const brandText = localizedValue(settings?.brandStatement, currentLocale) || "Linnorea Design Works";
@@ -86,7 +78,6 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
                     <link.icon className="w-4 h-4" />
                     <span className="text-sm md:text-base">{link.label}</span>
                   </span>
-                  <PlusIcon className="hidden w-4 h-4 p-2.5 md:block" />
                 </a>
               ))}
             </div>
