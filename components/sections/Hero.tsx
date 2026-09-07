@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type MuxPlayerElement from "@mux/mux-player";
 import { gsap } from "gsap";
 import { ArrowAction } from "@/components/ui/ArrowAction";
@@ -35,7 +35,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const [isTabVisible, setIsTabVisible] = useState(true);
   const [autoAdvanceResetKey, setAutoAdvanceResetKey] = useState(0);
   const [readyVideoIndexes, setReadyVideoIndexes] = useState<Set<number>>(() => new Set());
-  const [preloadIndex, setPreloadIndex] = useState<number | null>(null);
   const playbackGenerationRef = useRef(0);
   const previousActiveIndexRef = useRef<number | null>(null);
 
@@ -67,11 +66,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   );
   const activePlaybackId = playbackIds[activeIndex] ?? null;
   const nextIndex = resolvedSlides.length > 1 ? (activeIndex + 1) % resolvedSlides.length : null;
-  const maybePreloadNextSlide = useCallback((nextProgress: number) => {
-    if (nextIndex !== null && nextProgress >= 0.8 && !isPaused && isHeroInView && isTabVisible) {
-      setPreloadIndex(nextIndex);
-    }
-  }, [isHeroInView, isPaused, isTabVisible, nextIndex]);
   const playActiveVideo = (player: MuxPlayerElement) => {
     if (player.readyState < 3) {
       return;
@@ -214,9 +208,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     playbackGenerationRef.current += 1;
     const isSlideChange = previousActiveIndexRef.current !== activeIndex;
     previousActiveIndexRef.current = activeIndex;
-    if (isSlideChange) {
-      setPreloadIndex(null);
-    }
 
     muxPlayerRefs.current.forEach((player, index) => {
       if (!player) {
@@ -228,7 +219,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         player.currentTime = 0;
         player.setAttribute("preload", "none");
       } else {
-        player.setAttribute("preload", "metadata");
+        player.setAttribute("preload", "auto");
         if (isSlideChange) {
           player.pause();
           player.currentTime = 0;
@@ -254,11 +245,13 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
   useEffect(() => {
     muxPlayerRefs.current.forEach((player, index) => {
-      if (player) {
-        player.setAttribute("preload", index === activeIndex || index === preloadIndex ? "metadata" : "none");
+      if (!player) {
+        return;
       }
+
+      player.setAttribute("preload", index === activeIndex || index === nextIndex ? "auto" : "none");
     });
-  }, [activeIndex, preloadIndex]);
+  }, [activeIndex, nextIndex]);
 
   useEffect(() => {
     if (reducedMotion || resolvedSlides.length <= 1 || activePlaybackId || isPaused || !isHeroInView || !isTabVisible) {
@@ -280,7 +273,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       const elapsed = now - startedAt;
       const nextProgress = Math.min(elapsed / AUTO_ADVANCE_MS, 1);
       setProgress(nextProgress);
-      maybePreloadNextSlide(nextProgress);
       if (elapsed < AUTO_ADVANCE_MS) {
         animationFrameId = window.requestAnimationFrame(updateImageProgress);
       }
@@ -297,7 +289,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         window.clearTimeout(imageTimerId);
       }
     };
-  }, [activeIndex, activePlaybackId, autoAdvanceResetKey, isHeroInView, isPaused, isTabVisible, maybePreloadNextSlide, reducedMotion, resolvedSlides.length]);
+  }, [activeIndex, activePlaybackId, autoAdvanceResetKey, isHeroInView, isPaused, isTabVisible, reducedMotion, resolvedSlides.length]);
 
   const goToSlide = (index: number, isManualNavigation = false) => {
     const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
@@ -364,7 +356,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
     const nextProgress = Math.min(video.currentTime / video.duration, 1);
     setProgress(nextProgress);
-    maybePreloadNextSlide(nextProgress);
 
     if (!videoAdvancedRef.current && video.currentTime >= video.duration - 0.25) {
       videoAdvancedRef.current = true;
@@ -393,11 +384,27 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         {resolvedSlides.map((slide, index) => {
           const slidePlaybackId = playbackIds[index];
           const slideMediaUrl = slide.image ? urlFor(slide.image).width(1800).height(1100).fit("crop").auto("format").quality(78).url() : null;
+          const slidePosterUrl = slideMediaUrl ?? (slidePlaybackId ? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0` : null);
           const isActive = index === activeIndex;
 
           return (
             <div key={slide._id ?? `hero-media-${index}`} className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${isActive ? "opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!isActive}>
               <div className="hero-media-frame">
+                {slidePosterUrl ? (
+                  <Image
+                    src={slidePosterUrl}
+                    alt={isActive ? headline : ""}
+                    fill
+                    priority={index === 0}
+                    sizes="100vw"
+                    onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
+                    className={`object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && readyVideoIndexes.has(index) ? "opacity-0" : "opacity-100"}`}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] px-6 text-center text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
+                    {dictionary.ui.placeholderHeroImage}
+                  </div>
+                )}
                 {slidePlaybackId && mounted ? (
                   <MuxPlayer
                     ref={(player) => {
@@ -407,8 +414,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                     autoPlay={false}
                     muted
                     playsInline
-                    preload={isActive || index === preloadIndex ? "metadata" : "none"}
-                    poster={slideMediaUrl ?? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0`}
+                    preload={isActive || index === nextIndex ? "auto" : "none"}
+                    poster={slidePosterUrl ?? undefined}
                     theme="microvideo"
                     nohotkeys
                     defaultHiddenCaptions
@@ -424,29 +431,16 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                       "--media-preview-time-display": "none",
                       "--media-play-button-display": "none",
                       "--media-loading-indicator-display": "none",
+                      background: "transparent",
                     }}
                     onTimeUpdate={isActive ? handleVideoTimeUpdate : undefined}
                     onEnded={() => handleVideoEnded(index)}
                     onCanPlay={() => handleVideoCanPlay(index)}
                     onError={() => handleVideoFailure(index)}
                     onStalled={() => handleVideoFailure(index)}
-                    className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && readyVideoIndexes.has(index) ? "visible opacity-100" : "invisible opacity-0"}`}
+                    className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isActive && (!slideMediaUrl || readyVideoIndexes.has(index)) ? "visible opacity-100" : "invisible opacity-0"}`}
                   />
-                ) : slideMediaUrl ? (
-                  <Image
-                    src={slideMediaUrl}
-                    alt={isActive ? headline : ""}
-                    fill
-                    priority={index === 0}
-                    sizes="100vw"
-                    onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
-                    className="object-cover transition-opacity duration-300 motion-reduce:transition-none"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))] px-6 text-center text-[10px] font-medium uppercase tracking-[0.6em] text-white/40">
-                    {dictionary.ui.placeholderHeroImage}
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
           );
