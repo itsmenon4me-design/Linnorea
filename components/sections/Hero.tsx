@@ -151,11 +151,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
             media.preload = "auto";
             media.load();
             void media.play()
-              .then(() => {
-                if (index !== activeIndex) {
-                  media.pause();
-                }
-              })
+              .then(() => undefined)
               .catch((error: unknown) => {
                 console.warn("Hero next-slide preload could not start.", error);
               });
@@ -506,7 +502,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                       }
                     }}
                     playbackId={slidePlaybackId}
-                    autoPlay={false}
+                    autoPlay={isActive || index === nextIndex}
                     muted
                     playsInline
                     preload={isActive || index === nextIndex ? "auto" : "none"}
