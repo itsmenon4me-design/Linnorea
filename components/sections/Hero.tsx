@@ -74,6 +74,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const mediaRetryAttemptsRef = useRef<Map<number, number>>(new Map());
   const mediaRetryTimersRef = useRef<Map<number, number>>(new Map());
   const mediaErrorCleanupRef = useRef<Map<number, () => void>>(new Map());
+  const mediaErrorLogRef = useRef<Map<string, number>>(new Map());
   const lifecycleQueuesRef = useRef<Map<number, Promise<void>>>(new Map());
   useEffect(() => {
     activeIndexRef.current = activeIndex;
@@ -114,6 +115,13 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           queuedMedia.currentTime = 0;
         }
         await queuedMedia.play();
+        if (playerIndex === activeIndexRef.current) {
+          console.info("Hero video playback succeeded.", {
+            index: playerIndex,
+            playbackId: player.getAttribute("playback-id"),
+            outcome: "video-playing",
+          });
+        }
       }).catch((error: unknown) => {
         if (generation === playbackGenerationRef.current) {
           console.warn("Hero video could not be played.", error);
@@ -170,12 +178,26 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     const retryTimers = mediaRetryTimersRef.current;
 
     const retryVideoAfterError = (index: number, player: MuxPlayerElement, errorEvent: Event) => {
-      const eventMedia = errorEvent.currentTarget as HTMLMediaElement;
+      const eventTarget = errorEvent.currentTarget as (HTMLMediaElement | MuxPlayerElement);
+      const eventMedia = eventTarget instanceof HTMLMediaElement ? eventTarget : null;
       const media = player.mediaController?.media ?? eventMedia;
-      const mediaError = media.error ?? eventMedia.error;
+      const eventError = eventMedia?.error ?? ("error" in eventTarget ? eventTarget.error : null);
+      const mediaError = eventError ?? media.error;
       const isActive = index === activeIndexRef.current;
       const isNext = index === nextIndexRef.current;
       const playbackId = player.getAttribute("playback-id");
+      const errorKey = `${playbackId ?? "unknown"}:${index}:${mediaError?.code ?? "unknown"}:${mediaError?.message ?? "unknown"}`;
+      const now = performance.now();
+      const previousErrorAt = mediaErrorLogRef.current.get(errorKey);
+      if (previousErrorAt !== undefined && now - previousErrorAt < 1000) {
+        return;
+      }
+      mediaErrorLogRef.current.set(errorKey, now);
+      mediaErrorLogRef.current.forEach((timestamp, key) => {
+        if (now - timestamp >= 1000) {
+          mediaErrorLogRef.current.delete(key);
+        }
+      });
 
       console.warn("Hero video media error detected.", {
         index,
@@ -205,6 +227,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           index,
           playbackId,
           attempts: attempts - 1,
+          outcome: "poster-fallback",
         });
         return;
       }
