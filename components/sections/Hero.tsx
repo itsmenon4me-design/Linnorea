@@ -308,6 +308,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     }
 
     playActiveVideo(activePlayer);
+    const retryId = window.setTimeout(() => playActiveVideo(activePlayer), 50);
+    return () => window.clearTimeout(retryId);
   }, [activeIndex, isHeroInView, isPaused, isTabVisible]);
 
   useEffect(() => {
