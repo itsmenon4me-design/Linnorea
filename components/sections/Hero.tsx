@@ -214,16 +214,18 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         return;
       }
 
-      if (index !== activeIndex) {
+      if (index !== activeIndex && index !== nextIndex) {
         player.pause();
         player.currentTime = 0;
         player.setAttribute("preload", "none");
-      } else {
+      } else if (index === activeIndex) {
         player.setAttribute("preload", "auto");
         if (isSlideChange) {
           player.pause();
           player.currentTime = 0;
         }
+      } else {
+        player.setAttribute("preload", "auto");
       }
     });
 
@@ -309,7 +311,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       setAutoAdvanceResetKey((key) => key + 1);
 
       muxPlayerRefs.current.forEach((player, playerIndex) => {
-        if (player && playerIndex !== normalizedIndex) {
+        if (player && playerIndex !== normalizedIndex && playerIndex !== nextIndex) {
           player.pause();
           player.currentTime = 0;
         }
