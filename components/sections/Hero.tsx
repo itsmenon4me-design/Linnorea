@@ -19,6 +19,8 @@ type HeroProps = {
 };
 
 const AUTO_ADVANCE_MS = 6000;
+const MEDIA_ERROR_RETRY_DELAY_MS = 400;
+const MAX_MEDIA_ERROR_RETRIES = 3;
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
 export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
@@ -66,8 +68,35 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   );
   const activePlaybackId = playbackIds[activeIndex] ?? null;
   const nextIndex = playbackIds.length > 1 ? (activeIndex + 1) % playbackIds.length : null;
+  const activeIndexRef = useRef(activeIndex);
+  const nextIndexRef = useRef<number | null>(nextIndex);
+  const mediaRetryAttemptsRef = useRef<Map<number, number>>(new Map());
+  const mediaRetryTimersRef = useRef<Map<number, number>>(new Map());
+  const mediaErrorCleanupRef = useRef<Map<number, () => void>>(new Map());
+  const lifecycleQueuesRef = useRef<Map<number, Promise<void>>>(new Map());
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+    nextIndexRef.current = nextIndex;
+  }, [activeIndex, nextIndex]);
+  const queueMediaOperation = (
+    index: number,
+    player: MuxPlayerElement,
+    operation: (media: HTMLMediaElement) => Promise<void> | void,
+  ) => {
+    const media = player.mediaController?.media ?? player;
+    const previous = lifecycleQueuesRef.current.get(index) ?? Promise.resolve();
+    const next = previous.catch(() => undefined).then(() => operation(media));
+    lifecycleQueuesRef.current.set(index, next);
+    void next.finally(() => {
+      if (lifecycleQueuesRef.current.get(index) === next) {
+        lifecycleQueuesRef.current.delete(index);
+      }
+    });
+    return next;
+  };
   const playActiveVideo = (player: MuxPlayerElement) => {
     const media = player.mediaController?.media ?? player;
+    const playerIndex = muxPlayerRefs.current.indexOf(player);
     const generation = playbackGenerationRef.current;
     const startPlayback = () => {
       pendingPlayCleanupRef.current?.();
@@ -76,14 +105,15 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         return;
       }
 
-      if (
-        media.ended ||
-        (Number.isFinite(media.duration) && media.duration > 0 && media.currentTime >= media.duration - 0.05)
-      ) {
-        media.currentTime = 0;
-      }
-
-      void media.play().catch((error: unknown) => {
+      void queueMediaOperation(playerIndex, player, async (queuedMedia) => {
+        if (
+          queuedMedia.ended ||
+          (Number.isFinite(queuedMedia.duration) && queuedMedia.duration > 0 && queuedMedia.currentTime >= queuedMedia.duration - 0.05)
+        ) {
+          queuedMedia.currentTime = 0;
+        }
+        await queuedMedia.play();
+      }).catch((error: unknown) => {
         if (generation === playbackGenerationRef.current) {
           console.warn("Hero video could not be played.", error);
         }
@@ -131,6 +161,156 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   };
 
   useEffect(() => {
+    const node = rootRef.current;
+    if (!node) {
+      return;
+    }
+    const errorCleanups = mediaErrorCleanupRef.current;
+    const retryTimers = mediaRetryTimersRef.current;
+
+    const retryVideoAfterError = (index: number, player: MuxPlayerElement, errorEvent: Event) => {
+      const eventMedia = errorEvent.currentTarget as HTMLMediaElement;
+      const media = player.mediaController?.media ?? eventMedia;
+      const mediaError = media.error ?? eventMedia.error;
+      const isActive = index === activeIndexRef.current;
+      const isNext = index === nextIndexRef.current;
+      const playbackId = player.getAttribute("playback-id");
+
+      console.warn("Hero video media error detected.", {
+        index,
+        playbackId,
+        role: isActive ? "active" : isNext ? "next" : "inactive",
+        code: mediaError?.code ?? null,
+        message: mediaError?.message ?? null,
+        readyState: media.readyState,
+        networkState: media.networkState,
+      });
+
+      setReadyVideoIndexes((current) => {
+        if (!current.has(index)) return current;
+        const next = new Set(current);
+        next.delete(index);
+        return next;
+      });
+
+      if (mediaRetryTimersRef.current.has(index)) {
+        return;
+      }
+
+      const attempts = (mediaRetryAttemptsRef.current.get(index) ?? 0) + 1;
+      mediaRetryAttemptsRef.current.set(index, attempts);
+      if (attempts > MAX_MEDIA_ERROR_RETRIES) {
+        console.warn("Hero video retry limit reached; keeping poster fallback.", {
+          index,
+          playbackId,
+          attempts: attempts - 1,
+        });
+        return;
+      }
+
+      const retryTimer = window.setTimeout(() => {
+        mediaRetryTimersRef.current.delete(index);
+        const currentPlayer = muxPlayerRefs.current[index];
+        const currentMedia = currentPlayer?.mediaController?.media;
+        if (!currentPlayer || !currentMedia) {
+          console.warn("Hero video retry skipped because the media instance is unavailable.", {
+            index,
+            playbackId,
+            attempt: attempts,
+          });
+          return;
+        }
+
+        console.info("Retrying Hero video after media error.", {
+          index,
+          playbackId,
+          attempt: attempts,
+        });
+        const handleRetryReady = () => {
+          currentMedia.removeEventListener("canplay", handleRetryReady);
+          currentMedia.removeEventListener("loadeddata", handleRetryReady);
+          const currentlyActive = index === activeIndexRef.current;
+          const currentlyNext = index === nextIndexRef.current;
+          if (!currentlyActive && !currentlyNext) {
+            console.info("Hero video retry succeeded while no longer relevant.", { index, playbackId, attempt: attempts });
+            return;
+          }
+
+          void queueMediaOperation(index, currentPlayer, async (queuedMedia) => {
+            await queuedMedia.play();
+          })
+            .then(() => {
+              setReadyVideoIndexes((current) => {
+                const next = new Set(current);
+                next.add(index);
+                return next;
+              });
+              console.info("Hero video retry succeeded.", { index, playbackId, attempt: attempts });
+              if (!currentlyActive) {
+                void queueMediaOperation(index, currentPlayer, (queuedMedia) => queuedMedia.pause());
+              }
+              mediaRetryAttemptsRef.current.delete(index);
+            })
+            .catch((retryError: unknown) => {
+              console.warn("Hero video retry failed during play.", {
+                index,
+                playbackId,
+                attempt: attempts,
+                error: retryError,
+              });
+              retryVideoAfterError(index, currentPlayer, new Event("error"));
+            });
+        };
+
+        void queueMediaOperation(index, currentPlayer, (queuedMedia) => {
+          queuedMedia.preload = "auto";
+          queuedMedia.load();
+          queuedMedia.addEventListener("canplay", handleRetryReady, { once: true });
+          queuedMedia.addEventListener("loadeddata", handleRetryReady, { once: true });
+          if (queuedMedia.readyState >= 3) {
+            handleRetryReady();
+          }
+        });
+      }, MEDIA_ERROR_RETRY_DELAY_MS);
+      mediaRetryTimersRef.current.set(index, retryTimer);
+    };
+
+    const attachErrorListeners = () => {
+      node.querySelectorAll<MuxPlayerElement>("mux-player").forEach((player, index) => {
+        const media = player.mediaController?.media;
+        const existingCleanup = errorCleanups.get(index);
+        if (existingCleanup) {
+          existingCleanup();
+          errorCleanups.delete(index);
+        }
+
+        const handleError = (event: Event) => retryVideoAfterError(index, player, event);
+        player.addEventListener("error", handleError);
+        media?.addEventListener("error", handleError);
+        errorCleanups.set(index, () => {
+          player.removeEventListener("error", handleError);
+          media?.removeEventListener("error", handleError);
+        });
+      });
+    };
+
+    attachErrorListeners();
+    const listenerRetryId = window.setInterval(attachErrorListeners, 250);
+    const stopListenerRetryId = window.setTimeout(() => {
+      window.clearInterval(listenerRetryId);
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(stopListenerRetryId);
+      window.clearInterval(listenerRetryId);
+      errorCleanups.forEach((cleanup) => cleanup());
+      errorCleanups.clear();
+      retryTimers.forEach((timer) => window.clearTimeout(timer));
+      retryTimers.clear();
+    };
+  }, [activeIndex, nextIndex, playbackIds.length]);
+
+  useEffect(() => {
     if (!mounted || (!activePlaybackId && !activeSlide?.image)) {
       window.dispatchEvent(new Event("linnorea:hero-ready"));
     }
@@ -155,12 +335,17 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           player.minPreloadSegments = 1;
           const media = player.mediaController?.media;
           if (media && media.readyState === 0) {
-            media.preload = "auto";
-            media.load();
-            void media.play()
+            void queueMediaOperation(index, player, async (queuedMedia) => {
+              queuedMedia.preload = "auto";
+              queuedMedia.load();
+              await queuedMedia.play();
+              if (index !== activeIndex) {
+                queuedMedia.pause();
+              }
+            })
               .then(() => {
                 if (index !== activeIndex) {
-                  media.pause();
+                  console.info("Hero next-slide preload lifecycle completed.", { index });
                 }
               })
               .catch((error: unknown) => {
@@ -298,8 +483,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       }
 
       if (index !== activeIndex && index !== nextIndex) {
-        player.pause();
-        player.currentTime = 0;
+        void queueMediaOperation(index, player, (media) => {
+          media.pause();
+          media.currentTime = 0;
+        });
         player.setAttribute("preload", "none");
       } else {
         player.setAttribute("preload", "auto");
@@ -315,7 +502,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     }
 
     if (isPaused || !isHeroInView || !isTabVisible) {
-      activePlayer.pause();
+      void queueMediaOperation(activeIndex, activePlayer, (media) => media.pause());
       return;
     }
 
@@ -335,7 +522,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       if (index === nextIndex) {
         player.minPreloadSegments = 1;
         if (player.readyState === 0) {
-          player.load();
+          void queueMediaOperation(index, player, (media) => media.load());
         }
       } else {
         player.minPreloadSegments = undefined;
@@ -385,8 +572,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     const currentPlayer = muxPlayerRefs.current[activeIndex];
 
     if (normalizedIndex !== activeIndex && currentPlayer) {
-      currentPlayer.pause();
-      currentPlayer.currentTime = 0;
+      void queueMediaOperation(activeIndex, currentPlayer, (media) => {
+        media.pause();
+        media.currentTime = 0;
+      });
       setIsPaused(false);
     }
 
@@ -398,8 +587,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
       muxPlayerRefs.current.forEach((player, playerIndex) => {
         if (player && playerIndex !== normalizedIndex && playerIndex !== nextIndex) {
-          player.pause();
-          player.currentTime = 0;
+          void queueMediaOperation(playerIndex, player, (media) => {
+            media.pause();
+            media.currentTime = 0;
+          });
         }
       });
 
@@ -419,12 +610,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     if (activePlayer) {
       if (activePlayer.paused) {
         setIsPaused(false);
-        void activePlayer.play().catch((error: unknown) => {
+        void queueMediaOperation(activeIndex, activePlayer, (media) => media.play()).catch((error: unknown) => {
           console.warn("Hero video could not be played.", error);
         });
       } else {
         setIsPaused(true);
-        activePlayer.pause();
+        void queueMediaOperation(activeIndex, activePlayer, (media) => media.pause());
       }
       return;
     }
@@ -502,7 +693,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                         player.preload = shouldPreload ? "auto" : "none";
                         if (index === nextIndex) {
                           player.minPreloadSegments = 1;
-                          player.load();
+                          void queueMediaOperation(index, player, (media) => media.load());
                         }
                       }
                     }}
