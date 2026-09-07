@@ -214,7 +214,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     const retryTimers = mediaRetryTimersRef.current;
 
     const retryVideoAfterError = (index: number, player: MuxPlayerElement, errorEvent: Event) => {
-      const eventTarget = errorEvent.currentTarget as (HTMLMediaElement | MuxPlayerElement);
+      const eventTarget = errorEvent.currentTarget as (HTMLMediaElement | MuxPlayerElement | null);
       const eventMedia = eventTarget instanceof HTMLMediaElement ? eventTarget : null;
       const media = player.mediaController?.media ?? eventMedia;
       const playbackId = player.getAttribute("playback-id");
@@ -225,7 +225,9 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         });
         return;
       }
-      const eventError = eventMedia?.error ?? ("error" in eventTarget ? eventTarget.error : null);
+      const eventError =
+        eventMedia?.error ??
+        (eventTarget !== null && "error" in eventTarget ? eventTarget.error : null);
       const mediaError = eventError ?? media.error;
       const isActive = index === activeIndexRef.current;
       const isNext = index === nextIndexRef.current;
