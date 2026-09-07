@@ -80,13 +80,13 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
                   href={link.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex w-full md:w-auto items-center justify-between md:justify-start gap-3 border-b border-white/10 md:border-none py-4 md:py-0"
+                  className="flex w-full md:w-auto items-center justify-between md:justify-start gap-3 border-none py-4 md:py-0"
                 >
                   <span className="flex items-center gap-3">
                     <link.icon className="w-4 h-4" />
                     <span className="text-sm md:text-base">{link.label}</span>
                   </span>
-                  <PlusIcon className="w-4 h-4 p-2.5" />
+                  <PlusIcon className="hidden w-4 h-4 p-2.5 md:block" />
                 </a>
               ))}
             </div>
