@@ -121,6 +121,11 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const mediaErrorLogRef = useRef<Map<string, number>>(new Map());
   const lifecycleQueuesRef = useRef<Map<number, Promise<void>>>(new Map());
   const preloadStartedRef = useRef<Set<number>>(new Set());
+  const preloadInFlightRef = useRef<Set<number>>(new Set());
+  const preloadQueueRef = useRef<Array<{
+    index: number;
+    operation: (media: HTMLMediaElement) => Promise<void> | void;
+  }>>([]);
   const dragRef = useRef<{
     pointerId: number;
     startX: number;
@@ -153,6 +158,50 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       }
     });
     return next;
+  };
+  const drainPreloadQueue = () => {
+    while (preloadQueueRef.current.length > 0) {
+      preloadQueueRef.current.sort((a, b) => {
+        const active = activeIndexRef.current;
+        return Number(b.index === active) - Number(a.index === active);
+      });
+      const activeIndex = activeIndexRef.current;
+      const activeQueued = preloadQueueRef.current.some((item) => item.index === activeIndex);
+      const activeInFlight = preloadInFlightRef.current.has(activeIndex);
+      const maxInFlight = activeQueued || activeInFlight ? 2 : 1;
+      if (preloadInFlightRef.current.size >= maxInFlight) {
+        return;
+      }
+      const next = preloadQueueRef.current.shift();
+      if (!next || preloadInFlightRef.current.has(next.index)) {
+        continue;
+      }
+
+      const player = muxPlayerRefs.current[next.index];
+      if (!player) {
+        continue;
+      }
+
+      preloadInFlightRef.current.add(next.index);
+      void queueMediaOperation(next.index, player, next.operation)
+        .catch((error: unknown) => {
+          console.warn("Hero managed preload failed.", { index: next.index, error });
+        })
+        .finally(() => {
+          preloadInFlightRef.current.delete(next.index);
+          drainPreloadQueue();
+        });
+    }
+  };
+  const requestManagedPreload = (
+    index: number,
+    operation: (media: HTMLMediaElement) => Promise<void> | void,
+  ) => {
+    if (preloadInFlightRef.current.has(index) || preloadQueueRef.current.some((item) => item.index === index)) {
+      return;
+    }
+    preloadQueueRef.current.push({ index, operation });
+    drainPreloadQueue();
   };
   const playActiveVideo = (player: MuxPlayerElement) => {
     const media = player.mediaController?.media;
@@ -422,7 +471,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           const media = player.mediaController?.media;
           if (media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
             preloadStartedRef.current.add(index);
-            void queueMediaOperation(index, player, async (queuedMedia) => {
+            requestManagedPreload(index, async (queuedMedia) => {
               queuedMedia.preload = "auto";
               queuedMedia.load();
               await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
@@ -430,12 +479,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
               if (index !== activeIndex) {
                 queuedMedia.pause();
               }
-            })
-              .then(() => console.info("Hero video preload lifecycle completed.", { index }))
-              .catch((error: unknown) => {
-                preloadStartedRef.current.delete(index);
-                console.warn("Hero next-slide preload could not start.", error);
-              });
+            });
           }
         }
       });
@@ -613,10 +657,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         player.minPreloadSegments = 1;
         if (player.readyState === 0 && !preloadStartedRef.current.has(index)) {
           preloadStartedRef.current.add(index);
-          void queueMediaOperation(index, player, (media) => media.load()).catch((error: unknown) => {
-            preloadStartedRef.current.delete(index);
-            console.warn("Hero next-slide preload load could not start.", error);
-          });
+          requestManagedPreload(index, (media) => media.load());
         }
       }
     });
@@ -630,15 +671,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       if (!player || !media || preloadStartedRef.current.has(index)) return;
 
       preloadStartedRef.current.add(index);
-      void queueMediaOperation(index, player, async (queuedMedia) => {
+      requestManagedPreload(index, async (queuedMedia) => {
         queuedMedia.preload = "auto";
         queuedMedia.load();
         await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
         await queuedMedia.play();
         if (index !== activeIndexRef.current) queuedMedia.pause();
-      }).catch((error: unknown) => {
-        preloadStartedRef.current.delete(index);
-        console.warn("Hero video preload could not start.", { index, error });
       });
     };
 
