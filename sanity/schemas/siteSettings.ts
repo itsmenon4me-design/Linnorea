@@ -28,6 +28,14 @@ export const siteSettings = defineType({
       options: { hotspot: true },
     }),
     defineField({
+      name: "projectHighlightImages",
+      title: "Project highlight images",
+      type: "array",
+      of: [{ type: "image", options: { hotspot: true } }],
+      validation: (Rule) => Rule.max(4),
+      description: "Optional images shown in the carousel at the top of the Projects page. Maximum 4 images.",
+    }),
+    defineField({
       name: "brandStatement",
       title: "Brand statement",
       type: "localeString",
@@ -73,6 +81,7 @@ export const siteSettings = defineType({
         type: "object",
         fields: [
           defineField({ name: "title", title: "Stage title", type: "localeString" }),
+          defineField({ name: "subtitle", title: "Stage subtitle", type: "localeString" }),
           defineField({ name: "description", title: "Stage description", type: "localeText" }),
           defineField({ name: "image", title: "Stage image", type: "image", options: { hotspot: true } }),
           defineField({ name: "order", title: "Display order", type: "number" }),

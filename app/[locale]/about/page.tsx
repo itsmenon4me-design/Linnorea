@@ -50,7 +50,7 @@ export default async function AboutPage({ params }: AboutProps) {
         <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} placeholderLabel={dictionary.ui.placeholderStudioImage} videoLabel={dictionary.ui.studioVideo} />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/20 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-40 md:px-8 md:pb-20">
-          <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">Linnorea Design Works</p>
+          <p className="text-xs tracking-[0.2em] text-[var(--color-accent-gold)]">Linnorea design works</p>
           <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.about}</h1>
           <p className="mt-8 text-sm uppercase tracking-[0.25em] text-white/65">{established}</p>
           <p className="mt-6 max-w-2xl text-lg leading-7 text-white/80 md:text-2xl md:leading-9">{description}</p>
@@ -59,17 +59,17 @@ export default async function AboutPage({ params }: AboutProps) {
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
        <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
-         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.ourKey}</p>
-         <div className="space-y-6 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">
-           {keyItems.length ? keyItems.map((item, index) => <p key={`${localizedValue(item.label, safeLocale)}-${index}`}>{localizedValue(item.label, safeLocale)}</p>) : <p>{dictionary.about.keyPlaceholder}</p>}
+         <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.ourKey}</p>
+         <div className="max-w-3xl space-y-7 text-2xl leading-[1.15] tracking-[-0.04em] text-white/90 md:text-5xl">
+           {keyItems.length ? keyItems.map((item, index) => <p key={`${localizedValue(item.label, safeLocale)}-${index}`} className={index === 0 ? "font-medium text-[1.12em]" : "pl-8 text-[0.82em] text-white/75 md:pl-16"}>{localizedValue(item.label, safeLocale)}</p>) : <p>{dictionary.about.keyPlaceholder}</p>}
          </div>
        </div>
       </ScrollReveal>
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
        <div className="border-t border-white/15 pt-6">
-         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.vision}</p>
-         <div data-reveal className="mt-10 max-w-4xl text-2xl leading-[1.25] tracking-[-0.04em] text-white/90 md:text-4xl">
+         <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.vision}</p>
+         <div data-reveal className="mt-10 max-w-3xl text-xl leading-8 tracking-[-0.02em] text-white/90 md:text-3xl md:leading-10">
            <p>{localizedValue(settings?.aboutVision, safeLocale) || dictionary.about.visionPlaceholder}</p>
          </div>
        </div>
@@ -77,9 +77,9 @@ export default async function AboutPage({ params }: AboutProps) {
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
        <div className="grid gap-10 border-t border-white/15 pt-6 md:grid-cols-[0.7fr_1.3fr]">
-         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.mission}</p>
-         <ul className="space-y-5 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-3xl">
-           {missionItems.length ? missionItems.map((item, index) => <li key={`${localizedValue(item, safeLocale)}-${index}`} className="flex gap-4"><span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span><span>{localizedValue(item, safeLocale)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
+         <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.mission}</p>
+         <ul className="max-w-3xl space-y-10 text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
+           {missionItems.length ? missionItems.map((item, index) => <li key={`${localizedValue(item, safeLocale)}-${index}`} className="flex gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{localizedValue(item, safeLocale)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
          </ul>
        </div>
       </section>
@@ -90,12 +90,13 @@ export default async function AboutPage({ params }: AboutProps) {
          <div className="mt-12 space-y-12">
            {processItems.length ? processItems.map((item, index) => {
              const title = localizedValue(item.title, safeLocale) || `${dictionary.about.processStage} ${index + 1}`;
+             const subtitle = localizedValue(item.subtitle, safeLocale);
              const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
              return (
                <article key={`${title}-${index}`} className="grid gap-6 border-b border-white/15 pb-12 md:grid-cols-[0.15fr_0.85fr] md:gap-10">
                  <span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span>
                  <div className="grid gap-8 md:grid-cols-[1fr_0.9fr] md:items-start">
-                   <div><h2 className="text-3xl tracking-[-0.04em]">{title}</h2><p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{localizedValue(item.description, safeLocale) || dictionary.about.processDescriptionPlaceholder}</p></div>
+                   <div><h2 className="text-3xl tracking-[-0.04em]">{title}</h2>{subtitle ? <p className="mt-3 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{localizedValue(item.description, safeLocale) || dictionary.about.processDescriptionPlaceholder}</p></div>
                    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <div className="flex h-full items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.about.processImagePlaceholder}</div>}</div>
                  </div>
                </article>

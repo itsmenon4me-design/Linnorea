@@ -26,8 +26,8 @@ type HeroTransition = {
 
 const AUTO_ADVANCE_MS = 6000;
 const SLIDE_TRANSITION_MS = 720;
-const VIDEO_PRELOAD_STAGGER_MS = 1800;
-const MAX_HERO_SLIDES = 4;
+const VIDEO_PRELOAD_STAGGER_MS = 450;
+const MAX_HERO_SLIDES = 3;
 const DRAG_THRESHOLD_PX = 96;
 const DRAG_PLAY_TRIGGER_RATIO = 0.5;
 const MEDIA_ERROR_RETRY_DELAY_MS = 900;
@@ -480,7 +480,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       node.querySelectorAll<MuxPlayerElement>("mux-player").forEach((player, index) => {
         muxPlayerRefs.current[index] = player;
         player.preload = "auto";
-        if (index === nextIndex || index === activeIndex) {
+        if (playbackIds[index]) {
           player.minPreloadSegments = 1;
           const media = player.mediaController?.media;
           if (media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
@@ -671,7 +671,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       }
 
       player.preload = "auto";
-      if (index === nextIndex || index === activeIndex) {
+      if (playbackIds[index]) {
         player.minPreloadSegments = 1;
         if (player.readyState === 0 && !preloadStartedRef.current.has(index)) {
           preloadStartedRef.current.add(index);
@@ -706,6 +706,34 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
     return () => preloadTimers.forEach((timer) => window.clearTimeout(timer));
   }, [playbackIds, resolvedSlides]);
+
+  const goToSlide = (index: number, isManualNavigation = false) => {
+    const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
+    if (normalizedIndex === activeIndex || transitionRef.current) return;
+
+    const direction: 1 | -1 =
+      normalizedIndex > activeIndex || (activeIndex === resolvedSlides.length - 1 && normalizedIndex === 0) ? 1 : -1;
+    const nextTransition = { from: activeIndex, to: normalizedIndex, direction };
+    transitionRef.current = nextTransition;
+    setTransition(nextTransition);
+    setIsPaused(false);
+
+    if (isManualNavigation) {
+      videoAdvancedRef.current = false;
+      progressRef.current = 0;
+      setProgress(0);
+      setAutoAdvanceResetKey((key) => key + 1);
+
+      muxPlayerRefs.current.forEach((player, playerIndex) => {
+        if (player && playerIndex !== normalizedIndex && playerIndex !== activeIndex && playerIndex !== nextIndex) {
+          void queueMediaOperation(playerIndex, player, (media) => {
+            media.pause();
+            media.currentTime = 0;
+          });
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     if (!transition) return;
@@ -767,7 +795,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     const advance = () => {
       setProgress(1);
       const nextActiveIndex = (activeIndex + 1) % resolvedSlides.length;
-      setActiveIndex(nextActiveIndex);
+      goToSlide(nextActiveIndex);
     };
 
     const startedAt = performance.now() - progressRef.current * AUTO_ADVANCE_MS;
@@ -804,34 +832,6 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     resolvedSlides.length,
     transition,
   ]);
-
-  const goToSlide = (index: number, isManualNavigation = false) => {
-    const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
-    if (normalizedIndex === activeIndex || transitionRef.current) return;
-
-    const direction: 1 | -1 = normalizedIndex > activeIndex || (activeIndex === resolvedSlides.length - 1 && normalizedIndex === 0) ? 1 : -1;
-    const nextTransition = { from: activeIndex, to: normalizedIndex, direction };
-    transitionRef.current = nextTransition;
-    setTransition(nextTransition);
-    setIsPaused(false);
-
-    if (isManualNavigation) {
-      videoAdvancedRef.current = false;
-      progressRef.current = 0;
-      setProgress(0);
-      setAutoAdvanceResetKey((key) => key + 1);
-
-      muxPlayerRefs.current.forEach((player, playerIndex) => {
-        if (player && playerIndex !== normalizedIndex && playerIndex !== activeIndex && playerIndex !== nextIndex) {
-          void queueMediaOperation(playerIndex, player, (media) => {
-            media.pause();
-            media.currentTime = 0;
-          });
-        }
-      });
-
-    }
-  };
 
   const togglePause = () => {
     const activePlayer = muxPlayerRefs.current[activeIndex];
@@ -871,6 +871,23 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   };
 
   const handleVideoEnded = (endedIndex: number) => {
+    const isDragGestureActive = isDragging || dragTargetIndex !== null;
+    if (
+      isDragGestureActive &&
+      (endedIndex === activeIndex || endedIndex === dragPlayingIndex || endedIndex === dragTargetIndex)
+    ) {
+      const player = muxPlayerRefs.current[endedIndex];
+      if (player) {
+        void queueMediaOperation(endedIndex, player, async (media) => {
+          media.currentTime = 0;
+          await media.play();
+        }).catch((error: unknown) => {
+          console.warn("Hero drag video could not be looped.", { index: endedIndex, error });
+        });
+      }
+      return;
+    }
+
     if (endedIndex !== activeIndex || videoAdvancedRef.current) {
       return;
     }
@@ -905,7 +922,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
     const media = player.mediaController?.media;
     const logReset = (phase: string) => {
-      console.info("[Hero drag restart]", {
+      console.log("[Hero drag commit restart]", {
         phase,
         timestamp: new Date().toISOString(),
         performanceTimeMs: Math.round(performance.now()),
@@ -944,6 +961,14 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     }
 
     pendingDragRestartRef.current = null;
+    const player = muxPlayerRefs.current[activeIndex];
+    const media = player?.mediaController?.media;
+    console.log("[Hero drag commit]", {
+      phase: "before-restartActiveVideo",
+      timestamp: new Date().toISOString(),
+      index: activeIndex,
+      currentTime: media?.currentTime ?? null,
+    });
     setDragPlayingIndex(null);
     void restartActiveVideo(activeIndex);
   }, [activeIndex, transition]);
@@ -962,6 +987,8 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
   const handlePointerDown = (event: React.PointerEvent<HTMLElement>) => {
     if (transitionRef.current || resolvedSlides.length <= 1 || event.target instanceof Element && event.target.closest("button, a")) return;
+    slideTimelineRef.current?.kill();
+    slideTimelineRef.current = null;
     setDragTargetIndex(null);
     setIsDragging(true);
     setDragPlayingIndex(activeIndex);
@@ -970,10 +997,19 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         gsap.killTweensOf(panel);
       }
     });
-    const activePanel = mediaPanelRefs.current[activeIndex];
-    if (activePanel) {
-      gsap.set(activePanel, { xPercent: 0 });
-    }
+    mediaPanelRefs.current.forEach((panel, index) => {
+      if (!panel) return;
+      gsap.set(panel, {
+        xPercent: index === activeIndex ? 0 : 100,
+        visibility: index === activeIndex ? "visible" : "hidden",
+      });
+    });
+    console.log("[Hero drag transform]", {
+      phase: "pointer-down-reset",
+      timestamp: new Date().toISOString(),
+      activeIndex,
+      transformOwner: "drag-pointer",
+    });
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -1046,6 +1082,19 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     }
     gsap.set(outgoingPanel, { xPercent: deltaPercent });
     gsap.set(incomingPanel, { xPercent: deltaPercent + direction * 100, visibility: "visible" });
+    console.log("[Hero drag transform]", {
+      phase: "pointer-move",
+      timestamp: new Date().toISOString(),
+      deltaPercent: Number(deltaPercent.toFixed(2)),
+      direction,
+      activeIndex,
+      targetIndex,
+      targetChanged,
+      passedPlayTrigger,
+      outgoingXPercent: Number(gsap.getProperty(outgoingPanel, "xPercent")),
+      incomingXPercent: Number(gsap.getProperty(incomingPanel, "xPercent")),
+      transformOwner: "drag-pointer",
+    });
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLElement>) => {
@@ -1066,6 +1115,13 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       playbackGenerationRef.current += 1;
       pendingDragRestartRef.current = drag.targetIndex;
       dragCommitRef.current = true;
+      console.log("[Hero drag transform]", {
+        phase: "commit-settle",
+        timestamp: new Date().toISOString(),
+        from: activeIndex,
+        to: drag.targetIndex,
+        transformOwner: "commit-timeline",
+      });
       goToSlide(drag.targetIndex, true);
       setDragTargetIndex(null);
       return;
@@ -1110,6 +1166,9 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
           const isTransitionIncoming = transition?.to === index;
           const isDragIncoming = dragTargetIndex === index;
           const isTransitionVisible = isActive || isTransitionIncoming || isDragIncoming;
+          const shouldLoopDuringDrag =
+            (isDragging || dragTargetIndex !== null) &&
+            (isActive || index === dragPlayingIndex || isDragIncoming);
 
           return (
             <div
@@ -1147,10 +1206,11 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                     }}
                     playbackId={slidePlaybackId}
                     autoPlay={isActive || index === nextIndex || isTransitionIncoming}
+                    loop={shouldLoopDuringDrag}
                     muted
                     playsInline
                     preload="auto"
-                    minPreloadSegments={index === nextIndex || isActive ? 1 : undefined}
+                    minPreloadSegments={slidePlaybackId ? 1 : undefined}
                     poster={slidePosterUrl ?? undefined}
                     theme="microvideo"
                     nohotkeys
@@ -1228,7 +1288,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         <div className="mt-4 flex items-center gap-2.5 md:mt-4">
           {resolvedSlides.map((slide, index) => {
             const isActive = index === activeIndex;
-            const isDragGestureActive = isDragging || dragTargetIndex !== null || transition !== null;
+            const isDragGestureActive = isDragging || dragTargetIndex !== null || dragPlayingIndex !== null || transition !== null;
             const visualActiveIndex = isDragGestureActive ? dragPlayingIndex ?? activeIndex : activeIndex;
             const isIndicatorActive = visualActiveIndex === index;
             const buttonSizeClass = isIndicatorActive ? "h-5 w-5" : "h-2.5 w-2.5";
@@ -1245,7 +1305,11 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                   isIndicatorActive ? (
                   <span className="block h-5 w-5 rounded-full border-2 border-white/55" aria-hidden="true" />
                   ) : (
-                    <span className="block h-[6.8px] w-[6.8px] rounded-full bg-white/35" aria-hidden="true" />
+                    <span
+                      className="block h-[6.8px] w-[6.8px] rounded-full"
+                      style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+                      aria-hidden="true"
+                    />
                   )
                 ) : (
                   <CarouselDot active={isActive} passed={index < activeIndex} progress={progress} resetKey={`hero-dot-${activeIndex}`} />

@@ -48,13 +48,25 @@ export const project = defineType({
       name: "category",
       title: "Category",
       type: "string",
-      description: "Example: Residential, Commercial, Hospitality, etc.",
+      description: "Free-text category. Current labels: Residential or Retail. Add any future category without changing the schema.",
+    }),
+    defineField({
+      name: "status",
+      title: "Status",
+      type: "string",
+      description: "Free-text project status. Use Ongoing for current work; blank values are treated as completed.",
     }),
     defineField({
       name: "styleTag",
       title: "Style tag",
       type: "localeString",
       description: "Example: Modern Tropical, Compact Tropical, American Classic.",
+    }),
+    defineField({
+      name: "homeTagline",
+      title: "Home highlight tagline",
+      type: "localeString",
+      description: "Short supporting line shown under this project when it appears in the Home highlights.",
     }),
     defineField({
       name: "location",

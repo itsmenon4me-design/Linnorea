@@ -71,16 +71,6 @@ button {
   animation: splash-logo-pulse 1.8s ease-in-out infinite;
 }
 
-@media (max-width: 959.99px) {
-  .header-site {
-    background: var(--color-bg-elevated);
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    transform: none !important;
-    transition: none;
-  }
-}
-
 @media (min-width: 960px) {
   .header-desktop-nav {
     display: flex;

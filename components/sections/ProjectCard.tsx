@@ -36,12 +36,13 @@ export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
               {dictionary.ui.placeholderProjectImage}
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-black/80 to-transparent px-5 pb-5 pt-16 opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-            <p className="text-sm text-white/80">{project.category || dictionary.ui.projectCategory}</p>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-5 pb-5 pt-20">
+            <p className="text-lg font-medium tracking-[-0.02em] text-white">{title}</p>
+            <p className="mt-1 text-xs text-white/75">{project.category || dictionary.ui.projectCategory}</p>
           </div>
         </div>
         <div className="flex items-start justify-between gap-4 border-b border-white/15 py-4">
-          <h2 className="text-2xl font-medium tracking-[-0.03em] text-white md:text-3xl">{title}</h2>
+          <h2 className="text-sm font-medium tracking-[0.02em] text-white/75 md:text-base">{style || dictionary.ui.projectCategory}</h2>
           {style ? <p className="max-w-[45%] text-right text-[10px] uppercase tracking-[0.2em] text-white/55">{style}</p> : null}
         </div>
       </article>

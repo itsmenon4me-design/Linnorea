@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { sanityClient } from "@/lib/sanity/client";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
 import type { Locale } from "@/lib/i18n/config";
@@ -87,9 +88,17 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
             className="min-w-0 w-full border-b border-white/25 pt-8 pb-10 text-center md:pt-10 md:pb-12"
             aria-labelledby="footer-brand"
           >
+            <Image
+              src="/assets/logo-mark.png"
+              alt=""
+              width={48}
+              height={48}
+              className="mx-auto h-10 w-10 object-contain"
+            />
+
             <p
               id="footer-brand"
-              className="text-[11px] font-medium uppercase tracking-[0.35em] text-white/60"
+              className="text-[11px] font-medium tracking-[0.35em] text-white/60"
             >
               Linnorea
             </p>

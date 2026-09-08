@@ -1,5 +1,5 @@
 export const heroSlidesQuery = `
-  *[_type == "heroSlide"] | order(order asc, _createdAt asc) {
+  *[_type == "heroSlide"] | order(order asc, _createdAt asc)[0...3] {
     _id,
     _type,
     image,
@@ -36,7 +36,9 @@ export const projectListQuery = `
     slug,
     coverImage,
     category,
+    status,
     styleTag,
+    homeTagline,
     location,
     year,
     featured,
@@ -54,6 +56,7 @@ export const projectBySlugQuery = `
     gallery,
     heroVideo{asset->{url}},
     category,
+    status,
     styleTag,
     location,
     year,
@@ -84,6 +87,7 @@ export const siteSettingsQuery = `
         status
       }
     },
+    projectHighlightImages,
     officeAddress,
     googleMapsUrl,
     whatsappNumber,

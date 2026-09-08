@@ -66,7 +66,9 @@ export type Project = {
   gallery?: SanityImage[];
   heroVideo?: { asset?: { _ref?: string; url?: string } };
   category?: string;
+  status?: string;
   styleTag?: LocalizedString;
+  homeTagline?: LocalizedString;
   location?: LocalizedString;
   year?: string;
   area?: string;
@@ -77,13 +79,14 @@ export type Project = {
 };
 
 export type SiteSettings = {
+  projectHighlightImages?: SanityImage[];
   brandStatement?: LocalizedString;
   aboutEstablished?: LocalizedString;
   aboutDescription?: LocalizedString;
   aboutKey?: Array<{ label?: LocalizedString; order?: number }>;
   aboutVision?: LocalizedString;
   aboutMission?: LocalizedString[];
-  aboutProcess?: Array<{ title?: LocalizedString; description?: LocalizedString; image?: SanityImage; order?: number }>;
+  aboutProcess?: Array<{ title?: LocalizedString; subtitle?: LocalizedString; description?: LocalizedString; image?: SanityImage; order?: number }>;
   studioVisualImage?: SanityImage;
   studioVisualVideo?: MuxVideo;
   officeAddress?: Partial<Record<Locale, string>>;

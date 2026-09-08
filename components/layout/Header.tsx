@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -20,10 +20,11 @@ type HeaderProps = {
 const headerContentClassName = "relative z-10 m-0 mt-[7px] mb-[8px] flex h-[25px] max-w-7xl items-center px-6";
 
 export function Header({ dictionary, currentLocale }: HeaderProps) {
+  const pathname = usePathname();
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logo, setLogo] = useState<SanityImage | null>(null);
-  const pathname = usePathname();
+  const previousScrollYRef = useRef(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,20 +46,23 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
   }, []);
 
   useEffect(() => {
-    const hero = document.querySelector("[data-home-hero]");
-    if (!hero) return;
+    const scrollThreshold = 8;
+    previousScrollYRef.current = window.scrollY;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsHidden(!entry.isIntersecting);
-      },
-      { threshold: 0 },
-    );
-    observer.observe(hero);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDelta = currentScrollY - previousScrollYRef.current;
 
-    return () => {
-      observer.disconnect();
+      if (currentScrollY <= 0) {
+        setIsHidden(false);
+      } else if (Math.abs(scrollDelta) >= scrollThreshold) {
+        setIsHidden(scrollDelta > 0);
+        previousScrollYRef.current = currentScrollY;
+      }
     };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navItems = [
@@ -88,8 +92,9 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
       ].join(" ")}
     >
       <div className={headerContentClassName}>
-        <Link href={`/${currentLocale}`} aria-label={dictionary.ui.linnoreaHome} className="inline-flex h-6 w-6 shrink-0">
-          <Image src={logo ? urlFor(logo).width(48).height(48).fit("crop").auto("format").quality(78).url() : "/assets/logo-mark.png"} alt="Linnorea" width={24} height={24} priority className="block h-6 w-6 object-contain" />
+        <Link href={`/${currentLocale}`} aria-label={dictionary.ui.linnoreaHome} className="inline-flex min-h-11 items-center gap-2.5 text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+          <Image src={logo ? urlFor(logo).width(48).height(48).fit("crop").auto("format").quality(78).url() : "/assets/logo-mark.png"} alt="" width={22} height={22} priority className="block h-[22px] w-[22px] object-contain" />
+          <span className="text-[11px] font-medium tracking-[0.08em]">Linnorea Design Works</span>
         </Link>
 
         <nav className="header-desktop-nav ml-8 hidden items-center gap-7 text-[10px] font-medium uppercase tracking-[0.2em] text-white/80">
@@ -120,7 +125,7 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
       </div>
 
       {isMenuOpen ? (
-        <div className="header-mobile-menu border-t border-white/10 bg-[#0b0b0d]/90 px-5 py-5 backdrop-blur-md">
+        <div className="header-mobile-menu border-t border-white/10 bg-[#0b0b0d] px-5 py-5">
           <nav className="flex flex-col gap-4 text-sm uppercase tracking-[0.2em] text-white/80">
             {navItems.map((item, index) => (
               <Link key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)} className={navLinkClass(isNavItemActive(item.href, index))}>

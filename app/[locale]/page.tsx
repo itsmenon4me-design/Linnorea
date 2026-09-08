@@ -30,6 +30,7 @@ type ProjectListItem = {
   slug?: { current?: string };
   coverImage?: SanityImage;
   styleTag?: { id?: string; en?: string; [key: string]: string | undefined };
+  homeTagline?: { id?: string; en?: string; [key: string]: string | undefined };
 };
 
 export function generateStaticParams() {
@@ -67,6 +68,7 @@ export default async function HomePage({ params }: HomePageProps) {
               {highlightProjects.map((project) => {
                 const title = localizedValue(project.title, safeLocale) || dictionary.home.untitledProject;
                 const style = localizedValue(project.styleTag, safeLocale) || project.category || dictionary.ui.projectCategory;
+                const tagline = localizedValue(project.homeTagline, safeLocale);
                 const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
                 const card = (
                   <article data-reveal className="group">
@@ -78,6 +80,7 @@ export default async function HomePage({ params }: HomePageProps) {
                     <div className="border-b border-white/15 py-5">
                       <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent-gold)]">{style}</p>
                       <h3 className="mt-3 text-2xl font-medium tracking-[-0.04em] text-white">{title}</h3>
+                      {tagline ? <p className="mt-2 max-w-sm text-sm leading-6 text-white/65">{tagline}</p> : null}
                       <ArrowAction label={dictionary.home.discover} className="mt-5 text-[10px] uppercase tracking-[0.25em] text-white" />
                     </div>
                   </article>
@@ -86,6 +89,12 @@ export default async function HomePage({ params }: HomePageProps) {
               })}
             </div>
           ) : null}
+          <Link
+            href={`/${safeLocale}/project`}
+            className="mt-12 inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]"
+          >
+            <ArrowAction label={dictionary.home.discoverMore} className="text-[10px] uppercase tracking-[0.25em]" />
+          </Link>
         </div>
       </ScrollReveal>
 
