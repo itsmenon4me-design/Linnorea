@@ -33,6 +33,53 @@ export const siteSettings = defineType({
       type: "localeString",
     }),
     defineField({
+      name: "aboutEstablished",
+      title: "About established tagline",
+      type: "localeString",
+    }),
+    defineField({
+      name: "aboutDescription",
+      title: "About brand description",
+      type: "localeText",
+    }),
+    defineField({
+      name: "aboutKey",
+      title: "About Our Key",
+      type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "label", title: "Keyword", type: "localeString" }),
+          defineField({ name: "order", title: "Display order", type: "number" }),
+        ],
+      }],
+    }),
+    defineField({
+      name: "aboutVision",
+      title: "About vision",
+      type: "localeText",
+    }),
+    defineField({
+      name: "aboutMission",
+      title: "About mission points",
+      type: "array",
+      of: [{ type: "localeText" }],
+    }),
+    defineField({
+      name: "aboutProcess",
+      title: "About process",
+      type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "title", title: "Stage title", type: "localeString" }),
+          defineField({ name: "description", title: "Stage description", type: "localeText" }),
+          defineField({ name: "image", title: "Stage image", type: "image", options: { hotspot: true } }),
+          defineField({ name: "order", title: "Display order", type: "number" }),
+        ],
+      }],
+    }),
+    defineField({
       name: "studioVisualImage",
       title: "Studio visual image",
       type: "image",

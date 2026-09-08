@@ -6,11 +6,28 @@
     "service": "サービス",
     "product": "商品"
   },
+  "about": {
+    "establishedPlaceholder": "2023年8月23日設立",
+    "descriptionPlaceholder": "[Placeholder brand description]",
+    "ourKey": "Our Key",
+    "keyPlaceholder": "[Placeholder Our Key]",
+    "vision": "Vision",
+    "visionPlaceholder": "[Placeholder vision]",
+    "mission": "Mission",
+    "missionPlaceholder": "[Placeholder mission]",
+    "process": "Our Process",
+    "processStage": "Stage",
+    "processDescriptionPlaceholder": "[Placeholder process description]",
+    "processImagePlaceholder": "[Placeholder process image]",
+    "processPlaceholder": "[Placeholder process]"
+  },
   "home": {
     "eyebrow": "プレースホルダー",
     "headline": "Where Space Feels.",
     "subheadline": "Linnorea のホームページ用の仮コピーです。最終文言は未定です。",
     "cta": "相談を予約する",
+    "highlightsEyebrow": "注目の3プロジェクト",
+    "highlightsTitle": "私たちがつくった空間。",
     "discover": "詳しく見る",
     "collections": "Collections",
     "selectedSpaces": "Selected spaces.",

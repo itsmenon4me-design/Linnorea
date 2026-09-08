@@ -9,8 +9,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
-import { approachItemsQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
-import { localizedValue, type ApproachItem, type SiteSettings, type TeamMember } from "@/lib/sanity/types";
+import { siteSettingsQuery } from "@/lib/sanity/queries";
+import { localizedValue, type SiteSettings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 type AboutProps = { params: Promise<{ locale: string }> };
@@ -30,12 +30,16 @@ export default async function AboutPage({ params }: AboutProps) {
   const { locale } = await params;
   const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
   const dictionary = getDictionary(safeLocale);
-  const [settings, approachItems, teamMembers] = await Promise.all([
-    sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
-    sanityClient.fetch<ApproachItem[]>(approachItemsQuery, {}, { next: { revalidate } }),
-    sanityClient.fetch<TeamMember[]>(teamMembersQuery, {}, { next: { revalidate } }),
-  ]);
-  const story = localizedValue(settings?.brandStatement, safeLocale) || dictionary.ui.placeholderBrandStory;
+  const settings = await sanityClient.fetch<SiteSettings | null>(
+    siteSettingsQuery,
+    {},
+    { next: { revalidate } },
+  );
+  const established = localizedValue(settings?.aboutEstablished, safeLocale) || dictionary.about.establishedPlaceholder;
+  const description = localizedValue(settings?.aboutDescription, safeLocale) || dictionary.about.descriptionPlaceholder;
+  const keyItems = settings?.aboutKey ?? [];
+  const missionItems = settings?.aboutMission ?? [];
+  const processItems = settings?.aboutProcess ?? [];
   const whatsappNumber = settings?.whatsappNumber;
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
 
@@ -48,57 +52,60 @@ export default async function AboutPage({ params }: AboutProps) {
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-40 md:px-8 md:pb-20">
           <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">Linnorea Design Works</p>
           <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.about}</h1>
+          <p className="mt-8 text-sm uppercase tracking-[0.25em] text-white/65">{established}</p>
+          <p className="mt-6 max-w-2xl text-lg leading-7 text-white/80 md:text-2xl md:leading-9">{description}</p>
         </div>
       </section>
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
-        <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.ourPhilosophy}</p>
-          <div className="space-y-6 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">
-            {story.split(/\n\n+/).map((paragraph, index) => <p key={`${paragraph}-${index}`}>{paragraph}</p>)}
-          </div>
-        </div>
+       <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
+         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.ourKey}</p>
+         <div className="space-y-6 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">
+           {keyItems.length ? keyItems.map((item, index) => <p key={`${localizedValue(item.label, safeLocale)}-${index}`}>{localizedValue(item.label, safeLocale)}</p>) : <p>{dictionary.about.keyPlaceholder}</p>}
+         </div>
+       </div>
+      </ScrollReveal>
+
+      <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
+       <div className="border-t border-white/15 pt-6">
+         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.vision}</p>
+         <div data-reveal className="mt-10 max-w-4xl text-2xl leading-[1.25] tracking-[-0.04em] text-white/90 md:text-4xl">
+           <p>{localizedValue(settings?.aboutVision, safeLocale) || dictionary.about.visionPlaceholder}</p>
+         </div>
+       </div>
       </ScrollReveal>
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div className="border-t border-white/15 pt-6">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.approach}</p>
-          <div className="mt-12 grid gap-10 md:grid-cols-3">
-            {(approachItems.length ? approachItems : [
-              { _id: "fallback-1", title: { id: "Listen before designing." }, description: { id: dictionary.ui.placeholderApproachCopy } },
-              { _id: "fallback-2", title: { id: "Let the room lead." }, description: { id: dictionary.ui.placeholderApproachCopy } },
-              { _id: "fallback-3", title: { id: "Make daily rituals feel considered." }, description: { id: dictionary.ui.placeholderApproachCopy } },
-            ]).map((item, index) => (
-              <ScrollReveal key={item._id} className="border-b border-white/15 pb-8">
-                <div data-reveal>
-                  <span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span>
-                  <h2 className="mt-8 max-w-xs text-2xl leading-tight tracking-[-0.04em] text-white/90">{localizedValue(item.title, safeLocale)}</h2>
-                  <p className="mt-5 text-sm leading-6 text-white/55">{localizedValue(item.description, safeLocale)}</p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
+       <div className="grid gap-10 border-t border-white/15 pt-6 md:grid-cols-[0.7fr_1.3fr]">
+         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.mission}</p>
+         <ul className="space-y-5 text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-3xl">
+           {missionItems.length ? missionItems.map((item, index) => <li key={`${localizedValue(item, safeLocale)}-${index}`} className="flex gap-4"><span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span><span>{localizedValue(item, safeLocale)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
+         </ul>
+       </div>
       </section>
 
       <section className="mx-5 border-y border-white/15 py-16 md:mx-8 md:py-24">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.team}</p>
-          {teamMembers.length ? (
-            <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
-              {teamMembers.map((member) => (
-                <article key={member._id} className="border-b border-white/15 pb-6">
-                  {member.photo ? <Image src={urlFor(member.photo).width(800).height(800).fit("crop").auto("format").quality(78).url()} alt={member.name ?? ""} width={800} height={800} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="mb-5 aspect-square w-full object-cover" /> : null}
-                  <h2 className="text-2xl tracking-[-0.04em]">{member.name}</h2>
-                  <p className="mt-2 text-sm text-[var(--color-accent-gold)]">{localizedValue(member.role, safeLocale)}</p>
-                  {localizedValue(member.bio, safeLocale) ? <p className="mt-4 text-sm leading-6 text-white/65">{localizedValue(member.bio, safeLocale)}</p> : null}
-                </article>
-              ))}
-            </div>
-          ) : <p className="mt-6 text-sm text-white/65">{dictionary.ui.teamPending}</p>}
-        </div>
+       <div className="mx-auto max-w-7xl">
+         <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.about.process}</p>
+         <div className="mt-12 space-y-12">
+           {processItems.length ? processItems.map((item, index) => {
+             const title = localizedValue(item.title, safeLocale) || `${dictionary.about.processStage} ${index + 1}`;
+             const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
+             return (
+               <article key={`${title}-${index}`} className="grid gap-6 border-b border-white/15 pb-12 md:grid-cols-[0.15fr_0.85fr] md:gap-10">
+                 <span className="text-sm text-[var(--color-accent-gold)]">0{index + 1}</span>
+                 <div className="grid gap-8 md:grid-cols-[1fr_0.9fr] md:items-start">
+                   <div><h2 className="text-3xl tracking-[-0.04em]">{title}</h2><p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{localizedValue(item.description, safeLocale) || dictionary.about.processDescriptionPlaceholder}</p></div>
+                   <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <div className="flex h-full items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.about.processImagePlaceholder}</div>}</div>
+                 </div>
+               </article>
+             );
+           }) : <p className="text-sm leading-6 text-white/60">{dictionary.about.processPlaceholder}</p>}
+         </div>
+       </div>
       </section>
 
+      {/* Approach and Team data remain in Sanity and can be restored here when approved. */}
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
         <h2 className="max-w-xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.ui.seeThinking}</h2>
         <div className="flex flex-wrap gap-3">

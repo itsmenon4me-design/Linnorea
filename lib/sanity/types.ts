@@ -72,11 +72,18 @@ export type Project = {
   area?: string;
   description?: Partial<Record<Locale, PortableTextBlock[]>>;
   scopeOfWork?: LocalizedString;
+  featured?: boolean;
   order?: number;
 };
 
 export type SiteSettings = {
   brandStatement?: LocalizedString;
+  aboutEstablished?: LocalizedString;
+  aboutDescription?: LocalizedString;
+  aboutKey?: Array<{ label?: LocalizedString; order?: number }>;
+  aboutVision?: LocalizedString;
+  aboutMission?: LocalizedString[];
+  aboutProcess?: Array<{ title?: LocalizedString; description?: LocalizedString; image?: SanityImage; order?: number }>;
   studioVisualImage?: SanityImage;
   studioVisualVideo?: MuxVideo;
   officeAddress?: Partial<Record<Locale, string>>;

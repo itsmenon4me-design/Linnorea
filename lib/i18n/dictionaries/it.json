@@ -6,11 +6,28 @@
     "service": "Servizio",
     "product": "Prodotto"
   },
+  "about": {
+    "establishedPlaceholder": "Fondata il 23 agosto 2023",
+    "descriptionPlaceholder": "[Placeholder brand description]",
+    "ourKey": "Our Key",
+    "keyPlaceholder": "[Placeholder Our Key]",
+    "vision": "Vision",
+    "visionPlaceholder": "[Placeholder vision]",
+    "mission": "Mission",
+    "missionPlaceholder": "[Placeholder mission]",
+    "process": "Our Process",
+    "processStage": "Stage",
+    "processDescriptionPlaceholder": "[Placeholder process description]",
+    "processImagePlaceholder": "[Placeholder process image]",
+    "processPlaceholder": "[Placeholder process]"
+  },
   "home": {
     "eyebrow": "Placeholder",
     "headline": "Where Space Feels.",
     "subheadline": "Testo placeholder per la homepage di Linnorea. Il messaggio finale è ancora TBD.",
     "cta": "Prenota una consulenza",
+    "highlightsEyebrow": "3 progetti in evidenza",
+    "highlightsTitle": "Spazi che abbiamo realizzato.",
     "discover": "Scopri",
     "collections": "Collections",
     "selectedSpaces": "Selected spaces.",

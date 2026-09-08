@@ -71,6 +71,12 @@ export const siteSettingsQuery = `
     _type,
     logo,
     brandStatement,
+    aboutEstablished,
+    aboutDescription,
+    aboutKey | order(order asc),
+    aboutVision,
+    aboutMission,
+    aboutProcess | order(order asc),
     studioVisualImage,
     studioVisualVideo {
       asset-> {

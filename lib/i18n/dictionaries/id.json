@@ -6,11 +6,28 @@
     "service": "Layanan",
     "product": "Produk"
   },
+  "about": {
+    "establishedPlaceholder": "Established 23 Agustus 2023",
+    "descriptionPlaceholder": "Linnorea Design Works adalah studio Arsitektur & Desain Interior yang berbasis di Jakarta, fokus menciptakan ruang yang jelas, fungsional, dan bermakna.",
+    "ourKey": "Our Key",
+    "keyPlaceholder": "[Placeholder Our Key]",
+    "vision": "Vision",
+    "visionPlaceholder": "[Placeholder vision, awaiting approved copy]",
+    "mission": "Mission",
+    "missionPlaceholder": "[Placeholder mission, awaiting approved copy]",
+    "process": "Our Process",
+    "processStage": "Tahap",
+    "processDescriptionPlaceholder": "[Placeholder process description]",
+    "processImagePlaceholder": "[Placeholder process image]",
+    "processPlaceholder": "[Placeholder process, awaiting approved content]"
+  },
   "home": {
     "eyebrow": "Placeholder",
     "headline": "Where Space Feels.",
     "subheadline": "",
     "cta": "Jadwalkan Konsultasi",
+    "highlightsEyebrow": "3 Highlight Project",
+    "highlightsTitle": "Ruang yang telah kami wujudkan.",
     "discover": "Temukan",
     "collections": "Collections",
     "selectedSpaces": "Selected spaces.",

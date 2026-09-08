@@ -82,7 +82,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const [readyVideoIndexes, setReadyVideoIndexes] = useState<Set<number>>(() => new Set());
   const [transition, setTransition] = useState<HeroTransition | null>(null);
   const [dragTargetIndex, setDragTargetIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragPlayingIndex, setDragPlayingIndex] = useState<number | null>(null);
+  const pendingDragRestartRef = useRef<number | null>(null);
+  const dragCommitRef = useRef(false);
   const transitionRef = useRef<HeroTransition | null>(null);
+  const dragSwapActiveRef = useRef(false);
   const playbackGenerationRef = useRef(0);
   const pendingPlayCleanupRef = useRef<(() => void) | null>(null);
 
@@ -135,12 +140,12 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     lastX: number;
     lockedAxis: "horizontal" | "vertical" | null;
     targetIndex: number | null;
-    playTriggered: boolean;
-    incomingPaused: boolean;
+    swapActive: boolean;
   } | null>(null);
   useEffect(() => {
     activeIndexRef.current = activeIndex;
     nextIndexRef.current = nextIndex;
+    dragSwapActiveRef.current = false;
   }, [activeIndex, nextIndex]);
   const queueMediaOperation = (
     index: number,
@@ -275,7 +280,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       return next;
     });
 
-    if ((index === activeIndex || index === transitionRef.current?.to) && !isPaused && isHeroInView && isTabVisible) {
+    if ((index === activeIndex || index === transitionRef.current?.to) && !dragSwapActiveRef.current && !isPaused && isHeroInView && isTabVisible) {
       const player = muxPlayerRefs.current[index];
       if (player) playActiveVideo(player);
       window.dispatchEvent(new Event("linnorea:hero-ready"));
@@ -484,6 +489,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
               queuedMedia.preload = "auto";
               queuedMedia.load();
               await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
+              if (dragSwapActiveRef.current && index === activeIndexRef.current) {
+                queuedMedia.pause();
+                return;
+              }
               await queuedMedia.play();
               if (index !== activeIndex) {
                 queuedMedia.pause();
@@ -494,7 +503,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       });
 
       const activePlayer = muxPlayerRefs.current[activeIndex];
-      if (activePlayer && !isPaused && isHeroInView && isTabVisible) {
+      if (activePlayer && !dragSwapActiveRef.current && !isPaused && isHeroInView && isTabVisible) {
         playActiveVideo(activePlayer);
       }
     };
@@ -525,7 +534,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
 
     const handlePlay = () => setIsPaused(false);
     const handleCanPlay = () => {
-      if (!isPaused && isHeroInView && isTabVisible) {
+      if (!dragSwapActiveRef.current && !isPaused && isHeroInView && isTabVisible) {
         playActiveVideo(player);
       }
     };
@@ -708,8 +717,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     slideTimelineRef.current?.kill();
     const incomingX = transition.direction * 100;
     const outgoingX = transition.direction * -100;
-    gsap.set(outgoingPanel, { xPercent: 0 });
-    gsap.set(incomingPanel, { xPercent: incomingX });
+    if (!dragCommitRef.current) {
+      gsap.set(outgoingPanel, { xPercent: 0 });
+      gsap.set(incomingPanel, { xPercent: incomingX });
+    }
 
     const timeline = gsap.timeline({
       defaults: {
@@ -719,6 +730,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       onComplete: () => {
         gsap.set(incomingPanel, { clearProps: "visibility" });
         setActiveIndex(transition.to);
+        dragCommitRef.current = false;
         transitionRef.current = null;
         setTransition(null);
       },
@@ -735,7 +747,17 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   }, [reducedMotion, transition]);
 
   useEffect(() => {
-    if (reducedMotion || resolvedSlides.length <= 1 || activePlaybackId || isPaused || !isHeroInView || !isTabVisible) {
+    if (
+      reducedMotion ||
+      resolvedSlides.length <= 1 ||
+      activePlaybackId ||
+      isPaused ||
+      !isHeroInView ||
+      !isTabVisible ||
+      isDragging ||
+      dragTargetIndex !== null ||
+      transition !== null
+    ) {
       return;
     }
 
@@ -769,7 +791,19 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         window.clearTimeout(imageTimerId);
       }
     };
-  }, [activeIndex, activePlaybackId, autoAdvanceResetKey, isHeroInView, isPaused, isTabVisible, reducedMotion, resolvedSlides.length]);
+  }, [
+    activeIndex,
+    activePlaybackId,
+    autoAdvanceResetKey,
+    dragTargetIndex,
+    isHeroInView,
+    isDragging,
+    isPaused,
+    isTabVisible,
+    reducedMotion,
+    resolvedSlides.length,
+    transition,
+  ]);
 
   const goToSlide = (index: number, isManualNavigation = false) => {
     const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
@@ -818,7 +852,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   };
 
   const handleVideoTimeUpdate = (event: Event) => {
-    if (isPaused) {
+    if (isPaused || isDragging || dragTargetIndex !== null || transition !== null) {
       return;
     }
 
@@ -846,12 +880,15 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     goToSlide(endedIndex + 1);
   };
 
-  const resetDragIncomingVideo = (index: number) => {
+  const resetDragMedia = (index: number) => {
     const player = muxPlayerRefs.current[index];
     if (!player) {
       return;
     }
 
+    const media = player.mediaController?.media;
+    media?.pause();
+    player.currentTime = 0;
     void queueMediaOperation(index, player, (media) => {
       media.pause();
       media.currentTime = 0;
@@ -860,9 +897,83 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     });
   };
 
+  const restartActiveVideo = (index: number) => {
+    const player = muxPlayerRefs.current[index];
+    if (!player) {
+      return Promise.resolve();
+    }
+
+    const media = player.mediaController?.media;
+    const logReset = (phase: string) => {
+      console.info("[Hero drag restart]", {
+        phase,
+        timestamp: new Date().toISOString(),
+        performanceTimeMs: Math.round(performance.now()),
+        index,
+        currentTime: media?.currentTime ?? null,
+        paused: media?.paused ?? null,
+        readyState: media?.readyState ?? null,
+      });
+    };
+    logReset("before-direct-reset");
+    media?.pause();
+    player.currentTime = 0;
+    logReset("after-direct-reset");
+    return queueMediaOperation(index, player, async (media) => {
+      logReset("before-queued-reset");
+      media.pause();
+      media.currentTime = 0;
+      logReset("after-queued-reset");
+      if (media.currentTime !== 0) {
+        media.load();
+        media.currentTime = 0;
+        logReset("after-load-reset");
+      }
+      await waitForMediaReady(media, MEDIA_ERROR_RETRY_TIMEOUT_MS);
+      logReset("after-ready-before-play");
+      await media.play();
+      logReset("after-play");
+    }).catch((error: unknown) => {
+      console.warn("Hero drag video could not be restarted.", { index, error });
+    });
+  };
+
+  useEffect(() => {
+    if (transition !== null || pendingDragRestartRef.current !== activeIndex) {
+      return;
+    }
+
+    pendingDragRestartRef.current = null;
+    setDragPlayingIndex(null);
+    void restartActiveVideo(activeIndex);
+  }, [activeIndex, transition]);
+
+  const pauseDragMedia = (index: number) => {
+    const player = muxPlayerRefs.current[index];
+    if (!player) {
+      return;
+    }
+
+    player.mediaController?.media?.pause();
+    void queueMediaOperation(index, player, (media) => media.pause()).catch((error: unknown) => {
+      console.warn("Hero drag video could not be paused.", { index, error });
+    });
+  };
+
   const handlePointerDown = (event: React.PointerEvent<HTMLElement>) => {
     if (transitionRef.current || resolvedSlides.length <= 1 || event.target instanceof Element && event.target.closest("button, a")) return;
     setDragTargetIndex(null);
+    setIsDragging(true);
+    setDragPlayingIndex(activeIndex);
+    mediaPanelRefs.current.forEach((panel) => {
+      if (panel) {
+        gsap.killTweensOf(panel);
+      }
+    });
+    const activePanel = mediaPanelRefs.current[activeIndex];
+    if (activePanel) {
+      gsap.set(activePanel, { xPercent: 0 });
+    }
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -870,8 +981,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       lastX: event.clientX,
       lockedAxis: null,
       targetIndex: null,
-      playTriggered: false,
-      incomingPaused: false,
+      swapActive: false,
     };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
@@ -891,31 +1001,49 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     event.preventDefault();
     const direction: 1 | -1 = deltaX < 0 ? 1 : -1;
     const targetIndex = (activeIndex + direction + resolvedSlides.length) % resolvedSlides.length;
-    if (drag.targetIndex !== null && drag.targetIndex !== targetIndex) {
-      resetDragIncomingVideo(drag.targetIndex);
-      drag.playTriggered = false;
-      drag.incomingPaused = false;
+    const targetChanged = drag.targetIndex !== targetIndex;
+    if (drag.targetIndex !== null && targetChanged) {
+      resetDragMedia(drag.targetIndex);
+      setDragPlayingIndex(activeIndex);
+      if (drag.swapActive) {
+        dragSwapActiveRef.current = false;
+        const activePlayer = muxPlayerRefs.current[activeIndex];
+        if (activePlayer) playActiveVideo(activePlayer);
+        drag.swapActive = false;
+      }
     }
     drag.targetIndex = targetIndex;
     setDragTargetIndex(targetIndex);
     const width = rootRef.current?.clientWidth ?? window.innerWidth;
-    const distanceRatio = Math.abs(deltaX) / Math.max(width, 1);
     const incomingPlayer = muxPlayerRefs.current[targetIndex];
-    if (distanceRatio < DRAG_PLAY_TRIGGER_RATIO) {
-      if (!drag.incomingPaused) {
-        resetDragIncomingVideo(targetIndex);
-        drag.incomingPaused = true;
-      }
-    } else if (!drag.playTriggered && incomingPlayer) {
-      drag.playTriggered = true;
-      drag.incomingPaused = false;
+    const passedPlayTrigger = Math.abs(deltaX) / Math.max(width, 1) >= DRAG_PLAY_TRIGGER_RATIO;
+    if (targetChanged && incomingPlayer && !passedPlayTrigger) {
+      resetDragMedia(targetIndex);
+    }
+    if (passedPlayTrigger && !drag.swapActive && incomingPlayer) {
+      dragSwapActiveRef.current = true;
+      playbackGenerationRef.current += 1;
+      pauseDragMedia(activeIndex);
       playActiveVideo(incomingPlayer);
+      setDragPlayingIndex(targetIndex);
+      drag.swapActive = true;
+    } else if (!passedPlayTrigger && drag.swapActive) {
+      resetDragMedia(targetIndex);
+      dragSwapActiveRef.current = false;
+      playbackGenerationRef.current += 1;
+      const activePlayer = muxPlayerRefs.current[activeIndex];
+      if (activePlayer) playActiveVideo(activePlayer);
+      setDragPlayingIndex(activeIndex);
+      drag.swapActive = false;
     }
     const deltaPercent = (deltaX / Math.max(width, 1)) * 100;
     const outgoingPanel = mediaPanelRefs.current[activeIndex];
     const incomingPanel = mediaPanelRefs.current[targetIndex];
     if (!outgoingPanel || !incomingPanel) return;
 
+    if (targetChanged) {
+      gsap.set(incomingPanel, { xPercent: direction * 100 });
+    }
     gsap.set(outgoingPanel, { xPercent: deltaPercent });
     gsap.set(incomingPanel, { xPercent: deltaPercent + direction * 100, visibility: "visible" });
   };
@@ -924,20 +1052,32 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     dragRef.current = null;
+    setIsDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (drag.lockedAxis !== "horizontal" || drag.targetIndex === null) {
       setDragTargetIndex(null);
+      setDragPlayingIndex(null);
       return;
     }
 
     const distance = event.clientX - drag.startX;
-    if (Math.abs(distance) >= DRAG_THRESHOLD_PX) {
+    if (Math.abs(distance) >= DRAG_THRESHOLD_PX && drag.swapActive) {
+      resetDragMedia(drag.targetIndex);
+      playbackGenerationRef.current += 1;
+      pendingDragRestartRef.current = drag.targetIndex;
+      dragCommitRef.current = true;
       goToSlide(drag.targetIndex, true);
       setDragTargetIndex(null);
       return;
     }
 
-    resetDragIncomingVideo(drag.targetIndex);
+    resetDragMedia(drag.targetIndex);
+    if (drag.swapActive) {
+      dragSwapActiveRef.current = false;
+      const activePlayer = muxPlayerRefs.current[activeIndex];
+      if (activePlayer) playActiveVideo(activePlayer);
+    }
+    setDragPlayingIndex(activeIndex);
     const outgoingPanel = mediaPanelRefs.current[activeIndex];
     const incomingPanel = mediaPanelRefs.current[drag.targetIndex];
     const direction: 1 | -1 = distance < 0 ? 1 : -1;
@@ -955,10 +1095,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       ref={rootRef}
       data-home-hero
       className="hero-section relative isolate flex flex-col overflow-hidden bg-[var(--color-bg-base)] text-white"
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
+      onPointerDownCapture={handlePointerDown}
+      onPointerMoveCapture={handlePointerMove}
+      onPointerUpCapture={handlePointerUp}
+      onPointerCancelCapture={handlePointerUp}
       style={{ height: "100svh", minHeight: 640, touchAction: "pan-y", userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none", msUserSelect: "none" }}
     >
       <div className="absolute inset-0">
@@ -1088,7 +1228,10 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         <div className="mt-4 flex items-center gap-2.5 md:mt-4">
           {resolvedSlides.map((slide, index) => {
             const isActive = index === activeIndex;
-            const buttonSizeClass = isActive ? "h-5 w-5" : "h-2.5 w-2.5";
+            const isDragGestureActive = isDragging || dragTargetIndex !== null || transition !== null;
+            const visualActiveIndex = isDragGestureActive ? dragPlayingIndex ?? activeIndex : activeIndex;
+            const isIndicatorActive = visualActiveIndex === index;
+            const buttonSizeClass = isIndicatorActive ? "h-5 w-5" : "h-2.5 w-2.5";
             return (
               <button
                 key={slide._id ?? `hero-slide-${index}`}
@@ -1098,7 +1241,15 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
                 onClick={() => goToSlide(index, true)}
                 className={`relative m-0 flex ${buttonSizeClass} items-center justify-center rounded-full border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
               >
-                <CarouselDot active={isActive} passed={index < activeIndex} progress={progress} resetKey={`hero-dot-${activeIndex}`} />
+                {isDragGestureActive ? (
+                  isIndicatorActive ? (
+                  <span className="block h-5 w-5 rounded-full border-2 border-white/55" aria-hidden="true" />
+                  ) : (
+                    <span className="block h-[6.8px] w-[6.8px] rounded-full bg-white/35" aria-hidden="true" />
+                  )
+                ) : (
+                  <CarouselDot active={isActive} passed={index < activeIndex} progress={progress} resetKey={`hero-dot-${activeIndex}`} />
+                )}
               </button>
             );
           })}
