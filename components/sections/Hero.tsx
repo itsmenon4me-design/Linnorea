@@ -122,6 +122,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const lifecycleQueuesRef = useRef<Map<number, Promise<void>>>(new Map());
   const preloadStartedRef = useRef<Set<number>>(new Set());
   const preloadInFlightRef = useRef<Set<number>>(new Set());
+  const initialHeroLoadCompleteRef = useRef(false);
   const preloadQueueRef = useRef<Array<{
     index: number;
     operation: (media: HTMLMediaElement) => Promise<void> | void;
@@ -168,7 +169,11 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
       const activeIndex = activeIndexRef.current;
       const activeQueued = preloadQueueRef.current.some((item) => item.index === activeIndex);
       const activeInFlight = preloadInFlightRef.current.has(activeIndex);
-      const maxInFlight = activeQueued || activeInFlight ? 2 : 1;
+      const maxInFlight = !initialHeroLoadCompleteRef.current
+        ? 1
+        : activeQueued || activeInFlight
+          ? 2
+          : 1;
       if (preloadInFlightRef.current.size >= maxInFlight) {
         return;
       }
@@ -189,6 +194,9 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         })
         .finally(() => {
           preloadInFlightRef.current.delete(next.index);
+          if (next.index === 0) {
+            initialHeroLoadCompleteRef.current = true;
+          }
           drainPreloadQueue();
         });
     }
