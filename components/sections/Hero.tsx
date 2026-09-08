@@ -27,6 +27,7 @@ type HeroTransition = {
 const AUTO_ADVANCE_MS = 6000;
 const SLIDE_TRANSITION_MS = 720;
 const VIDEO_PRELOAD_STAGGER_MS = 1800;
+const MAX_HERO_SLIDES = 4;
 const DRAG_THRESHOLD_PX = 96;
 const DRAG_PLAY_TRIGGER_RATIO = 0.5;
 const MEDIA_ERROR_RETRY_DELAY_MS = 900;
@@ -88,7 +89,7 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
   const resolvedSlides = useMemo<HeroSlide[]>(
     () =>
       slides.length > 0
-        ? slides
+        ? slides.slice(0, MAX_HERO_SLIDES)
         : [
             {
               _id: "fallback-hero-slide",
