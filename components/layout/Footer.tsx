@@ -96,14 +96,7 @@ export async function Footer({ currentLocale, dictionary }: FooterProps) {
               className="mx-auto h-10 w-10 object-contain"
             />
 
-            <p
-              id="footer-brand"
-              className="text-[11px] font-medium tracking-[0.35em] text-white/60"
-            >
-              Linnorea
-            </p>
-
-            <p className="mt-5 text-sm leading-6 text-white/75">{brandText}</p>
+            <p id="footer-brand" className="mt-5 text-sm leading-6 text-white/75">{brandText}</p>
 
             <a
               href="https://wa.me/6281919452042"

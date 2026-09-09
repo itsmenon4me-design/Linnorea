@@ -92,9 +92,8 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
       ].join(" ")}
     >
       <div className={headerContentClassName}>
-        <Link href={`/${currentLocale}`} aria-label={dictionary.ui.linnoreaHome} className="inline-flex min-h-11 items-center gap-2.5 text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+        <Link href={`/${currentLocale}`} aria-label={dictionary.ui.linnoreaHome} className="inline-flex min-h-11 items-center text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
           <Image src={logo ? urlFor(logo).width(48).height(48).fit("crop").auto("format").quality(78).url() : "/assets/logo-mark.png"} alt="" width={22} height={22} priority className="block h-[22px] w-[22px] object-contain" />
-          <span className="text-[11px] font-medium tracking-[0.08em]">Linnorea Design Works</span>
         </Link>
 
         <nav className="header-desktop-nav ml-8 hidden items-center gap-7 text-[10px] font-medium uppercase tracking-[0.2em] text-white/80">
