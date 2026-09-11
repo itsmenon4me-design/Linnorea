@@ -2,6 +2,7 @@
 
 import type { MouseEvent, PointerEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
+import { gsap } from "gsap";
 
 type HorizontalDragScrollerProps = {
   children: ReactNode;
@@ -14,6 +15,7 @@ export function HorizontalDragScroller({ children, className = "" }: HorizontalD
   const [isDragging, setIsDragging] = useState(false);
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    gsap.killTweensOf(event.currentTarget);
     pointerRef.current = {
       active: true,
       dragging: false,
@@ -62,7 +64,12 @@ export function HorizontalDragScroller({ children, className = "" }: HorizontalD
       }, null);
 
       if (nearestCard) {
-        scroller.scrollTo({ left: nearestCard.offsetLeft, behavior: "smooth" });
+        gsap.to(scroller, {
+          scrollLeft: nearestCard.offsetLeft,
+          duration: 0.65,
+          ease: "power3.out",
+          overwrite: true,
+        });
       }
     }
   }
@@ -82,10 +89,10 @@ export function HorizontalDragScroller({ children, className = "" }: HorizontalD
         className={`hidden touch-pan-y gap-8 overflow-x-auto overscroll-x-contain snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex ${
           isDragging ? "cursor-grabbing select-none" : "cursor-grab"
         } ${isDragging ? "snap-none" : ""} ${className}`}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={stopDragging}
-        onPointerCancel={stopDragging}
+        onPointerDownCapture={handlePointerDown}
+        onPointerMoveCapture={handlePointerMove}
+        onPointerUpCapture={stopDragging}
+        onPointerCancelCapture={stopDragging}
         onClickCapture={preventClickAfterDrag}
       >
         {children}

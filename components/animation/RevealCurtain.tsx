@@ -58,7 +58,7 @@ export function RevealCurtain({
       <div className="relative z-0 h-full w-full">{children}</div>
       <div
       ref={darkPanelRef}
-      className="absolute inset-0 z-10"
+      className="pointer-events-none absolute inset-0 z-10"
       style={{ backgroundColor: darkPanelColor, clipPath: "inset(0 0% 0 0)" }}
       />
     </div>
