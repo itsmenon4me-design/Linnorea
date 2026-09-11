@@ -11,8 +11,8 @@
   --color-bg-base: #07080a;
   --color-bg-elevated: #17191c;
   --color-accent-progress: #d51f2c;
-  --color-accent-gold: #c8a875;
-  --color-accent-gold-light: #e3c995;
+  --color-accent-gold: #bdff00;
+  --color-accent-gold-light: #bdff00;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
