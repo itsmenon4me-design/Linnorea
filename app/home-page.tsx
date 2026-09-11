@@ -50,6 +50,7 @@ export default async function HomePage() {
     ...featuredProjects,
     ...projects.filter((project) => !project.featured),
   ];
+  const highlightsEyebrow = `${highlightProjects.length} ${dictionary.home.highlightProject}${highlightProjects.length === 1 ? "" : "s"}`;
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
@@ -59,7 +60,7 @@ export default async function HomePage() {
       {/* VisionCarousel and the previous six-tile Collections mosaic remain available for easy rollback. */}
       <ScrollReveal as="section" className="px-5 py-20 md:px-8 md:py-28">
         <div id="collections" data-reveal className="mx-auto max-w-7xl">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/75">{dictionary.home.highlightsEyebrow}</p>
+          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/75">{highlightsEyebrow}</p>
           <div className="mt-5 flex flex-col justify-between gap-6 border-b border-white/15 pb-8 md:flex-row md:items-end">
             <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.home.highlightsTitle}</h2>
             {highlightProjects.length === 0 ? <p className="max-w-xs text-sm leading-6 text-white/55">{dictionary.home.featuredProjectsEmpty}</p> : null}
