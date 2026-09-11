@@ -87,11 +87,11 @@ export default async function HomePage() {
                   </article>
                 );
                 return project.slug?.current ? (
-                  <Link key={project._id} href={`/project/${project.slug.current}`} className="block w-[min(78vw,24rem)] shrink-0 snap-start md:w-[min(42vw,24rem)] lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
+                  <Link key={project._id} href={`/project/${project.slug.current}`} className="block w-full md:w-[min(42vw,24rem)] md:shrink-0 md:snap-start lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
                     {card}
                   </Link>
                 ) : (
-                  <div key={project._id} className="w-[min(78vw,24rem)] shrink-0 snap-start md:w-[min(42vw,24rem)] lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
+                  <div key={project._id} className="w-full md:w-[min(42vw,24rem)] md:shrink-0 md:snap-start lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
                     {card}
                   </div>
                 );

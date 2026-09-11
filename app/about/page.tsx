@@ -52,9 +52,9 @@ export default async function AboutPage() {
       </div>
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div data-reveal className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_1fr] md:gap-8">
+        <div data-reveal className="grid min-w-0 gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.ourKey}</p>
-          <ul className="max-w-3xl space-y-10 text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
+          <ul className="min-w-0 max-w-3xl space-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
             {keyItems.length ? keyItems.map((item, index) => <li key={`${plainText(item.label)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{plainText(item.label)}</span></li>) : <li>{dictionary.about.keyPlaceholder}</li>}
           </ul>
         </div>
@@ -70,28 +70,28 @@ export default async function AboutPage() {
       </ScrollReveal>
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_1fr] md:gap-8">
+        <div className="grid min-w-0 gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.mission}</p>
-          <ul className="max-w-3xl space-y-10 text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
+          <ul className="min-w-0 max-w-3xl space-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
             {missionItems.length ? missionItems.map((item, index) => <li key={`${plainText(item)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{plainText(item)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
           </ul>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_1fr] md:gap-8">
+        <div className="grid min-w-0 gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.process}</p>
-          <div className="space-y-12">
+          <div className="min-w-0 space-y-12">
             {processItems.length ? processItems.map((item, index) => {
               const title = plainText(item.title) || `${dictionary.about.processStage} ${index + 1}`;
               const subtitle = plainText(item.subtitle);
               const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
               return (
-                <article key={`${title}-${index}`} className="grid gap-6 border-b border-white/15 pb-12 md:grid-cols-[auto_1fr] md:gap-6">
+                <article key={`${title}-${index}`} className="grid min-w-0 gap-6 border-b border-white/15 pb-12 md:grid-cols-[auto_minmax(0,1fr)] md:gap-6">
                   <span className="self-start justify-self-start pt-1 text-left text-sm leading-none text-[var(--color-accent-gold)]">0{index + 1}</span>
-                  <div className="grid gap-8 md:grid-cols-[1fr_0.9fr] md:items-start">
-                    <div><h2 className="text-3xl tracking-[-0.04em]">{title}</h2>{subtitle ? <p className="mt-3 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
-                    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}</div>
+                  <div className="grid min-w-0 gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] md:items-start">
+                    <div className="min-w-0 text-left"><h2 className="text-3xl tracking-[-0.04em]">{title}</h2>{subtitle ? <p className="mt-3 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
+                    <div className="relative min-w-0 aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}</div>
                   </div>
                 </article>
               );
