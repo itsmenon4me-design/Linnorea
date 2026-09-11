@@ -41,8 +41,8 @@ function normalizeHeroEyebrows(slides: HeroSlide[]) {
 
 export default async function HomePage() {
   const [projects, heroSlides] = await Promise.all([
-    sanityClient.fetch<ProjectListItem[]>(projectListQuery),
-    sanityClient.fetch<HeroSlide[]>(heroSlidesQuery),
+    sanityClient.fetch<ProjectListItem[]>(projectListQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<HeroSlide[]>(heroSlidesQuery, {}, { next: { revalidate } }),
   ]);
   const normalizedHeroSlides = normalizeHeroEyebrows(heroSlides);
   const featuredProjects = projects.filter((project) => project.featured);
