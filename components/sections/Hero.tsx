@@ -25,7 +25,6 @@ type HeroTransition = {
 
 const AUTO_ADVANCE_MS = 6000;
 const SLIDE_TRANSITION_MS = 720;
-const VIDEO_PRELOAD_STAGGER_MS = 450;
 const MAX_HERO_SLIDES = 3;
 const DRAG_THRESHOLD_PX = 96;
 const DRAG_PLAY_TRIGGER_RATIO = 0.5;
@@ -660,7 +659,14 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
           media.currentTime = 0;
         });
       }
-      player.setAttribute("preload", "auto");
+      const isActive = index === activeIndex;
+      const isNext = index === nextIndex;
+      const preloadMode = isActive || isNext ? "auto" : "none";
+      player.setAttribute("preload", preloadMode);
+      const media = player.mediaController?.media;
+      if (media) {
+        media.preload = preloadMode;
+      }
     });
 
   }, [activeIndex, activePlaybackId, mounted, nextIndex, playbackIds]);
@@ -695,10 +701,16 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         return;
       }
 
-      player.preload = "auto";
-      if (playbackIds[index]) {
+      const shouldLoad = index === activeIndex || index === nextIndex;
+      const preloadMode = shouldLoad ? "auto" : "none";
+      player.preload = preloadMode;
+      const media = player.mediaController?.media;
+      if (media) {
+        media.preload = preloadMode;
+      }
+      if (playbackIds[index] && shouldLoad) {
         player.minPreloadSegments = 1;
-        if (player.readyState === 0 && !preloadStartedRef.current.has(index)) {
+        if (index === nextIndex && player.readyState === 0 && !preloadStartedRef.current.has(index)) {
           preloadStartedRef.current.add(index);
           requestManagedPreload(index, (media) => media.load());
         }
@@ -707,30 +719,19 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
   }, [activeIndex, nextIndex]);
 
   useEffect(() => {
-    const preloadTimers: number[] = [];
-    const startPreload = (index: number) => {
-      const player = muxPlayerRefs.current[index];
-      const media = player?.mediaController?.media;
-      if (!player || !media || preloadStartedRef.current.has(index)) return;
+    if (nextIndex === null) {
+      return;
+    }
 
-      preloadStartedRef.current.add(index);
-      requestManagedPreload(index, async (queuedMedia) => {
-        queuedMedia.preload = "auto";
-        queuedMedia.load();
-        await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
-        await queuedMedia.play();
-        if (index !== activeIndexRef.current) queuedMedia.pause();
-      });
-    };
+    const nextPlayer = muxPlayerRefs.current[nextIndex];
+    const nextMedia = nextPlayer?.mediaController?.media;
+    if (!nextPlayer || !nextMedia || !playbackIds[nextIndex] || preloadStartedRef.current.has(nextIndex)) {
+      return;
+    }
 
-    resolvedSlides.forEach((slide, index) => {
-      if (!playbackIds[index]) return;
-      const timer = window.setTimeout(() => startPreload(index), index === 0 ? 0 : index * VIDEO_PRELOAD_STAGGER_MS);
-      preloadTimers.push(timer);
-    });
-
-    return () => preloadTimers.forEach((timer) => window.clearTimeout(timer));
-  }, [playbackIds, resolvedSlides]);
+    preloadStartedRef.current.add(nextIndex);
+    requestManagedPreload(nextIndex, (media) => media.load());
+  }, [nextIndex, playbackIds]);
 
   const goToSlide = (index: number, isManualNavigation = false) => {
     const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
@@ -1175,16 +1176,21 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                     ref={(player) => {
                       muxPlayerRefs.current[index] = player;
                       if (player) {
-                        player.preload = "auto";
+                        const preloadMode = index === activeIndex || index === nextIndex ? "auto" : "none";
+                        player.preload = preloadMode;
+                        const media = player.mediaController?.media;
+                        if (media) {
+                          media.preload = preloadMode;
+                        }
                         player.minPreloadSegments = 1;
                       }
                     }}
                     playbackId={slidePlaybackId}
-                    autoPlay={isActive || index === nextIndex || isTransitionIncoming}
+                    autoPlay={isActive || isTransitionIncoming}
                     loop={shouldLoopDuringDrag}
                     muted
                     playsInline
-                    preload="auto"
+                    preload={isActive || index === nextIndex || isTransitionIncoming ? "auto" : "none"}
                     minPreloadSegments={slidePlaybackId ? 1 : undefined}
                     poster={slidePosterUrl ?? undefined}
                     theme="microvideo"
