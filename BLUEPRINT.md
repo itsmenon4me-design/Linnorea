@@ -21,7 +21,7 @@ linnorea/
 │       └── product/
 │           └── page.tsx
 ├── components/
-│   ├── layout/                       # Header, Footer, LangSwitcher
+│   ├── layout/                       # Header, Footer
 │   ├── sections/                     # Hero, ProjectShowcase, ServiceSummary, dst
 │   ├── animation/                    # LenisProvider, ScrollRevealWrapper, ParallaxImage
 │   └── ui/                           # Button, Tag, GridItem, dst (Tailwind-based)
@@ -41,7 +41,7 @@ linnorea/
 │   │   ├── service.ts
 │   │   ├── product.ts
 │   │   ├── siteSettings.ts
-│   │   └── localeString.ts           # object type reusable untuk field multi-bahasa
+│   │   └── dictionaries/en.json      # English UI copy
 │   └── sanity.config.ts
 ├── public/
 │   └── assets/                       # aset statis Linnorea (logo, favicon, dll)
@@ -53,41 +53,29 @@ Catatan: Sanity Studio boleh di-deploy sebagai project terpisah (lebih umum & le
 
 ## 2. Sanity Schema (Content Model)
 
-### 2.1 Tipe reusable: `localeString` / `localeText` / `localeBlock`
-Setiap field yang butuh terjemahan memakai object dengan key per-locale:
+### 2.1 Field konten tunggal
+Situs memakai satu bahasa publik dan setiap field copy di Sanity adalah input tunggal:
 
-```ts
-// localeString.ts
-export default {
-  name: 'localeString',
-  type: 'object',
-  fields: [
-    { name: 'id', type: 'string', title: 'Indonesian' },
-    { name: 'en', type: 'string', title: 'English' },
-    { name: 'ja', type: 'string', title: 'Japanese' },
-    { name: 'fr', type: 'string', title: 'French' },
-    { name: 'de', type: 'string', title: 'German' },
-    { name: 'it', type: 'string', title: 'Italian' },
-  ],
-}
-```
-`localeText` dan `localeBlock` mengikuti pola sama tapi dengan `type: 'text'` / `type: 'array' of block` per field.
+- Copy pendek memakai `string`.
+- Copy panjang memakai `text`.
+- Narasi rich text memakai `array` berisi `block`.
+- Tidak ada object bahasa atau field locale reusable.
 
 ### 2.2 Schema: `project`
 | Field | Tipe | Catatan |
 |---|---|---|
-| title | localeString | judul proyek |
+| title | string | judul proyek |
 | slug | slug | dari title (id atau en) |
 | coverImage | image | untuk listing & hero detail |
 | gallery | array of image | galeri proyek |
 | heroVideo | file (opsional) | jika ada video showcase |
 | category | reference / string | mis. residential, commercial, dsb |
-| styleTag | localeString | mis. "Modern Tropical", "Compact Tropical", "American Classic" — ditampilkan di card listing |
-| location | localeString | opsional |
+| styleTag | string | mis. "Modern Tropical", "Compact Tropical", "American Classic" — ditampilkan di card listing |
+| location | string | opsional |
 | year | string | opsional |
 | area | string | opsional, mis. "120 m²" |
-| description | localeBlock | deskripsi panjang, untuk narasi concept/design story |
-| scopeOfWork | localeString | opsional, mis. "Full interior design & build" |
+| description | array of block | deskripsi panjang, untuk narasi concept/design story |
+| scopeOfWork | string | opsional, mis. "Full interior design & build" |
 | featured | boolean | untuk showcase di Home |
 | order | number | urutan tampil di listing — juga dipakai untuk menentukan next/prev project di halaman detail |
 
@@ -96,32 +84,32 @@ export default {
 ### 2.3 Schema: `service`
 | Field | Tipe |
 |---|---|
-| title | localeString |
+| title | string |
 | slug | slug |
 | icon/image | image |
-| description | localeText |
+| description | text |
 | order | number |
 
 ### 2.4 Schema: `product`
 | Field | Tipe |
 |---|---|
-| name | localeString |
+| name | string |
 | slug | slug |
 | images | array of image |
-| description | localeText |
+| description | text |
 | order | number |
 
 ### 2.5 Schema: `siteSettings` (singleton)
 | Field | Tipe |
 |---|---|
 | logo | image |
-| brandStatement | localeString |
+| brandStatement | string |
 | whatsappNumber | string | nomor WhatsApp untuk CTA konsultasi (FR6, FR11, FR18) |
-| whatsappCtaText | localeString | teks default CTA, mis. "Have a Space in Mind?" |
+| whatsappCtaText | string | teks default CTA, mis. "Have a Space in Mind?" |
 | socialLinks | array | Instagram, Threads, LinkedIn, Pinterest (FR7) |
-| seoDefaults | object (title/description per locale) |
+| seoDefaults | object (title/description) |
 
-## 3. Routing & i18n
+## 3. Routing
 
 - Base path: `/{locale}/...`, locale ∈ `{id, en, ja, fr, de, it}`, default `id`.
 - Middleware Next.js mendeteksi locale dari URL, fallback ke `id` jika tidak dikenali.
@@ -154,7 +142,7 @@ export default {
 
 ### 4.4 Project — Detail
 1. **Hero** — cover image/video proyek, judul, lokasi/tahun/style tag.
-2. **Deskripsi** — narasi concept/design story (localeBlock).
+2. **Deskripsi** — narasi concept/design story (array of block).
 3. **Galeri** — full-bleed gallery scroll, tiap gambar reveal saat masuk viewport.
 4. **Spesifikasi** — lokasi, tahun, luas, scope of work (jika ada), ditampilkan sebagai list ringkas.
 5. **CTA konsultasi** — tautan WhatsApp, konsisten dengan CTA pattern global (FR18).
@@ -192,12 +180,12 @@ export default {
 1. Setup Next.js + Tailwind + struktur folder dasar (tanpa konten dulu, pakai placeholder).
 2. Setup Sanity project + schema (project, service, product, siteSettings) + deploy Studio.
 3. Koneksi Sanity ↔ Next.js (client, queries, image builder) dengan data dummy.
-4. Bangun layout dasar (Header, Footer, LangSwitcher) + routing i18n.
+4. Bangun layout dasar (Header, Footer) + routing tanpa prefix bahasa.
 5. Bangun Home dengan konten dummy, pasang Lenis + GSAP dasar.
 6. Bangun Project (listing + detail) — ini halaman paling kompleks, jadi acuan pola untuk halaman lain.
 7. Bangun About, Service, Product.
 8. Polish animasi lintas halaman, uji `prefers-reduced-motion` & mobile.
-9. Isi terjemahan konten awal (minimal ID + EN dulu, sisanya menyusul).
+9. Isi konten editorial bahasa Inggris melalui single-input fields.
 10. QA performa (Core Web Vitals) & aksesibilitas sebelum go-live.
 
 ## 8. Hal yang Perlu Dikonfirmasi Sebelum/Selama Eksekusi

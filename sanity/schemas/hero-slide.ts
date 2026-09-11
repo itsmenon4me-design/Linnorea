@@ -8,19 +8,19 @@ export const heroSlide = defineType({
     defineField({
       name: "eyebrow",
       title: "Eyebrow label",
-      type: "localeString",
+      type: "string",
       description: "Optional small label shown above the headline.",
     }),
     defineField({
       name: "headline",
       title: "Headline",
-      type: "localeString",
+      type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "subheadline",
       title: "Subheadline",
-      type: "localeText",
+      type: "text",
       description: "Optional supporting copy shown below the headline.",
     }),
     defineField({
@@ -46,7 +46,7 @@ export const heroSlide = defineType({
   ],
   preview: {
     select: {
-      title: "headline.id",
+      title: "headline",
       media: "image",
     },
   },

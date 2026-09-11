@@ -5,19 +5,17 @@ import { useState } from "react";
 import { CarouselDot } from "@/components/ui/CarouselDot";
 import { ProjectCard } from "@/components/sections/ProjectCard";
 import { urlFor } from "@/lib/sanity/image";
-import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Project, SanityImage } from "@/lib/sanity/types";
 
 type ProjectCarouselProps = {
   projects: Project[];
-  locale: Locale;
   dictionary: Dictionary;
   previousLabel: string;
   nextLabel: string;
 };
 
-export function ProjectCarousel({ projects, locale, dictionary, previousLabel, nextLabel }: ProjectCarouselProps) {
+export function ProjectCarousel({ projects, dictionary, previousLabel, nextLabel }: ProjectCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   if (projects.length === 0) return null;
@@ -29,7 +27,7 @@ export function ProjectCarousel({ projects, locale, dictionary, previousLabel, n
   return (
     <div className="relative">
       <div className="overflow-hidden">
-        <ProjectCard project={projects[activeIndex]} locale={locale} dictionary={dictionary} />
+        <ProjectCard project={projects[activeIndex]} dictionary={dictionary} />
       </div>
       {projects.length > 1 ? (
         <CarouselControls

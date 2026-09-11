@@ -1,13 +1,8 @@
  "use client";
 
-import { usePathname } from "next/navigation";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 
 export default function ProjectLoading() {
-  const locale = usePathname().split("/")[1];
-  const safeLocale = locales.includes(locale as Locale) ? locale as Locale : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-24 pt-36 text-white md:px-8 md:pt-48">
       <p className="text-[10px] uppercase tracking-[0.38em] text-white/55">{dictionary.ui.loadingProject}</p>

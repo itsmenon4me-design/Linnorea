@@ -8,7 +8,7 @@ export const service = defineType({
     defineField({
       name: "title",
       title: "Service title",
-      type: "localeString",
+      type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -16,7 +16,7 @@ export const service = defineType({
       title: "Slug",
       type: "slug",
       options: {
-        source: "title.id",
+        source: "title",
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
@@ -31,7 +31,7 @@ export const service = defineType({
     defineField({
       name: "description",
       title: "Description",
-      type: "localeText",
+      type: "text",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -42,7 +42,7 @@ export const service = defineType({
   ],
   preview: {
     select: {
-      title: "title.id",
+      title: "title",
       media: "image",
     },
   },

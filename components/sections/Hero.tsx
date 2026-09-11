@@ -10,12 +10,10 @@ import { CarouselDot } from "@/components/ui/CarouselDot";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { urlFor } from "@/lib/sanity/image";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
-import { localizedValue, type HeroSlide } from "@/lib/sanity/types";
-import type { Locale } from "@/lib/i18n/config";
+import { plainText, type HeroSlide } from "@/lib/sanity/types";
 
 type HeroProps = {
   dictionary: Dictionary;
-  locale: Locale;
   slides?: HeroSlide[];
 };
 
@@ -65,7 +63,7 @@ const waitForMediaReady = (media: HTMLMediaElement, timeoutMs: number) => {
   });
 };
 
-export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
+export function Hero({ dictionary, slides = [] }: HeroProps) {
   const rootRef = useRef<HTMLElement | null>(null);
   const muxPlayerRefs = useRef<Array<MuxPlayerElement | null>>([]);
   const mediaPanelRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -101,17 +99,17 @@ export function Hero({ dictionary, locale, slides = [] }: HeroProps) {
         : [
             {
               _id: "fallback-hero-slide",
-              eyebrow: { [locale]: dictionary.home.eyebrow },
-              headline: { [locale]: dictionary.home.headline },
-              subheadline: { [locale]: dictionary.home.subheadline },
+              eyebrow: dictionary.home.eyebrow,
+              headline: dictionary.home.headline,
+              subheadline: dictionary.home.subheadline,
             },
           ],
-    [dictionary.home.eyebrow, dictionary.home.headline, dictionary.home.subheadline, locale, slides],
+    [dictionary.home.eyebrow, dictionary.home.headline, dictionary.home.subheadline, slides],
   );
   const activeSlide = resolvedSlides[activeIndex] ?? resolvedSlides[0];
-  const eyebrow = activeSlide?.eyebrow ? localizedValue(activeSlide.eyebrow, locale) : dictionary.home.eyebrow;
-  const headline = activeSlide?.headline ? localizedValue(activeSlide.headline, locale) : dictionary.home.headline;
-  const subheadline = activeSlide?.subheadline ? localizedValue(activeSlide.subheadline, locale) : dictionary.home.subheadline;
+  const eyebrow = plainText(activeSlide?.eyebrow) || dictionary.home.eyebrow;
+  const headline = plainText(activeSlide?.headline) || dictionary.home.headline;
+  const subheadline = plainText(activeSlide?.subheadline) || dictionary.home.subheadline;
   const playbackIds = useMemo(
     () =>
       resolvedSlides.map((slide) => {

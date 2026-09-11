@@ -2,26 +2,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { urlFor } from "@/lib/sanity/image";
-import type { Locale } from "@/lib/i18n/config";
-import { localizedValue, type Project } from "@/lib/sanity/types";
+import { plainText, type Project } from "@/lib/sanity/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 type ProjectCardProps = {
   project: Project;
-  locale: Locale;
   dictionary: Dictionary;
 };
 
-export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
-  const title = localizedValue(project.title, locale) || dictionary.home.untitledProject;
-  const style = localizedValue(project.styleTag, locale);
+export function ProjectCard({ project, dictionary }: ProjectCardProps) {
+  const title = plainText(project.title) || dictionary.home.untitledProject;
+  const style = plainText(project.styleTag);
   const slug = project.slug?.current;
   const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
 
   if (!slug) return null;
 
   return (
-    <Link href={`/${locale}/project/${slug}`} className="group block rounded-[1.25rem] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent-gold)]">
+    <Link href={`/project/${slug}`} className="group block rounded-[1.25rem] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent-gold)]">
       <article>
         <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] bg-[var(--color-bg-elevated)]">
           {imageUrl ? (

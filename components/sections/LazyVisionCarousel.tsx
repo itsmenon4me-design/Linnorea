@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import type { Locale } from "@/lib/i18n/config";
 import type { VisionSlide } from "@/lib/sanity/types";
 
 const DeferredVisionCarousel = dynamic(
@@ -13,7 +12,6 @@ const DeferredVisionCarousel = dynamic(
 
 type LazyVisionCarouselProps = {
   slides: VisionSlide[];
-  locale: Locale;
   readMoreLabel: string;
   previousLabel: string;
   nextLabel: string;

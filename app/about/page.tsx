@@ -5,39 +5,27 @@ import { Header } from "@/components/layout/Header";
 import { StudioVisual } from "@/components/sections/StudioVisual";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
-import { localizedValue, type SiteSettings } from "@/lib/sanity/types";
+import { plainText, type SiteSettings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
-type AboutProps = { params: Promise<{ locale: string }> };
-
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSiteSeo();
+  return { title: { absolute: `${dictionary.nav.about} | ${seo.title}` }, description: seo.description };
 }
 
-export async function generateMetadata({ params }: AboutProps): Promise<Metadata> {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const seo = await getSiteSeo(safeLocale);
-  return { title: { absolute: `${getDictionary(safeLocale).nav.about} | ${seo.title}` }, description: seo.description };
-}
-
-export default async function AboutPage({ params }: AboutProps) {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
+export default async function AboutPage() {
   const settings = await sanityClient.fetch<SiteSettings | null>(
     siteSettingsQuery,
     {},
     { next: { revalidate } },
   );
-  const established = localizedValue(settings?.aboutEstablished, safeLocale) || dictionary.about.establishedPlaceholder;
-  const description = localizedValue(settings?.aboutDescription, safeLocale) || dictionary.about.descriptionPlaceholder;
+  const established = plainText(settings?.aboutEstablished) || dictionary.about.establishedPlaceholder;
+  const description = plainText(settings?.aboutDescription) || dictionary.about.descriptionPlaceholder;
   const keyItems = settings?.aboutKey ?? [];
   const missionItems = settings?.aboutMission ?? [];
   const processItems = settings?.aboutProcess ?? [];
@@ -46,7 +34,7 @@ export default async function AboutPage({ params }: AboutProps) {
 
   return (
     <main className="bg-[var(--color-bg-base)] text-white">
-      <Header currentLocale={safeLocale} dictionary={dictionary} />
+      <Header dictionary={dictionary} />
       <section className="relative flex min-h-[72vh] items-end overflow-hidden bg-[var(--color-bg-elevated)]">
         <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} videoLabel={dictionary.ui.studioVideo} />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/20 to-transparent" />
@@ -67,7 +55,7 @@ export default async function AboutPage({ params }: AboutProps) {
         <div data-reveal className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_1fr] md:gap-8">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.ourKey}</p>
           <ul className="max-w-3xl space-y-10 text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
-            {keyItems.length ? keyItems.map((item, index) => <li key={`${localizedValue(item.label, safeLocale)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{localizedValue(item.label, safeLocale)}</span></li>) : <li>{dictionary.about.keyPlaceholder}</li>}
+            {keyItems.length ? keyItems.map((item, index) => <li key={`${plainText(item.label)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{plainText(item.label)}</span></li>) : <li>{dictionary.about.keyPlaceholder}</li>}
           </ul>
         </div>
       </ScrollReveal>
@@ -76,7 +64,7 @@ export default async function AboutPage({ params }: AboutProps) {
        <div className="border-t border-white/15 pt-6">
          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.vision}</p>
          <div data-reveal className="mt-10 max-w-3xl text-xl leading-8 tracking-[-0.02em] text-white/90 md:text-3xl md:leading-10">
-           <p>{localizedValue(settings?.aboutVision, safeLocale) || dictionary.about.visionPlaceholder}</p>
+           <p>{plainText(settings?.aboutVision) || dictionary.about.visionPlaceholder}</p>
          </div>
        </div>
       </ScrollReveal>
@@ -85,7 +73,7 @@ export default async function AboutPage({ params }: AboutProps) {
         <div className="grid gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_1fr] md:gap-8">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.mission}</p>
           <ul className="max-w-3xl space-y-10 text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
-            {missionItems.length ? missionItems.map((item, index) => <li key={`${localizedValue(item, safeLocale)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{localizedValue(item, safeLocale)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
+            {missionItems.length ? missionItems.map((item, index) => <li key={`${plainText(item)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{plainText(item)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
           </ul>
         </div>
       </section>
@@ -95,14 +83,14 @@ export default async function AboutPage({ params }: AboutProps) {
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.process}</p>
           <div className="space-y-12">
             {processItems.length ? processItems.map((item, index) => {
-              const title = localizedValue(item.title, safeLocale) || `${dictionary.about.processStage} ${index + 1}`;
-              const subtitle = localizedValue(item.subtitle, safeLocale);
+              const title = plainText(item.title) || `${dictionary.about.processStage} ${index + 1}`;
+              const subtitle = plainText(item.subtitle);
               const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
               return (
                 <article key={`${title}-${index}`} className="grid gap-6 border-b border-white/15 pb-12 md:grid-cols-[auto_1fr] md:gap-6">
                   <span className="self-start justify-self-start pt-1 text-left text-sm leading-none text-[var(--color-accent-gold)]">0{index + 1}</span>
                   <div className="grid gap-8 md:grid-cols-[1fr_0.9fr] md:items-start">
-                    <div><h2 className="text-3xl tracking-[-0.04em]">{title}</h2>{subtitle ? <p className="mt-3 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{localizedValue(item.description, safeLocale) || dictionary.about.processDescriptionPlaceholder}</p></div>
+                    <div><h2 className="text-3xl tracking-[-0.04em]">{title}</h2>{subtitle ? <p className="mt-3 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
                     <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}</div>
                   </div>
                 </article>
@@ -116,8 +104,8 @@ export default async function AboutPage({ params }: AboutProps) {
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
         <h2 className="max-w-xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.ui.seeThinking}</h2>
         <div className="flex flex-wrap gap-3">
-          <Link href={`/${safeLocale}/project`} className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[var(--color-bg-base)]">{dictionary.ui.viewProjects}</Link>
-          {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{localizedValue(settings?.whatsappCtaText, safeLocale) || dictionary.home.cta}</a> : null}
+          <Link href="/project" className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[var(--color-bg-base)]">{dictionary.ui.viewProjects}</Link>
+          {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{plainText(settings?.whatsappCtaText) || dictionary.home.cta}</a> : null}
         </div>
       </section>
     </main>

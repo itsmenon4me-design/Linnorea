@@ -8,7 +8,7 @@ export const product = defineType({
     defineField({
       name: "name",
       title: "Product name",
-      type: "localeString",
+      type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -16,7 +16,7 @@ export const product = defineType({
       title: "Slug",
       type: "slug",
       options: {
-        source: "name.id",
+        source: "name",
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
@@ -31,7 +31,7 @@ export const product = defineType({
     defineField({
       name: "description",
       title: "Description",
-      type: "localeText",
+      type: "text",
     }),
     defineField({
       name: "order",
@@ -41,7 +41,7 @@ export const product = defineType({
   ],
   preview: {
     select: {
-      title: "name.id",
+      title: "name",
       media: "images.0",
     },
   },

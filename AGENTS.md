@@ -16,7 +16,7 @@ This is a from-scratch build. It is not a WordPress theme or plugin — it repla
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Framework | **Next.js** (App Router) | Routing, rendering, i18n routing |
+| Framework | **Next.js** (App Router) | Routing and rendering |
 | CMS | **Sanity** (headless) | Content model, media, admin dashboard (Sanity Studio) |
 | Scroll animation | **GSAP + ScrollTrigger** | Reveal, parallax, pinned sections, transitions |
 | Smooth scroll | **Lenis** | Inertia/momentum scrolling feel |
@@ -26,18 +26,9 @@ This is a from-scratch build. It is not a WordPress theme or plugin — it repla
 
 Do not introduce a different CMS, animation library, or CSS framework unless the project owner explicitly approves it.
 
-## 3. Languages (i18n)
+## 3. Language
 
-Six locales, all first-class (not machine-translated fallbacks unless explicitly marked as draft):
-
-- `id` — Indonesian (default/primary)
-- `en` — English
-- `ja` — Japanese
-- `fr` — French
-- `de` — German
-- `it` — Italian
-
-Routing convention: locale-prefixed paths, e.g. `/id/`, `/en/`, `/ja/`, `/fr/`, `/de/`, `/it/`. Use Next.js built-in i18n routing (App Router `[locale]` segment). Every page and every Sanity document type that holds visible copy must support all six locales via Sanity's field-level or document-level internationalization plugin.
+The public site uses English copy and unprefixed routes such as `/about` and `/project`. Legacy locale-prefixed URLs permanently redirect to their unprefixed equivalents. Sanity content fields are single plain inputs so editors can enter the copy appropriate for the site.
 
 ## 4. People & Roles
 
@@ -57,7 +48,7 @@ Routing convention: locale-prefixed paths, e.g. `/id/`, `/en/`, `/ja/`, `/fr/`, 
 
 ## 6. Repository Conventions
 
-- `/app` — Next.js App Router pages, organized under `/app/[locale]/...`
+- `/app` — Next.js App Router pages, organized under unprefixed route folders
 - `/components` — reusable UI components (Hero, Nav, ProjectCard, ScrollSection, etc.)
 - `/lib` — Sanity client, GSAP/Lenis setup helpers, i18n helpers
 - `/sanity` — Sanity Studio config, schema definitions, deployed as its own app (see §7)

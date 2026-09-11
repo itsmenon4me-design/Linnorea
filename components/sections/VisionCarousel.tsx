@@ -8,8 +8,7 @@ import { ArrowAction } from "@/components/ui/ArrowAction";
 import { CarouselDot } from "@/components/ui/CarouselDot";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { urlFor } from "@/lib/sanity/image";
-import { localizedValue, type VisionSlide } from "@/lib/sanity/types";
-import type { Locale } from "@/lib/i18n/config";
+import { plainText, type VisionSlide } from "@/lib/sanity/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 const AUTO_ADVANCE_MS = 6000;
@@ -89,19 +88,18 @@ const PanelSlide = forwardRef<HTMLDivElement, PanelSlideProps>(function PanelSli
 
 type VisionCarouselProps = {
   slides: VisionSlide[];
-  locale: Locale;
   readMoreLabel: string;
   previousLabel: string;
   nextLabel: string;
   dictionary: Dictionary;
 };
 
-export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previousLabel, nextLabel, dictionary }: VisionCarouselProps) {
+export function VisionCarousel({ slides: cmsSlides, readMoreLabel, previousLabel, nextLabel, dictionary }: VisionCarouselProps) {
   const slides: SlideData[] = cmsSlides.length > 0
     ? cmsSlides.map((slide) => ({
-        label: localizedValue(slide.label, locale) || dictionary.ui.visionSlide,
-        headline: localizedValue(slide.headline, locale) || dictionary.ui.placeholderHeadline,
-        description: localizedValue(slide.description, locale) || dictionary.ui.placeholderDescription,
+        label: plainText(slide.label) || dictionary.ui.visionSlide,
+        headline: plainText(slide.headline) || dictionary.ui.placeholderHeadline,
+        description: plainText(slide.description) || dictionary.ui.placeholderDescription,
         image: slide.image,
       }))
     : fallbackSlides;

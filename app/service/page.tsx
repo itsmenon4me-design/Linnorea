@@ -2,41 +2,32 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { serviceListQuery } from "@/lib/sanity/queries";
-import { localizedValue, type Service } from "@/lib/sanity/types";
+import { plainText, type Service } from "@/lib/sanity/types";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 
 export const revalidate = 60;
-type ServiceProps = { params: Promise<{ locale: string }> };
-
-export function generateStaticParams() { return locales.map((locale) => ({ locale })); }
-export async function generateMetadata({ params }: ServiceProps): Promise<Metadata> {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const seo = await getSiteSeo(safeLocale);
-  return { title: { absolute: `${getDictionary(safeLocale).nav.service} | ${seo.title}` }, description: seo.description };
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSiteSeo();
+  return { title: { absolute: `${dictionary.nav.service} | ${seo.title}` }, description: seo.description };
 }
 
-export default async function ServicePage({ params }: ServiceProps) {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
+export default async function ServicePage() {
   const services = await sanityClient.fetch<Service[]>(serviceListQuery, {}, { next: { revalidate } });
   return (
     <main className="bg-[var(--color-bg-base)] text-white">
-      <Header currentLocale={safeLocale} dictionary={dictionary} />
+      <Header dictionary={dictionary} />
       <header className="mx-auto max-w-7xl px-5 pb-20 pt-36 md:px-8 md:pb-28 md:pt-48">
         <p className="normal-case border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/75">Linnorea design works</p>
         <h1 className="mt-6 text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{dictionary.nav.service}</h1>
       </header>
       {services.length ? services.map((service, index) => {
-        const title = localizedValue(service.title, safeLocale) || dictionary.ui.untitledService;
-        const description = localizedValue(service.description, safeLocale) || dictionary.ui.placeholderServiceDescription;
+        const title = plainText(service.title) || dictionary.ui.untitledService;
+        const description = plainText(service.description) || dictionary.ui.placeholderServiceDescription;
         const imageUrl = service.image ? urlFor(service.image).width(1800).height(1200).fit("crop").auto("format").quality(78).url() : null;
         return (
           <ScrollReveal key={service._id} as="section" className="border-t border-white/15">

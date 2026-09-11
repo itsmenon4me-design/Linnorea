@@ -1,3 +1,3 @@
-export default function RootPage() {
-  return null;
-}
+import HomePage from "./home-page";
+
+export default HomePage;

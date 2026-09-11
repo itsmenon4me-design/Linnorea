@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
+import { Footer } from "@/components/layout/Footer";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import "./globals.css";
 
@@ -20,19 +20,10 @@ const geistMono = Geist_Mono({
 
 type RootLayoutProps = Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale?: string }>;
 }>;
 
-async function getSafeLocale(locale?: string) {
-  const requestHeaders = await headers();
-  const requestedLocale = locale ?? requestHeaders.get("x-locale") ?? undefined;
-  return locales.includes(requestedLocale as Locale) ? (requestedLocale as Locale) : defaultLocale;
-}
-
-export async function generateMetadata({ params }: Omit<RootLayoutProps, "children">): Promise<Metadata> {
-  const { locale } = await params;
-  const safeLocale = await getSafeLocale(locale);
-  const seo = await getSiteSeo(safeLocale);
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSiteSeo();
 
   return {
     title: {
@@ -43,12 +34,9 @@ export async function generateMetadata({ params }: Omit<RootLayoutProps, "childr
   };
 }
 
-export default async function RootLayout({ children, params }: RootLayoutProps) {
-  const { locale } = await params;
-  const safeLocale = await getSafeLocale(locale);
-
+export default async function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang={safeLocale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <head>
         <link rel="preconnect" href="https://stream.mux.com" />
         <link rel="preconnect" href="https://image.mux.com" />
@@ -57,7 +45,10 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
       </head>
       <body className="min-h-full bg-[var(--color-bg-base)] text-white">
         <SplashScreen />
-        {children}
+        <div className="min-h-screen bg-[var(--color-bg-base)] text-white">
+          <div className="min-h-screen">{children}</div>
+          <Footer dictionary={dictionary} />
+        </div>
       </body>
     </html>
   );

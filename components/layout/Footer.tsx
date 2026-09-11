@@ -1,12 +1,10 @@
 import Image from "next/image";
 import { sanityClient } from "@/lib/sanity/client";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
-import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { localizedValue, type SiteSettings } from "@/lib/sanity/types";
+import { plainText, type SiteSettings } from "@/lib/sanity/types";
 
 type FooterProps = {
-  currentLocale: Locale;
   dictionary: Dictionary;
 };
 
@@ -42,11 +40,11 @@ function SocialIcon({ platform, className }: { platform?: string; className?: st
   }
 }
 
-export async function Footer({ currentLocale, dictionary }: FooterProps) {
+export async function Footer({ dictionary }: FooterProps) {
   const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
-  const brandText = localizedValue(settings?.brandStatement, currentLocale) || "Linnorea Design Works";
-  const officeAddress = localizedValue(settings?.officeAddress, currentLocale) || "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
-  const whatsappText = localizedValue(settings?.whatsappCtaText, currentLocale) || dictionary.home.cta;
+  const brandText = plainText(settings?.brandStatement) || "Linnorea Design Works";
+  const officeAddress = plainText(settings?.officeAddress) || "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
+  const whatsappText = plainText(settings?.whatsappCtaText) || dictionary.home.cta;
   const socialOrder = ["WhatsApp", "Instagram", "Threads", "LinkedIn", "Pinterest"];
   const socialLinks = socialOrder.flatMap((platform) => {
     const configuredLink = settings?.socialLinks?.find((link) => link.platform === platform && link.url);

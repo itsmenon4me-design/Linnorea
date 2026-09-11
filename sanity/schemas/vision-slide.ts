@@ -8,20 +8,20 @@ export const visionSlide = defineType({
     defineField({
       name: "label",
       title: "Label",
-      type: "localeString",
+      type: "string",
       description: 'Editorial label, for example "VISION / 01" or "GOALS / 02".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "headline",
       title: "Headline",
-      type: "localeString",
+      type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "description",
       title: "Description",
-      type: "localeText",
+      type: "text",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -40,8 +40,8 @@ export const visionSlide = defineType({
   ],
   preview: {
     select: {
-      title: "headline.id",
-      subtitle: "label.id",
+      title: "headline",
+      subtitle: "label",
       media: "image",
     },
   },

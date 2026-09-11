@@ -1,13 +1,8 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 
 export default function ProjectError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  const { locale } = useParams<{ locale: string }>();
-  const safeLocale = locales.includes(locale as Locale) ? locale as Locale : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--color-bg-base)] px-5 text-white">
       <div className="max-w-md">

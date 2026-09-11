@@ -7,17 +7,16 @@ import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { ProductDetailImage } from "@/components/sections/ProductDetailImage";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { ArrowAction } from "@/components/ui/ArrowAction";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
-import { localizedValue, plainText, type Product, type SiteSettings } from "@/lib/sanity/types";
+import { plainText, type Product, type SiteSettings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
 type ProductDetail = Product & { slug?: { current?: string } };
-type ProductDetailProps = { params: Promise<{ locale: string; slug: string }> };
+type ProductDetailProps = { params: Promise<{ slug: string }> };
 
 const productListQuery = `*[_type == "product"] | order(order asc, _createdAt asc) {
   _id, name, slug, images, description, order
@@ -31,25 +30,16 @@ const siteSettingsQuery = `*[_type == "siteSettings"][0] {
   whatsappNumber
 }`;
 
-export async function generateStaticParams() {
-  const products = await sanityClient.fetch<ProductDetail[]>(productListQuery, {}, { next: { revalidate } });
-  return locales.flatMap((locale) => products.flatMap((product) => product.slug?.current ? [{ locale, slug: product.slug.current }] : []));
-}
-
 export async function generateMetadata({ params }: ProductDetailProps): Promise<Metadata> {
-  const { locale, slug } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
-  const seo = await getSiteSeo(safeLocale);
+  const { slug } = await params;
+  const seo = await getSiteSeo();
   const product = await sanityClient.fetch<ProductDetail | null>(productBySlugQuery, { slug }, { next: { revalidate } });
-  const title = product ? localizedValue(product.name, safeLocale) || dictionary.ui.untitledProduct : dictionary.nav.product;
+  const title = plainText(product?.name) || dictionary.nav.product;
   return { title: { absolute: `${title} | ${seo.title}` }, description: seo.description };
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailProps) {
-  const { locale, slug } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
+  const { slug } = await params;
   const [product, settings] = await Promise.all([
     sanityClient.fetch<ProductDetail | null>(productBySlugQuery, { slug }, { next: { revalidate } }),
     sanityClient.fetch<Pick<SiteSettings, "whatsappNumber"> | null>(siteSettingsQuery, {}, { next: { revalidate } }),
@@ -57,8 +47,8 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
 
   if (!product) notFound();
 
-  const name = localizedValue(product.name, safeLocale) || dictionary.ui.untitledProduct;
-  const description = plainText(localizedValue(product.description, safeLocale)) || dictionary.ui.placeholderProductDescription;
+  const name = plainText(product.name) || dictionary.ui.untitledProduct;
+  const description = plainText(product.description) || dictionary.ui.placeholderProductDescription;
   const imageUrls = (product.images ?? [])
     .filter((image) => Boolean(image.asset?._ref))
     .map((image) => urlFor(image).width(2200).height(1650).fit("crop").auto("format").quality(78).url());
@@ -69,9 +59,9 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
 
   return (
     <main className="bg-[var(--color-bg-base)] text-white">
-      <Header currentLocale={safeLocale} dictionary={dictionary} />
+      <Header dictionary={dictionary} />
       <section className="mx-auto max-w-7xl px-5 pb-16 pt-36 md:px-8 md:pb-20 md:pt-48">
-        <Link href={`/${safeLocale}/product`} className="inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]">
+        <Link href="/product" className="inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]">
           <ArrowAction label={dictionary.nav.product} direction="left" className="text-[10px] uppercase tracking-[0.25em]" />
         </Link>
         <p className="mt-12 normal-case border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/75">Linnorea living</p>

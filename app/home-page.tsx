@@ -6,32 +6,24 @@ import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { RevealCurtain } from "@/components/animation/RevealCurtain";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { ArrowAction } from "@/components/ui/ArrowAction";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HorizontalDragScroller } from "@/components/sections/HorizontalDragScroller";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { heroSlidesQuery, projectListQuery } from "@/lib/sanity/queries";
-import { localizedValue, type HeroSlide, type SanityImage } from "@/lib/sanity/types";
-
-type HomePageProps = {
-  params: Promise<{ locale: string }>;
-};
+import { plainText, type HeroSlide, type SanityImage } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
 type ProjectListItem = {
   _id: string;
-  title?: {
-    id?: string;
-    en?: string;
-    [key: string]: string | undefined;
-  };
+  title?: string;
   category?: string;
   featured?: boolean;
   slug?: { current?: string };
   coverImage?: SanityImage;
-  styleTag?: { id?: string; en?: string; [key: string]: string | undefined };
-  homeTagline?: { id?: string; en?: string; [key: string]: string | undefined };
+  styleTag?: string;
+  homeTagline?: string;
 };
 
 function normalizeEyebrow(value: string | undefined) {
@@ -43,20 +35,11 @@ function normalizeEyebrow(value: string | undefined) {
 function normalizeHeroEyebrows(slides: HeroSlide[]) {
   return slides.map((slide) => ({
     ...slide,
-    eyebrow: slide.eyebrow
-      ? Object.fromEntries(Object.entries(slide.eyebrow).map(([locale, value]) => [locale, normalizeEyebrow(value)]))
-      : slide.eyebrow,
+    eyebrow: normalizeEyebrow(plainText(slide.eyebrow)),
   }));
 }
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
-
-export default async function HomePage({ params }: HomePageProps) {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
+export default async function HomePage() {
   const [projects, heroSlides] = await Promise.all([
     sanityClient.fetch<ProjectListItem[]>(projectListQuery),
     sanityClient.fetch<HeroSlide[]>(heroSlidesQuery),
@@ -66,13 +49,13 @@ export default async function HomePage({ params }: HomePageProps) {
   const highlightProjects = [
     ...featuredProjects,
     ...projects.filter((project) => !project.featured),
-  ].slice(0, 3);
+  ];
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <style>{`.hero-eyebrow { align-self: flex-start; border-left: 1px solid var(--color-accent-gold); padding-left: 1rem; text-align: left; text-transform: none; }`}</style>
-      <Header currentLocale={safeLocale} dictionary={dictionary} />
-      <Hero dictionary={dictionary} locale={safeLocale} slides={normalizedHeroSlides} />
+      <Header dictionary={dictionary} />
+      <Hero dictionary={dictionary} slides={normalizedHeroSlides} />
       {/* VisionCarousel and the previous six-tile Collections mosaic remain available for easy rollback. */}
       <ScrollReveal as="section" className="px-5 py-20 md:px-8 md:py-28">
         <div id="collections" data-reveal className="mx-auto max-w-7xl">
@@ -82,11 +65,11 @@ export default async function HomePage({ params }: HomePageProps) {
             {highlightProjects.length === 0 ? <p className="max-w-xs text-sm leading-6 text-white/55">{dictionary.home.featuredProjectsEmpty}</p> : null}
           </div>
           {highlightProjects.length > 0 ? (
-            <div className="mt-10 grid gap-10 md:grid-cols-3">
+            <HorizontalDragScroller className="mt-10 -mx-5 px-5 md:-mx-8 md:px-8">
               {highlightProjects.map((project) => {
-                const title = localizedValue(project.title, safeLocale) || dictionary.home.untitledProject;
-                const style = localizedValue(project.styleTag, safeLocale) || project.category || dictionary.ui.projectCategory;
-                const tagline = localizedValue(project.homeTagline, safeLocale);
+                const title = plainText(project.title) || dictionary.home.untitledProject;
+                const style = plainText(project.styleTag) || project.category || dictionary.ui.projectCategory;
+                const tagline = plainText(project.homeTagline);
                 const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
                 const card = (
                   <article data-reveal className="group">
@@ -103,12 +86,20 @@ export default async function HomePage({ params }: HomePageProps) {
                     </div>
                   </article>
                 );
-                return project.slug?.current ? <Link key={project._id} href={`/${safeLocale}/project/${project.slug.current}`}>{card}</Link> : <div key={project._id}>{card}</div>;
+                return project.slug?.current ? (
+                  <Link key={project._id} href={`/project/${project.slug.current}`} className="block w-[min(78vw,24rem)] shrink-0 snap-start md:w-[min(42vw,24rem)] lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={project._id} className="w-[min(78vw,24rem)] shrink-0 snap-start md:w-[min(42vw,24rem)] lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
+                    {card}
+                  </div>
+                );
               })}
-            </div>
+            </HorizontalDragScroller>
           ) : null}
           <Link
-            href={`/${safeLocale}/project`}
+            href="/project"
             className="mt-12 inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]"
           >
             <ArrowAction label={dictionary.home.discoverMore} className="text-[10px] uppercase tracking-[0.25em]" />

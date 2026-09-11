@@ -4,22 +4,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
 import type { SanityImage } from "@/lib/sanity/types";
-import { LangSwitcher } from "./LangSwitcher";
 
 type HeaderProps = {
   dictionary: Dictionary;
-  currentLocale: Locale;
 };
 
 const headerContentClassName = "relative z-10 m-0 mt-[7px] mb-[8px] flex h-[25px] max-w-7xl items-center px-6";
 
-export function Header({ dictionary, currentLocale }: HeaderProps) {
+export function Header({ dictionary }: HeaderProps) {
   const pathname = usePathname();
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -66,11 +63,11 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
   }, []);
 
   const navItems = [
-    { label: dictionary.nav.home, href: `/${currentLocale}` },
-    { label: dictionary.nav.about, href: `/${currentLocale}/about` },
-    { label: dictionary.nav.project, href: `/${currentLocale}/project` },
-    { label: dictionary.nav.service, href: `/${currentLocale}/service` },
-    { label: dictionary.nav.product, href: `/${currentLocale}/product` },
+    { label: dictionary.nav.home, href: "/" },
+    { label: dictionary.nav.about, href: "/about" },
+    { label: dictionary.nav.project, href: "/project" },
+    { label: dictionary.nav.service, href: "/service" },
+    { label: dictionary.nav.product, href: "/product" },
   ];
   const isNavItemActive = (href: string, index: number) => {
     if (index === 0) {
@@ -92,7 +89,7 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
       ].join(" ")}
     >
       <div className={headerContentClassName}>
-        <Link href={`/${currentLocale}`} aria-label={dictionary.ui.linnoreaHome} className="inline-flex min-h-11 items-center text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+        <Link href="/" aria-label={dictionary.ui.linnoreaHome} className="inline-flex min-h-11 items-center text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
           <Image src={logo ? urlFor(logo).width(48).height(48).fit("crop").auto("format").quality(78).url() : "/assets/logo-mark.png"} alt="" width={22} height={22} priority className="block h-[22px] w-[22px] object-contain" />
         </Link>
 
@@ -103,10 +100,6 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
             </Link>
           ))}
         </nav>
-
-        <div className="header-desktop-language ml-auto hidden">
-          <LangSwitcher currentLocale={currentLocale} dictionary={dictionary} />
-        </div>
 
         <button
           type="button"
@@ -131,9 +124,6 @@ export function Header({ dictionary, currentLocale }: HeaderProps) {
                 {item.label}
               </Link>
             ))}
-            <div className="pt-2">
-              <LangSwitcher currentLocale={currentLocale} dictionary={dictionary} />
-            </div>
           </nav>
         </div>
       ) : null}

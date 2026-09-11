@@ -1,10 +1,3 @@
-import type { Locale } from "@/lib/i18n/config";
-
-export type LocalizedString = Partial<Record<Locale, string>> & {
-  id?: string;
-  en?: string;
-};
-
 export type SanityImage = {
   _key?: string;
   _type?: string;
@@ -21,10 +14,10 @@ export type MuxVideo = {
   };
 };
 
-export type LocalizedSeo = Partial<Record<Locale, {
+export type SeoDefaults = {
   title?: string;
   description?: string;
-}>>;
+};
 
 export type SocialLink = {
   platform?: string;
@@ -35,9 +28,9 @@ export type HeroSlide = {
   _id: string;
   _type?: string;
   image?: SanityImage;
-  eyebrow?: LocalizedString;
-  headline?: LocalizedString;
-  subheadline?: LocalizedString;
+  eyebrow?: string;
+  headline?: string;
+  subheadline?: string;
   heroVideo?: MuxVideo;
   order?: number;
 };
@@ -45,9 +38,9 @@ export type HeroSlide = {
 export type VisionSlide = {
   _id: string;
   _type?: string;
-  label?: LocalizedString;
-  headline?: LocalizedString;
-  description?: LocalizedString;
+  label?: string;
+  headline?: string;
+  description?: string;
   image?: SanityImage;
   order?: number;
 };
@@ -60,92 +53,104 @@ export type PortableTextBlock = {
 
 export type Project = {
   _id: string;
-  title?: LocalizedString;
+  title?: string;
   slug?: { current?: string };
   coverImage?: SanityImage;
   gallery?: SanityImage[];
   heroVideo?: { asset?: { _ref?: string; url?: string } };
   category?: string;
   status?: string;
-  styleTag?: LocalizedString;
-  homeTagline?: LocalizedString;
-  location?: LocalizedString;
+  styleTag?: string;
+  homeTagline?: string;
+  location?: string;
   year?: string;
   area?: string;
-  description?: Partial<Record<Locale, PortableTextBlock[]>>;
-  scopeOfWork?: LocalizedString;
+  description?: PortableTextBlock[];
+  scopeOfWork?: string;
   featured?: boolean;
   order?: number;
 };
 
 export type SiteSettings = {
   projectHighlightImages?: SanityImage[];
-  brandStatement?: LocalizedString;
-  aboutEstablished?: LocalizedString;
-  aboutDescription?: LocalizedString;
-  aboutKey?: Array<{ label?: LocalizedString; order?: number }>;
-  aboutVision?: LocalizedString;
-  aboutMission?: LocalizedString[];
-  aboutProcess?: Array<{ title?: LocalizedString; subtitle?: LocalizedString; description?: LocalizedString; image?: SanityImage; order?: number }>;
+  brandStatement?: string;
+  aboutEstablished?: string;
+  aboutDescription?: string;
+  aboutKey?: Array<{ label?: string; order?: number }>;
+  aboutVision?: string;
+  aboutMission?: string[];
+  aboutProcess?: Array<{ title?: string; subtitle?: string; description?: string; image?: SanityImage; order?: number }>;
   studioVisualImage?: SanityImage;
   studioVisualVideo?: MuxVideo;
-  officeAddress?: Partial<Record<Locale, string>>;
+  officeAddress?: string;
   googleMapsUrl?: string;
   whatsappNumber?: string;
-  whatsappCtaText?: LocalizedString;
+  whatsappCtaText?: string;
   socialLinks?: SocialLink[];
-  seoDefaults?: LocalizedSeo;
+  seoDefaults?: SeoDefaults;
 };
 
 export type ApproachItem = {
   _id: string;
-  title?: LocalizedString;
-  description?: LocalizedString;
+  title?: string;
+  description?: string;
   order?: number;
 };
 
 export type TeamMember = {
   _id: string;
   name?: string;
-  role?: LocalizedString;
-  bio?: LocalizedString;
+  role?: string;
+  bio?: string;
   photo?: SanityImage;
   order?: number;
 };
 
 export type Service = {
   _id: string;
-  title?: LocalizedString;
+  title?: string;
   image?: SanityImage;
-  description?: LocalizedString;
+  description?: string;
   order?: number;
 };
 
 export type Product = {
   _id: string;
-  name?: LocalizedString;
+  name?: string;
   images?: SanityImage[];
-  description?: LocalizedString;
+  description?: string;
   order?: number;
 };
 
-export function localizedValue(value: LocalizedString | undefined, locale: Locale) {
-  return value?.[locale] ?? value?.en ?? value?.id ?? "";
-}
+export function plainText(value: unknown): string {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const localized = value as Record<string, unknown>;
+    for (const locale of ["id", "en", "ja", "fr", "de", "it"]) {
+      const selected: string = plainText(localized[locale]);
+      if (selected) return selected;
+    }
+    return "";
+  }
 
-export function localizedSeoValue(value: LocalizedSeo | undefined, key: "title" | "description", locale: Locale) {
-  return value?.[locale]?.[key] ?? value?.en?.[key] ?? value?.id?.[key] ?? "";
-}
-
-export function plainText(value: string | undefined) {
-  return (value ?? "")
+  return (typeof value === "string" ? value : "")
     .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
 }
 
-export function portableTextToPlainText(blocks: PortableTextBlock[] | undefined) {
-  return blocks
-    ?.map((block) => block.children?.map((child) => child.text ?? "").join("") ?? "")
+export function portableTextToPlainText(value: unknown): string {
+  if (value && !Array.isArray(value) && typeof value === "object") {
+    const localized = value as Record<string, unknown>;
+    for (const locale of ["id", "en", "ja", "fr", "de", "it"]) {
+      const selected = portableTextToPlainText(localized[locale]);
+      if (selected) return selected;
+    }
+    return "";
+  }
+
+  if (!Array.isArray(value)) return "";
+
+  return (value as PortableTextBlock[])
+    .map((block) => block.children?.map((child) => child.text ?? "").join("") ?? "")
     .filter(Boolean)
     .join("\n\n") ?? "";
 }

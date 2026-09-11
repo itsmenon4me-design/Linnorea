@@ -54,6 +54,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      ...["id", "en", "ja", "fr", "de", "it"].map((locale) => ({
+        source: `/${locale}`,
+        destination: "/",
+        statusCode: 301,
+      })),
+      ...["id", "en", "ja", "fr", "de", "it"].map((locale) => ({
+        source: `/${locale}/:path*`,
+        destination: "/:path*",
+        statusCode: 301,
+      })),
+    ];
+  },
 };
 
 const withBundleAnalyzer = bundleAnalyzer({

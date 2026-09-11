@@ -6,34 +6,32 @@ import { Header } from "@/components/layout/Header";
 import { LazyAutoplayVideo } from "@/components/media/LazyAutoplayVideo";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { ArrowAction } from "@/components/ui/ArrowAction";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { projectBySlugQuery, projectListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
-import { localizedValue, portableTextToPlainText, type Project, type SiteSettings } from "@/lib/sanity/types";
+import { plainText, portableTextToPlainText, type Project, type SiteSettings } from "@/lib/sanity/types";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 
 export const revalidate = 60;
 
-type ProjectDetailProps = { params: Promise<{ locale: string; slug: string }> };
+type ProjectDetailProps = { params: Promise<{ slug: string }> };
 
 type ProjectNavLinkProps = {
   project: Project;
-  locale: Locale;
   label: string;
   direction: "left" | "right";
   side: "previous" | "next";
 };
 
-function ProjectNavLink({ project, locale, label, direction, side }: ProjectNavLinkProps) {
+function ProjectNavLink({ project, label, direction, side }: ProjectNavLinkProps) {
   const isPrevious = side === "previous";
-  const title = localizedValue(project.title, locale);
+  const title = plainText(project.title);
 
   return (
     <Link
-      href={`/${locale}/project/${project.slug?.current}`}
+      href={`/project/${project.slug?.current}`}
       className={`group min-w-0 flex items-start gap-4 focus-visible:outline-2 focus-visible:outline-[var(--color-accent-gold)] ${isPrevious ? "border-r border-white/15 pr-8" : "ml-auto pl-8 text-right"}`}
     >
       <span className={`block min-w-0 ${isPrevious ? "" : "text-right"}`}>
@@ -44,25 +42,17 @@ function ProjectNavLink({ project, locale, label, direction, side }: ProjectNavL
   );
 }
 
-export async function generateStaticParams() {
-  const projects = await sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } });
-  return locales.flatMap((locale) => projects.flatMap((project) => project.slug?.current ? [{ locale, slug: project.slug.current }] : []));
-}
-
 export async function generateMetadata({ params }: ProjectDetailProps): Promise<Metadata> {
-  const { locale, slug } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
+  const { slug } = await params;
   const project = await sanityClient.fetch<Project | null>(projectBySlugQuery, { slug }, { next: { revalidate } });
-  const seo = await getSiteSeo(safeLocale);
-  if (!project) return { title: { absolute: `${getDictionary(safeLocale).nav.project} | ${seo.title}` }, description: seo.description };
-  const title = localizedValue(project.title, safeLocale);
+  const seo = await getSiteSeo();
+  if (!project) return { title: { absolute: `${dictionary.nav.project} | ${seo.title}` }, description: seo.description };
+  const title = plainText(project.title);
   return { title: { absolute: `${title} | ${seo.title}` }, description: seo.description };
 }
 
 export default async function ProjectDetailPage({ params }: ProjectDetailProps) {
-  const { locale, slug } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
+  const { slug } = await params;
   const [project, projects, settings] = await Promise.all([
     sanityClient.fetch<Project | null>(projectBySlugQuery, { slug }, { next: { revalidate } }),
     sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } }),
@@ -74,17 +64,17 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
   const currentIndex = projects.findIndex((item) => item._id === project._id);
   const previous = currentIndex > 0 ? projects[currentIndex - 1] : null;
   const next = currentIndex >= 0 && currentIndex < projects.length - 1 ? projects[currentIndex + 1] : null;
-  const title = localizedValue(project.title, safeLocale) || dictionary.home.untitledProject;
-  const style = localizedValue(project.styleTag, safeLocale);
-  const location = localizedValue(project.location, safeLocale);
-  const description = portableTextToPlainText(project.description?.[safeLocale]);
+  const title = plainText(project.title) || dictionary.home.untitledProject;
+  const style = plainText(project.styleTag);
+  const location = plainText(project.location);
+  const description = portableTextToPlainText(project.description);
   const whatsappNumber = settings?.whatsappNumber;
-  const whatsappText = localizedValue(settings?.whatsappCtaText, safeLocale) || dictionary.home.cta;
+  const whatsappText = plainText(settings?.whatsappCtaText) || dictionary.home.cta;
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
 
   return (
     <main className="bg-[var(--color-bg-base)] text-white">
-      <Header currentLocale={safeLocale} dictionary={dictionary} />
+      <Header dictionary={dictionary} />
       <section className="relative flex min-h-[88vh] items-end overflow-hidden bg-[var(--color-bg-elevated)]">
         {project.heroVideo?.asset?.url ? (
           <LazyAutoplayVideo
@@ -98,7 +88,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         ) : <MediaPlaceholder className="absolute inset-0" />}
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/25 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-14 pt-40 md:px-8 md:pb-20">
-          <Link href={`/${safeLocale}/project`} className="mb-12 inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]">
+          <Link href="/project" className="mb-12 inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]">
             <ArrowAction label={dictionary.nav.project} direction="left" className="text-[10px] uppercase tracking-[0.25em]" />
           </Link>
           <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">{style || project.category || "Project"}</p>
@@ -144,7 +134,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
             [dictionary.ui.location, location],
             [dictionary.ui.year, project.year],
             [dictionary.ui.area, project.area],
-            [dictionary.ui.scope, localizedValue(project.scopeOfWork, safeLocale)],
+            [dictionary.ui.scope, project.scopeOfWork],
           ].map(([label, value]) => value ? <div key={label}><dt className="text-[10px] uppercase tracking-[0.25em] text-white/45">{label}</dt><dd className="mt-2 text-lg text-white/90">{value}</dd></div> : null)}
         </dl>
       </section>
@@ -159,8 +149,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
       ) : null}
 
       <nav aria-label={dictionary.ui.projectNavigation} className="mx-auto grid max-w-7xl grid-cols-2 px-5 py-16 md:px-8 md:py-24">
-        {previous ? <ProjectNavLink project={previous} locale={safeLocale} label={dictionary.ui.previous} direction="left" side="previous" /> : <span />}
-        {next ? <ProjectNavLink project={next} locale={safeLocale} label={dictionary.ui.next} direction="right" side="next" /> : <span />}
+        {previous ? <ProjectNavLink project={previous} label={dictionary.ui.previous} direction="left" side="previous" /> : <span />}
+        {next ? <ProjectNavLink project={next} label={dictionary.ui.next} direction="right" side="next" /> : <span />}
       </nav>
     </main>
   );

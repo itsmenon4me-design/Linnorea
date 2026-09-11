@@ -8,8 +8,8 @@ export const project = defineType({
     defineField({
       name: "title",
       title: "Project title",
-      type: "localeString",
-      description: "Title in Indonesian, English, Japanese, French, German, and Italian.",
+      type: "string",
+      description: "Single project title. Write in the preferred editorial language.",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -17,7 +17,7 @@ export const project = defineType({
       title: "Slug",
       type: "slug",
       options: {
-        source: "title.id",
+        source: "title",
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
@@ -59,20 +59,20 @@ export const project = defineType({
     defineField({
       name: "styleTag",
       title: "Style tag",
-      type: "localeString",
+      type: "string",
       description: "Example: Modern Tropical, Compact Tropical, American Classic.",
     }),
     defineField({
       name: "homeTagline",
       title: "Home highlight tagline",
-      type: "localeString",
+      type: "string",
       description: "Short supporting line shown under this project when it appears in the Home highlights.",
     }),
     defineField({
       name: "location",
       title: "Location",
-      type: "localeString",
-      description: "Project location in each language.",
+      type: "string",
+      description: "Project location.",
     }),
     defineField({
       name: "year",
@@ -89,14 +89,15 @@ export const project = defineType({
     defineField({
       name: "description",
       title: "Description",
-      type: "localeBlock",
+      type: "array",
+      of: [{ type: "block" }],
       description: "Narrative description for the concept/design story.",
     }),
     defineField({
       name: "scopeOfWork",
       title: "Scope of work",
-      type: "localeString",
-      description: "Optional summary of scope for each locale.",
+      type: "string",
+      description: "Optional summary of scope.",
     }),
     defineField({
       name: "featured",
@@ -113,7 +114,7 @@ export const project = defineType({
   ],
   preview: {
     select: {
-      title: "title.id",
+      title: "title",
       media: "coverImage",
     },
   },

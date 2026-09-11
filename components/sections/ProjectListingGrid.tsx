@@ -2,18 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { ProjectCard } from "@/components/sections/ProjectCard";
-import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Project } from "@/lib/sanity/types";
 
 type ProjectListingGridProps = {
   projects: Project[];
   categories: string[];
-  locale: Locale;
   dictionary: Dictionary;
 };
 
-export function ProjectListingGrid({ projects, categories, locale, dictionary }: ProjectListingGridProps) {
+export function ProjectListingGrid({ projects, categories, dictionary }: ProjectListingGridProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const visibleProjects = useMemo(
     () => activeCategory ? projects.filter((project) => project.category?.trim() === activeCategory) : projects,
@@ -37,7 +35,7 @@ export function ProjectListingGrid({ projects, categories, locale, dictionary }:
       ) : null}
       {visibleProjects.length > 0 ? (
         <div className="grid gap-12 pt-12 md:grid-cols-2 md:gap-x-10 md:gap-y-20">
-          {visibleProjects.map((project) => <ProjectCard key={project._id} project={project} locale={locale} dictionary={dictionary} />)}
+          {visibleProjects.map((project) => <ProjectCard key={project._id} project={project} dictionary={dictionary} />)}
         </div>
       ) : (
         <div className="border-b border-white/15 py-20 text-sm text-white/65">{dictionary.ui.filteredProjectEmpty}</div>

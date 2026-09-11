@@ -5,9 +5,9 @@ export const approachItem = defineType({
   title: "Approach item",
   type: "document",
   fields: [
-    defineField({ name: "title", title: "Title", type: "localeString", validation: (Rule) => Rule.required() }),
-    defineField({ name: "description", title: "Description", type: "localeText", validation: (Rule) => Rule.required() }),
+    defineField({ name: "title", title: "Title", type: "string", validation: (Rule) => Rule.required() }),
+    defineField({ name: "description", title: "Description", type: "text", validation: (Rule) => Rule.required() }),
     defineField({ name: "order", title: "Display order", type: "number", initialValue: 0, validation: (Rule) => Rule.required().integer() }),
   ],
-  preview: { select: { title: "title.id", subtitle: "description.id" } },
+  preview: { select: { title: "title", subtitle: "description" } },
 });

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { ProjectCarousel, ProjectHighlightCarousel } from "@/components/sections/ProjectCarousel";
 import { ProjectListingGrid } from "@/components/sections/ProjectListingGrid";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { projectListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
@@ -11,23 +10,12 @@ import type { Project, SiteSettings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
-type ProjectListingProps = { params: Promise<{ locale: string }> };
-
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSiteSeo();
+  return { title: { absolute: `${dictionary.nav.project} | ${seo.title}` }, description: seo.description };
 }
 
-export async function generateMetadata({ params }: ProjectListingProps): Promise<Metadata> {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const seo = await getSiteSeo(safeLocale);
-  return { title: { absolute: `${getDictionary(safeLocale).nav.project} | ${seo.title}` }, description: seo.description };
-}
-
-export default async function ProjectListingPage({ params }: ProjectListingProps) {
-  const { locale } = await params;
-  const safeLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
-  const dictionary = getDictionary(safeLocale);
+export default async function ProjectListingPage() {
   const [projects, siteSettings] = await Promise.all([
     sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
@@ -37,7 +25,7 @@ export default async function ProjectListingPage({ params }: ProjectListingProps
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
-      <Header currentLocale={safeLocale} dictionary={dictionary} />
+      <Header dictionary={dictionary} />
       {siteSettings?.projectHighlightImages?.length ? (
         <ProjectHighlightCarousel
           images={siteSettings.projectHighlightImages}
@@ -59,7 +47,6 @@ export default async function ProjectListingPage({ params }: ProjectListingProps
             </div>
             <ProjectCarousel
               projects={ongoingProjects}
-              locale={safeLocale}
               dictionary={dictionary}
               previousLabel={dictionary.ui.previous}
               nextLabel={dictionary.ui.next}
@@ -69,7 +56,7 @@ export default async function ProjectListingPage({ params }: ProjectListingProps
         {projects.length === 0 ? (
           <div className="border-b border-white/15 py-20 text-sm text-white/65">{dictionary.ui.projectEmpty}</div>
         ) : (
-          <ProjectListingGrid projects={projects} categories={categories} locale={safeLocale} dictionary={dictionary} />
+          <ProjectListingGrid projects={projects} categories={categories} dictionary={dictionary} />
         )}
       </section>
     </main>
