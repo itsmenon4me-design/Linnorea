@@ -52,9 +52,9 @@ export default async function AboutPage() {
       </div>
 
       <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div data-reveal className="grid min-w-0 gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.ourKey}</p>
-          <ul className="min-w-0 max-w-3xl space-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
+        <div data-reveal className="min-w-0 border-t border-white/15 pt-6">
+          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.ourKey}</p>
+          <ul className="mt-10 min-w-0 max-w-3xl space-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:mt-12 md:space-y-12 md:text-lg md:leading-8">
             {keyItems.length ? keyItems.map((item, index) => <li key={`${plainText(item.label)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{plainText(item.label)}</span></li>) : <li>{dictionary.about.keyPlaceholder}</li>}
           </ul>
         </div>
@@ -70,18 +70,18 @@ export default async function AboutPage() {
       </ScrollReveal>
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div className="grid min-w-0 gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.mission}</p>
-          <ul className="min-w-0 max-w-3xl space-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:space-y-12 md:text-lg md:leading-8">
+        <div className="min-w-0 border-t border-white/15 pt-6">
+          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.mission}</p>
+          <ul className="mt-10 min-w-0 max-w-3xl space-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:mt-12 md:space-y-12 md:text-lg md:leading-8">
             {missionItems.length ? missionItems.map((item, index) => <li key={`${plainText(item)}-${index}`} className="flex items-start gap-5 border-b border-white/10 pb-8"><span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-gold)]" /><span>{plainText(item)}</span></li>) : <li>{dictionary.about.missionPlaceholder}</li>}
           </ul>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div className="grid min-w-0 gap-6 border-t border-white/15 pt-6 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.process}</p>
-          <div className="min-w-0 space-y-12">
+        <div className="min-w-0 border-t border-white/15 pt-6">
+          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.process}</p>
+          <div className="mt-10 min-w-0 space-y-12 md:mt-12">
             {processItems.length ? processItems.map((item, index) => {
               const title = plainText(item.title) || `${dictionary.about.processStage} ${index + 1}`;
               const subtitle = plainText(item.subtitle);
