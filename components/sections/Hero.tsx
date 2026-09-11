@@ -1304,7 +1304,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
           >
             {eyebrow}
           </p>
-          <h1 className="mb-10 text-[32px] font-medium leading-[0.95] tracking-[-0.04em]" style={{ marginBottom: 40, fontSize: 32 }}>
+          <h1 data-animate className="mb-10 text-[32px] font-medium leading-[0.95] tracking-[-0.04em]" style={{ marginBottom: 40, fontSize: 32 }}>
             {headline}
           </h1>
           <a

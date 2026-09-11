@@ -54,7 +54,6 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
-      <style>{`.hero-eyebrow { align-self: flex-start; border-left: 1px solid var(--color-accent-gold); padding-left: 1rem; text-align: left; text-transform: none; }`}</style>
       <Header dictionary={dictionary} />
       <Hero dictionary={dictionary} slides={normalizedHeroSlides} />
       {/* VisionCarousel and the previous six-tile Collections mosaic remain available for easy rollback. */}
