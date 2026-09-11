@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { urlFor } from "@/lib/sanity/image";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedValue, type Project } from "@/lib/sanity/types";
@@ -32,9 +33,7 @@ export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
               className="object-cover transition duration-700 ease-out group-hover:scale-105"
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">
-              {dictionary.ui.placeholderProjectImage}
-            </div>
+            <MediaPlaceholder className="h-full w-full" />
           )}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-5 pb-5 pt-20">
             <p className="text-lg font-medium tracking-[-0.02em] text-white">{title}</p>
@@ -42,7 +41,7 @@ export function ProjectCard({ project, locale, dictionary }: ProjectCardProps) {
           </div>
         </div>
         <div className="flex items-start justify-between gap-4 border-b border-white/15 py-4">
-          <h2 className="text-sm font-medium tracking-[0.02em] text-white/75 md:text-base">{style || dictionary.ui.projectCategory}</h2>
+          <h2 className="text-sm font-medium tracking-[0.02em] text-white/75 md:text-base">{project.category || dictionary.ui.projectCategory}</h2>
           {style ? <p className="max-w-[45%] text-right text-[10px] uppercase tracking-[0.2em] text-white/55">{style}</p> : null}
         </div>
       </article>

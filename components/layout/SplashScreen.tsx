@@ -11,11 +11,21 @@ type SplashScreenProps = {
 };
 
 export function SplashScreen({ mode = "initial" }: SplashScreenProps) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    if (mode === "initial") {
+      if (window.sessionStorage.getItem("linnorea:splash-seen") === "1") {
+        window.setTimeout(() => setIsReady(true), 0);
+        return;
+      }
+      window.sessionStorage.setItem("linnorea:splash-seen", "1");
+      window.setTimeout(() => setIsVisible(true), 0);
+    }
+
     if (mode === "navigation") {
+      window.setTimeout(() => setIsVisible(true), 0);
       const timeoutId = window.setTimeout(() => setIsReady(true), MIN_DISPLAY_MS);
       return () => window.clearTimeout(timeoutId);
     }
@@ -69,6 +79,7 @@ export function SplashScreen({ mode = "initial" }: SplashScreenProps) {
   return (
     <div
       aria-hidden="true"
+      suppressHydrationWarning
       className={`splash-screen ${isVisible ? "splash-screen--visible" : "splash-screen--hidden"} ${isReady ? "splash-screen--ready" : ""}`}
     >
       <Image

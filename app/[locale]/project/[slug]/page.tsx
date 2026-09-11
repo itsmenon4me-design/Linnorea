@@ -13,6 +13,7 @@ import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 import { projectBySlugQuery, projectListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
 import { localizedValue, portableTextToPlainText, type Project, type SiteSettings } from "@/lib/sanity/types";
+import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 
 export const revalidate = 60;
 
@@ -94,11 +95,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
           />
         ) : project.coverImage ? (
           <Image src={urlFor(project.coverImage).width(1920).height(1280).fit("crop").auto("format").quality(78).url()} alt={title} fill priority sizes="100vw" className="object-cover" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.ui.placeholderHeroImage}</div>
-        )}
+        ) : <MediaPlaceholder className="absolute inset-0" />}
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-base)] via-black/25 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-14 pt-40 md:px-8 md:pb-20">
+          <Link href={`/${safeLocale}/project`} className="mb-12 inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]">
+            <ArrowAction label={dictionary.nav.project} direction="left" className="text-[10px] uppercase tracking-[0.25em]" />
+          </Link>
           <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--color-accent-gold)]">{style || project.category || "Project"}</p>
           <h1 className="mt-5 max-w-5xl text-5xl font-medium leading-[0.9] tracking-[-0.07em] md:text-6xl lg:text-7xl">{title}</h1>
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-sm text-white/75">
@@ -110,7 +112,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
       </section>
 
       {description ? (
-        <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
+        <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
           <div data-reveal className="grid gap-10 md:grid-cols-[0.7fr_1.3fr]">
             <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">{dictionary.ui.concept}</p>
             <p className="max-w-3xl whitespace-pre-line text-xl leading-[1.3] tracking-[-0.03em] text-white/90 md:text-4xl">{description}</p>
@@ -132,7 +134,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
           })}
         </section>
       ) : (
-        <div className="mx-5 border-y border-white/15 py-16 text-center text-[10px] uppercase tracking-[0.28em] text-white/45 md:mx-8">{dictionary.ui.placeholderGallery}</div>
+        <MediaPlaceholder className="mx-5 min-h-40 border-y border-white/15 md:mx-8" />
       )}
 
       <section className="mx-auto grid max-w-7xl gap-12 px-5 py-24 md:grid-cols-[0.7fr_1.3fr] md:px-8 md:py-36">
@@ -156,7 +158,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
         </section>
       ) : null}
 
-      <nav aria-label={dictionary.ui.projectNavigation} className="mx-auto grid max-w-7xl grid-cols-2 px-5 py-20 md:px-8 md:py-28">
+      <nav aria-label={dictionary.ui.projectNavigation} className="mx-auto grid max-w-7xl grid-cols-2 px-5 py-16 md:px-8 md:py-24">
         {previous ? <ProjectNavLink project={previous} locale={safeLocale} label={dictionary.ui.previous} direction="left" side="previous" /> : <span />}
         {next ? <ProjectNavLink project={next} locale={safeLocale} label={dictionary.ui.next} direction="right" side="next" /> : <span />}
       </nav>

@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { ArrowAction } from "@/components/ui/ArrowAction";
 import { CarouselDot } from "@/components/ui/CarouselDot";
+import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { urlFor } from "@/lib/sanity/image";
 import { localizedValue, type VisionSlide } from "@/lib/sanity/types";
 import type { Locale } from "@/lib/i18n/config";
@@ -72,19 +73,16 @@ const TextSlide = forwardRef<HTMLDivElement, TextSlideProps>(function TextSlide(
 type PanelSlideProps = {
   slide: SlideData;
   isIncoming?: boolean;
-  placeholderImageLabel: string;
-  imagePlaceholderLabel: string;
 };
 
-const PanelSlide = forwardRef<HTMLDivElement, PanelSlideProps>(function PanelSlide({ slide, isIncoming = false, placeholderImageLabel, imagePlaceholderLabel }, ref) {
+const PanelSlide = forwardRef<HTMLDivElement, PanelSlideProps>(function PanelSlide({ slide, isIncoming = false }, ref) {
   return (
     <div ref={ref} className={`absolute inset-0 ${isIncoming ? "z-10" : "z-0"}`}>
       {slide.image ? (
         <Image data-panel-image src={urlFor(slide.image).width(1400).height(1000).fit("crop").auto("format").quality(78).url()} alt={slide.headline} fill sizes="(min-width: 768px) 60vw, 100vw" loading={isIncoming ? "eager" : undefined} className="object-cover" />
       ) : (
-        <div data-panel-image className="absolute inset-0 flex items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.35em] text-white/40">{placeholderImageLabel}</div>
+        <MediaPlaceholder className="absolute inset-0" />
       )}
-      {!slide.image ? <span className="absolute bottom-4 left-4 text-[10px] uppercase tracking-[0.25em] text-white/45">{imagePlaceholderLabel}</span> : null}
     </div>
   );
 });
@@ -324,10 +322,10 @@ export function VisionCarousel({ slides: cmsSlides, locale, readMoreLabel, previ
         <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-transparent">
           {transition ? (
             <div className="absolute inset-0">
-              <PanelSlide ref={currentPanelRef} slide={slides[transition.from]} placeholderImageLabel={dictionary.ui.placeholderVisionImage} imagePlaceholderLabel={dictionary.ui.imagePlaceholder} />
-              <PanelSlide ref={incomingPanelRef} slide={slides[transition.to]} isIncoming placeholderImageLabel={dictionary.ui.placeholderVisionImage} imagePlaceholderLabel={dictionary.ui.imagePlaceholder} />
+              <PanelSlide ref={currentPanelRef} slide={slides[transition.from]} />
+              <PanelSlide ref={incomingPanelRef} slide={slides[transition.to]} isIncoming />
             </div>
-          ) : <PanelSlide ref={currentPanelRef} slide={activeSlide} placeholderImageLabel={dictionary.ui.placeholderVisionImage} imagePlaceholderLabel={dictionary.ui.imagePlaceholder} />}
+          ) : <PanelSlide ref={currentPanelRef} slide={activeSlide} />}
         </div>
       </div>
 

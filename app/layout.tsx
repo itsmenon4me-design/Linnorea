@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
-import { NavigationSplash } from "@/components/layout/NavigationSplash";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import "./globals.css";
@@ -58,7 +57,6 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
       </head>
       <body className="min-h-full bg-[var(--color-bg-base)] text-white">
         <SplashScreen />
-        <NavigationSplash />
         {children}
       </body>
     </html>

@@ -25,7 +25,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <div className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <div className="min-h-screen">{children}</div>
-      <div className="min-h-[45rem] md:min-h-[20rem]">
+      <div>
         <Footer currentLocale={safeLocale} dictionary={dictionary} />
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { RevealCurtain } from "@/components/animation/RevealCurtain";
+import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { ArrowAction } from "@/components/ui/ArrowAction";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -33,6 +34,21 @@ type ProjectListItem = {
   homeTagline?: { id?: string; en?: string; [key: string]: string | undefined };
 };
 
+function normalizeEyebrow(value: string | undefined) {
+  const text = value?.trim();
+  if (!text) return value;
+  return text.toLowerCase().replace(/^[a-z]/, (letter) => letter.toUpperCase());
+}
+
+function normalizeHeroEyebrows(slides: HeroSlide[]) {
+  return slides.map((slide) => ({
+    ...slide,
+    eyebrow: slide.eyebrow
+      ? Object.fromEntries(Object.entries(slide.eyebrow).map(([locale, value]) => [locale, normalizeEyebrow(value)]))
+      : slide.eyebrow,
+  }));
+}
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
@@ -45,6 +61,7 @@ export default async function HomePage({ params }: HomePageProps) {
     sanityClient.fetch<ProjectListItem[]>(projectListQuery),
     sanityClient.fetch<HeroSlide[]>(heroSlidesQuery),
   ]);
+  const normalizedHeroSlides = normalizeHeroEyebrows(heroSlides);
   const featuredProjects = projects.filter((project) => project.featured);
   const highlightProjects = [
     ...featuredProjects,
@@ -53,12 +70,13 @@ export default async function HomePage({ params }: HomePageProps) {
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
+      <style>{`.hero-eyebrow { align-self: flex-start; border-left: 1px solid var(--color-accent-gold); padding-left: 1rem; text-align: left; text-transform: none; }`}</style>
       <Header currentLocale={safeLocale} dictionary={dictionary} />
-      <Hero dictionary={dictionary} locale={safeLocale} slides={heroSlides} />
+      <Hero dictionary={dictionary} locale={safeLocale} slides={normalizedHeroSlides} />
       {/* VisionCarousel and the previous six-tile Collections mosaic remain available for easy rollback. */}
       <ScrollReveal as="section" className="px-5 py-20 md:px-8 md:py-28">
         <div id="collections" data-reveal className="mx-auto max-w-7xl">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">{dictionary.home.highlightsEyebrow}</p>
+          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/75">{dictionary.home.highlightsEyebrow}</p>
           <div className="mt-5 flex flex-col justify-between gap-6 border-b border-white/15 pb-8 md:flex-row md:items-end">
             <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.home.highlightsTitle}</h2>
             {highlightProjects.length === 0 ? <p className="max-w-xs text-sm leading-6 text-white/55">{dictionary.home.featuredProjectsEmpty}</p> : null}
@@ -74,11 +92,11 @@ export default async function HomePage({ params }: HomePageProps) {
                   <article data-reveal className="group">
                     <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
                       <RevealCurtain>
-                        {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-[1600ms] ease-out motion-reduce:transition-none group-hover:scale-105" /> : <div className="flex h-full items-center justify-center px-6 text-center text-[10px] uppercase tracking-[0.3em] text-white/45">{dictionary.home.featuredImagePlaceholder}</div>}
+                        {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-[1600ms] ease-out motion-reduce:transition-none group-hover:scale-105" /> : <MediaPlaceholder className="h-full w-full" />}
                       </RevealCurtain>
                     </div>
                     <div className="border-b border-white/15 py-5">
-                      <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent-gold)]">{style}</p>
+                      <p className="text-sm text-[var(--color-accent-gold)]">{style}</p>
                       <h3 className="mt-3 text-2xl font-medium tracking-[-0.04em] text-white">{title}</h3>
                       {tagline ? <p className="mt-2 max-w-sm text-sm leading-6 text-white/65">{tagline}</p> : null}
                       <ArrowAction label={dictionary.home.discover} className="mt-5 text-[10px] uppercase tracking-[0.25em] text-white" />

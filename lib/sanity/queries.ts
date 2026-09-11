@@ -117,6 +117,6 @@ export const serviceListQuery = `
 
 export const productListQuery = `
   *[_type == "product"] | order(order asc, _createdAt asc) {
-    _id, name, images, description, order
+    _id, name, slug, images, description, order
   }
 `;

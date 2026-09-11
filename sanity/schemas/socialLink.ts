@@ -10,7 +10,7 @@ export const socialLink = defineType({
       title: "Platform",
       type: "string",
       options: {
-        list: ["Facebook", "Instagram", "LinkedIn", "TikTok", "Twitch", "X", "YouTube"],
+        list: ["WhatsApp", "Instagram", "Threads", "LinkedIn", "Pinterest", "TikTok", "Facebook", "X", "Twitch", "YouTube"],
       },
       validation: (Rule) => Rule.required(),
     }),

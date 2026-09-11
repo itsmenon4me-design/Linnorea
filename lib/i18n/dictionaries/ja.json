@@ -7,7 +7,8 @@
     "product": "商品"
   },
   "about": {
-    "establishedPlaceholder": "2023年8月23日設立",
+    "establishedPlaceholder": "2023年8月23日",
+    "establishedLabel": "{date}設立",
     "descriptionPlaceholder": "[Placeholder brand description]",
     "ourKey": "Our Key",
     "keyPlaceholder": "[Placeholder Our Key]",

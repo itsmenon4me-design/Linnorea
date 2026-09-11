@@ -7,7 +7,8 @@
     "product": "Produk"
   },
   "about": {
-    "establishedPlaceholder": "Established 23 Agustus 2023",
+    "establishedPlaceholder": "23 Agustus 2023",
+    "establishedLabel": "Didirikan pada {date}",
     "descriptionPlaceholder": "Linnorea Design Works adalah studio Arsitektur & Desain Interior yang berbasis di Jakarta, fokus menciptakan ruang yang jelas, fungsional, dan bermakna.",
     "ourKey": "Our Key",
     "keyPlaceholder": "[Placeholder Our Key]",
