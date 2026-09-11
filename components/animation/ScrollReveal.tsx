@@ -22,11 +22,15 @@ export function ScrollReveal({ children, className, as = "div" }: ScrollRevealPr
 
     const context = gsap.context(() => {
       const targets = root.querySelectorAll("[data-reveal]");
+      const revealItems = root.querySelectorAll("[data-reveal-item]");
+      const revealImages = root.querySelectorAll("[data-reveal-image]");
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(targets, { opacity: 1, y: 0, clearProps: "transform" });
+        gsap.set([targets, revealItems, revealImages], { opacity: 1, y: 0, clearProps: "transform,clipPath" });
         return;
       }
 
+      gsap.set(revealItems, { opacity: 0, y: 20 });
+      gsap.set(revealImages, { opacity: 0, clipPath: "inset(12% 0 0 0)" });
       gsap.fromTo(
         targets,
         { opacity: 0, y: 28 },
@@ -43,6 +47,30 @@ export function ScrollReveal({ children, className, as = "div" }: ScrollRevealPr
           },
         },
       );
+      gsap.to(revealItems, {
+        opacity: 1,
+        y: 0,
+        duration: 0.75,
+        ease: "power2.out",
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: root,
+          start: "top 82%",
+          once: true,
+        },
+      });
+      gsap.to(revealImages, {
+        opacity: 1,
+        clipPath: "inset(0% 0 0 0)",
+        duration: 0.85,
+        ease: "power2.out",
+        stagger: 0.12,
+        scrollTrigger: {
+          trigger: root,
+          start: "top 82%",
+          once: true,
+        },
+      });
     }, root);
 
     return () => context.revert();

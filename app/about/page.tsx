@@ -78,8 +78,8 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div className="min-w-0 border-t border-white/15 pt-6">
+      <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
+        <div data-reveal className="min-w-0 border-t border-white/15 pt-6">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.process}</p>
           <div className="mt-10 min-w-0 space-y-12 md:mt-12">
             {processItems.length ? processItems.map((item, index) => {
@@ -87,18 +87,18 @@ export default async function AboutPage() {
               const subtitle = plainText(item.subtitle);
               const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
               return (
-                <article key={`${title}-${index}`} className="grid min-w-0 gap-6 border-b border-white/15 pb-12 md:grid-cols-[auto_minmax(0,1fr)] md:gap-6">
-                  <span className="self-start justify-self-start pt-1 text-left text-sm leading-none text-[var(--color-accent-gold)]">0{index + 1}</span>
-                  <div className="grid min-w-0 gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] md:items-start">
+                <article key={`${title}-${index}`} data-reveal className="grid min-w-0 gap-6 border-b border-white/15 pb-12 md:grid-cols-[auto_minmax(0,1fr)] md:gap-6">
+                  <span data-reveal-item className="self-start justify-self-start pt-1 text-left text-sm leading-none text-[var(--color-accent-gold)]">0{index + 1}</span>
+                  <div data-reveal-item className="grid min-w-0 gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] md:items-start">
                     <div className="min-w-0 text-left"><h2 className="text-3xl tracking-[-0.04em]">{title}</h2>{subtitle ? <p className="mt-3 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
-                    <div className="relative min-w-0 aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}</div>
+                    <div data-reveal-image className="relative min-w-0 aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">{imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}</div>
                   </div>
                 </article>
               );
             }) : <p className="text-sm leading-6 text-white/60">{dictionary.about.processPlaceholder}</p>}
           </div>
         </div>
-      </section>
+      </ScrollReveal>
 
       {/* Approach and Team data remain in Sanity and can be restored here when approved. */}
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
