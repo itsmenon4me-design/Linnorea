@@ -85,7 +85,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
   const [dragPlayingIndex, setDragPlayingIndex] = useState<number | null>(null);
   const [playingIndex, setPlayingIndex] = useState(0);
   const playingIndexRef = useRef(0);
-  const pendingDragRestartRef = useRef<number | null>(null);
   const dragCommitRef = useRef(false);
   const transitionRef = useRef<HeroTransition | null>(null);
   const dragSwapActiveRef = useRef(false);
@@ -941,65 +940,12 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     });
   };
 
-  const restartActiveVideo = (index: number) => {
-    const player = muxPlayerRefs.current[index];
-    if (!player) {
-      return Promise.resolve();
-    }
-
-    const media = player.mediaController?.media;
-    const logReset = (phase: string) => {
-      console.log("[Hero drag commit restart]", {
-        phase,
-        timestamp: new Date().toISOString(),
-        performanceTimeMs: Math.round(performance.now()),
-        index,
-        currentTime: media?.currentTime ?? null,
-        paused: media?.paused ?? null,
-        readyState: media?.readyState ?? null,
-      });
-    };
-    logReset("before-direct-reset");
-    media?.pause();
-    player.currentTime = 0;
-    logReset("after-direct-reset");
-    return queueMediaOperation(index, player, async (media) => {
-      logReset("before-queued-reset");
-      media.pause();
-      media.currentTime = 0;
-      logReset("after-queued-reset");
-      if (media.currentTime !== 0) {
-        media.load();
-        media.currentTime = 0;
-        logReset("after-load-reset");
-      }
-      await waitForMediaReady(media, MEDIA_ERROR_RETRY_TIMEOUT_MS);
-      logReset("after-ready-before-play");
-      await media.play();
-      playingIndexRef.current = index;
-      setPlayingIndex(index);
-      logReset("after-play");
-    }).catch((error: unknown) => {
-      console.warn("Hero drag video could not be restarted.", { index, error });
-    });
-  };
-
   useEffect(() => {
-    if (transition !== null || pendingDragRestartRef.current !== activeIndex) {
+    if (transition !== null) {
       return;
     }
 
-    pendingDragRestartRef.current = null;
-    const player = muxPlayerRefs.current[activeIndex];
-    const media = player?.mediaController?.media;
-    console.log("[Hero drag commit]", {
-      phase: "before-restartActiveVideo",
-      timestamp: new Date().toISOString(),
-      index: activeIndex,
-      currentTime: media?.currentTime ?? null,
-    });
     setDragPlayingIndex(null);
-    void restartActiveVideo(activeIndex);
   }, [activeIndex, transition]);
 
   const pauseDragMedia = (index: number) => {
@@ -1140,9 +1086,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
 
     const distance = event.clientX - drag.startX;
     if (Math.abs(distance) >= DRAG_THRESHOLD_PX && drag.swapActive) {
-      resetDragMedia(drag.targetIndex);
-      playbackGenerationRef.current += 1;
-      pendingDragRestartRef.current = drag.targetIndex;
       dragCommitRef.current = true;
       console.log("[Hero drag transform]", {
         phase: "commit-settle",
@@ -1152,6 +1095,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         transformOwner: "commit-timeline",
       });
       goToSlide(drag.targetIndex, true);
+      dragSwapActiveRef.current = false;
       setDragTargetIndex(null);
       return;
     }
