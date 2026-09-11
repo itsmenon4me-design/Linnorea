@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent, PointerEvent, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type HorizontalDragScrollerProps = {
   children: ReactNode;
@@ -14,25 +14,20 @@ export function HorizontalDragScroller({ children, className = "" }: HorizontalD
   const [isDragging, setIsDragging] = useState(false);
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (event.pointerType === "mouse") return;
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-
     pointerRef.current = {
       active: true,
       dragging: false,
       suppressClick: false,
       startX: event.clientX,
       startY: event.clientY,
-      startScrollLeft: scroller.scrollLeft,
+      startScrollLeft: event.currentTarget.scrollLeft,
     };
+    event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    if (event.pointerType === "mouse") return;
-    const scroller = scrollerRef.current;
     const pointer = pointerRef.current;
-    if (!scroller || !pointer.active) return;
+    if (!pointer.active) return;
 
     const distanceX = event.clientX - pointer.startX;
     const distanceY = event.clientY - pointer.startY;
@@ -41,16 +36,14 @@ export function HorizontalDragScroller({ children, className = "" }: HorizontalD
       pointer.dragging = true;
       setIsDragging(true);
     }
-
     event.preventDefault();
-    scroller.scrollLeft = pointer.startScrollLeft - distanceX;
+    event.currentTarget.scrollLeft = pointer.startScrollLeft - distanceX;
   }
 
   function stopDragging(event?: PointerEvent<HTMLDivElement>) {
-    const scroller = scrollerRef.current;
     const wasDragging = pointerRef.current.dragging;
-    if (scroller && event && scroller.hasPointerCapture(event.pointerId)) {
-      scroller.releasePointerCapture(event.pointerId);
+    if (event?.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
     pointerRef.current.active = false;
@@ -58,67 +51,6 @@ export function HorizontalDragScroller({ children, className = "" }: HorizontalD
     pointerRef.current.dragging = false;
     setIsDragging(false);
   }
-
-  useEffect(() => {
-    const element = scrollerRef.current;
-    if (element === null) return;
-    const dragElement: HTMLDivElement = element;
-
-    function handleMouseDown(event: globalThis.MouseEvent) {
-      if (event.button !== 0) return;
-      const bounds = dragElement.getBoundingClientRect();
-      if (
-        event.clientX < bounds.left ||
-        event.clientX > bounds.right ||
-        event.clientY < bounds.top ||
-        event.clientY > bounds.bottom
-      ) {
-        return;
-      }
-      pointerRef.current = {
-        active: true,
-        dragging: false,
-        suppressClick: false,
-        startX: event.clientX,
-        startY: event.clientY,
-        startScrollLeft: dragElement.scrollLeft,
-      };
-    }
-
-    function handleMouseMove(event: globalThis.MouseEvent) {
-      const pointer = pointerRef.current;
-      if (!pointer.active) return;
-
-      const distanceX = event.clientX - pointer.startX;
-      const distanceY = event.clientY - pointer.startY;
-      if (!pointer.dragging) {
-        if (Math.abs(distanceX) < 8 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
-        pointer.dragging = true;
-        setIsDragging(true);
-      }
-
-      event.preventDefault();
-      dragElement.scrollLeft = pointer.startScrollLeft - distanceX;
-    }
-
-    function handleMouseUp() {
-      const pointer = pointerRef.current;
-      if (!pointer.active) return;
-      pointer.active = false;
-      pointer.suppressClick = pointer.dragging;
-      pointer.dragging = false;
-      setIsDragging(false);
-    }
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mousedown", handleMouseDown);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, []);
 
   function preventClickAfterDrag(event: MouseEvent<HTMLDivElement>) {
     if (pointerRef.current.suppressClick) {
