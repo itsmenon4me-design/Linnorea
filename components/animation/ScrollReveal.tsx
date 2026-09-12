@@ -21,56 +21,58 @@ export function ScrollReveal({ children, className, as = "div" }: ScrollRevealPr
     if (!root) return;
 
     const context = gsap.context(() => {
-      const targets = root.querySelectorAll("[data-reveal]");
-      const revealItems = root.querySelectorAll("[data-reveal-item]");
-      const revealImages = root.querySelectorAll("[data-reveal-image]");
+      const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
+      const revealItems = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal-item]"));
+      const revealImages = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal-image]"));
+      const scrollTargets = [...targets, ...revealItems, ...revealImages];
+      if (scrollTargets.length === 0) return;
+
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set([targets, revealItems, revealImages], { opacity: 1, y: 0, clearProps: "transform,clipPath" });
+        gsap.set(root, { opacity: 1, marginTop: 0, clearProps: "transform" });
+        gsap.set(scrollTargets, { opacity: 1, y: 0, clearProps: "transform,clipPath" });
         return;
       }
 
-      gsap.set(revealItems, { opacity: 0, y: 20 });
-      gsap.set(revealImages, { opacity: 0, clipPath: "inset(12% 0 0 0)" });
-      gsap.fromTo(
-        targets,
-        { opacity: 0, y: 28 },
-        {
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: "top 82%",
+          once: true,
+        },
+      });
+      timeline.fromTo(root, { opacity: 0, marginTop: "6.25rem" }, {
+        opacity: 1,
+        marginTop: 0,
+        duration: 0.6,
+        ease: "power2.out",
+      });
+      if (targets.length > 0) {
+        timeline.fromTo(targets, { opacity: 0, y: 28 }, {
           opacity: 1,
           y: 0,
-          duration: 0.85,
+          duration: 0.75,
           ease: "power2.out",
           stagger: 0.08,
-          scrollTrigger: {
-            trigger: root,
-            start: "top 82%",
-            once: true,
-          },
-        },
-      );
-      gsap.to(revealItems, {
-        opacity: 1,
-        y: 0,
-        duration: 0.75,
-        ease: "power2.out",
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: root,
-          start: "top 82%",
-          once: true,
-        },
-      });
-      gsap.to(revealImages, {
-        opacity: 1,
-        clipPath: "inset(0% 0 0 0)",
-        duration: 0.85,
-        ease: "power2.out",
-        stagger: 0.12,
-        scrollTrigger: {
-          trigger: root,
-          start: "top 82%",
-          once: true,
-        },
-      });
+        }, "<0.12");
+      }
+      if (revealItems.length > 0) {
+        timeline.fromTo(revealItems, { opacity: 0, y: 20 }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          ease: "power2.out",
+          stagger: 0.1,
+        }, "<0.08");
+      }
+      if (revealImages.length > 0) {
+        timeline.fromTo(revealImages, { opacity: 0, clipPath: "inset(12% 0 0 0)" }, {
+          opacity: 1,
+          clipPath: "inset(0% 0 0 0)",
+          duration: 0.85,
+          ease: "power2.out",
+          stagger: 0.12,
+        });
+      }
     }, root);
 
     return () => context.revert();

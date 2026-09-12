@@ -1,12 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
-import { RevealCurtain } from "@/components/animation/RevealCurtain";
-import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { ArrowAction } from "@/components/ui/ArrowAction";
-import { HorizontalDragScroller } from "@/components/sections/HorizontalDragScroller";
+import { HighlightProjectsCarousel, type HighlightProject } from "@/components/sections/HighlightProjectsCarousel";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
@@ -65,38 +62,19 @@ export default async function HomePage() {
             {highlightProjects.length === 0 ? <p className="max-w-xs text-sm leading-6 text-white/55">{dictionary.home.featuredProjectsEmpty}</p> : null}
           </div>
           {highlightProjects.length > 0 ? (
-            <HorizontalDragScroller className="mt-10 -mx-5 px-5 md:-mx-8 md:px-8">
-              {highlightProjects.map((project) => {
-                const title = plainText(project.title) || dictionary.home.untitledProject;
-                const style = plainText(project.styleTag) || project.category || dictionary.ui.projectCategory;
-                const tagline = plainText(project.homeTagline);
-                const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
-                const card = (
-                  <article data-reveal className="group">
-                    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                      <RevealCurtain>
-                        {imageUrl ? <Image src={imageUrl} alt={title} fill draggable={false} sizes="(max-width: 768px) 100vw, 33vw" className="select-none object-cover transition-transform duration-[1600ms] ease-out motion-reduce:transition-none group-hover:scale-105" /> : <MediaPlaceholder className="h-full w-full" />}
-                      </RevealCurtain>
-                    </div>
-                    <div className="border-b border-white/15 py-5">
-                      <p className="text-sm text-[var(--color-accent-gold)]">{style}</p>
-                      <h3 className="mt-3 text-2xl font-medium tracking-[-0.04em] text-white">{title}</h3>
-                      {tagline ? <p className="mt-2 max-w-sm text-sm leading-6 text-white/65">{tagline}</p> : null}
-                      <ArrowAction label={dictionary.home.discover} className="mt-5 text-[10px] uppercase tracking-[0.25em] text-white" />
-                    </div>
-                  </article>
-                );
-                return project.slug?.current ? (
-                  <Link key={project._id} href={`/project/${project.slug.current}`} className="block w-full md:w-[min(42vw,24rem)] md:shrink-0 md:snap-start lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
-                    {card}
-                  </Link>
-                ) : (
-                  <div key={project._id} className="w-full md:w-[min(42vw,24rem)] md:shrink-0 md:snap-start lg:w-[calc((100vw-8rem)/3)] lg:max-w-[28rem]">
-                    {card}
-                  </div>
-                );
-              })}
-            </HorizontalDragScroller>
+            <div className="mt-10 -mx-5 overflow-hidden px-5 md:-mx-8 md:px-8">
+              <HighlightProjectsCarousel
+                projects={highlightProjects.map<HighlightProject>((project) => ({
+                  id: project._id,
+                  title: plainText(project.title) || dictionary.home.untitledProject,
+                  style: plainText(project.styleTag) || project.category || dictionary.ui.projectCategory,
+                  tagline: plainText(project.homeTagline),
+                  imageUrl: project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null,
+                  href: project.slug?.current ? `/project/${project.slug.current}` : null,
+                }))}
+                discoverLabel={dictionary.home.discover}
+              />
+            </div>
           ) : null}
           <Link
             href="/project"

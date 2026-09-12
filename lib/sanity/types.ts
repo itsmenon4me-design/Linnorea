@@ -71,6 +71,8 @@ export type Project = {
   order?: number;
 };
 
+export type ServiceProjectCard = Pick<Project, "_id" | "title" | "slug" | "coverImage" | "category" | "location" | "homeTagline">;
+
 export type SiteSettings = {
   projectHighlightImages?: SanityImage[];
   brandStatement?: string;

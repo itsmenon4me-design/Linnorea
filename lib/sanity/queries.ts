@@ -41,6 +41,7 @@ export const projectListQuery = `
     homeTagline,
     location,
     year,
+    description,
     featured,
     order
   }

@@ -16,7 +16,7 @@ type ProductCardProps = {
 export function ProductCard({ name, description, imageUrl, detailHref, discoverLabel }: ProductCardProps) {
   return (
     <article data-reveal className="border-b border-white/15 pb-6">
-      <div className="relative aspect-square overflow-hidden bg-[var(--color-bg-elevated)]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
         {imageUrl ? (
           <Image
             src={imageUrl}

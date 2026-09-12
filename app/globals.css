@@ -31,6 +31,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .product-grid {
@@ -186,6 +187,17 @@ button {
   border-color: rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.08);
   transform: translateY(-1px);
+}
+
+.carousel-arrow-button:hover,
+.carousel-arrow-button:focus-visible {
+  border-color: rgba(213, 31, 44, 0.9);
+  background: rgba(213, 31, 44, 0.08);
+}
+
+.carousel-arrow-button:hover .carousel-arrow-fill,
+.carousel-arrow-button:focus-visible .carousel-arrow-fill {
+  animation: hero-discover-fill 650ms ease-out forwards;
 }
 
 .arrow-circle-button--sm {
