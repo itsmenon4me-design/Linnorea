@@ -322,13 +322,12 @@ button {
 
 .project-gallery-image {
   transform: scale(var(--project-image-scale));
-  transition: transform 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1600ms ease-out;
 }
 
 .project-archive-grid .project-gallery-item:hover .project-gallery-image,
 .project-archive-grid .project-gallery-item:focus-visible .project-gallery-image {
-  animation: none !important;
-  transform: scale(1.05) !important;
+  transform: scale(1.05);
 }
 
 .project-card-meta {
@@ -361,7 +360,7 @@ button {
 }
 
 .project-gallery-item--image-entering .project-gallery-image {
-  animation: project-archive-image-zoom-out 1200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: project-archive-image-zoom-out 1600ms ease-out both;
 }
 
 @keyframes project-archive-image-zoom-out {

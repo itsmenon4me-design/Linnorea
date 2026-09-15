@@ -178,7 +178,7 @@ function FilterControl({ label, value, options, open, onToggle, onSelect }: { la
 }
 
 function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter, isListView }: { project: Project; index: number; dictionary: Dictionary; onOpen: () => void; onPointerEnter: () => void; isListView: boolean }) {
-  const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
+  const [isImageEntering, setIsImageEntering] = useState(false);
   const itemRef = useRef<HTMLButtonElement>(null);
   const title = plainText(project.title) || dictionary.home.untitledProject;
   const imageUrl = project.coverImage
@@ -188,23 +188,28 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
 
   useEffect(() => {
     const item = itemRef.current;
+    let entryTimer: number | undefined;
     if (!item || typeof IntersectionObserver === "undefined") {
-      setHasEnteredViewport(true);
+      setIsImageEntering(!isListView);
       return;
     }
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        setHasEnteredViewport(true);
+        setIsImageEntering(true);
+        entryTimer = window.setTimeout(() => setIsImageEntering(false), 1600);
         observer.disconnect();
       }
     }, { threshold: 0.08 });
     observer.observe(item);
-    return () => observer.disconnect();
-  }, []);
+    return () => {
+      observer.disconnect();
+      if (entryTimer !== undefined) window.clearTimeout(entryTimer);
+    };
+  }, [isListView]);
 
   return (
-    <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${hasEnteredViewport && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? "project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)]" : ""}`}>
+    <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isImageEntering && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? "project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)]" : ""}`}>
       <div className={`project-gallery-media relative overflow-hidden rounded-[0.65rem] bg-[var(--color-bg-elevated)] ${isListView ? "project-list-thumb h-16 w-[5.5rem]" : ""}`} style={isListView ? undefined : { aspectRatio }}>
         {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="project-gallery-image object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
         <div className={`project-card-meta pointer-events-none absolute bottom-2 left-2 mr-2 flex max-w-[calc(100%-1rem)] items-end rounded-xl bg-black/20 p-4 text-white ${isListView ? "sm:hidden" : ""}`}>
