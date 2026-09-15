@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
-import { normalizeProjectCategory, ProjectListingGrid } from "@/components/sections/ProjectListingGrid";
+import { ProjectListingGrid } from "@/components/sections/ProjectListingGrid";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { projectListQuery } from "@/lib/sanity/queries";
+import { normalizeProjectCategory } from "@/lib/sanity/projectCategories";
 import type { Project } from "@/lib/sanity/types";
 import { fallbackProjects } from "@/lib/sanity/fallbackProjects";
 

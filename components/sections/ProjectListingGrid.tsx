@@ -8,6 +8,7 @@ import "swiper/css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { urlFor } from "@/lib/sanity/image";
+import { normalizeProjectCategory } from "@/lib/sanity/projectCategories";
 import { plainText, portableTextToParagraphs, type Project } from "@/lib/sanity/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
@@ -158,14 +159,6 @@ function ProjectFilterButton({ active, onClick, children }: { active: boolean; o
 
 function uniqueProjectValues(values: Array<string | undefined>) {
   return Array.from(new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value))));
-}
-
-export function normalizeProjectCategory(category?: string) {
-  const normalized = category?.trim();
-  if (!normalized) return undefined;
-  if (normalized === "Residential" || normalized === "Commercial") return "Architecture";
-  if (normalized === "Retail") return "Design";
-  return normalized;
 }
 
 function FilterControl({ label, value, options, open, onToggle, onSelect }: { label: string; value: string | null; options: string[]; open: boolean; onToggle: () => void; onSelect: (value: string | null) => void }) {
