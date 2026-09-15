@@ -4,6 +4,12 @@ export type SanityImage = {
   asset?: {
     _ref?: string;
     _id?: string;
+    metadata?: {
+      dimensions?: {
+        width?: number;
+        height?: number;
+      };
+    };
   };
 };
 
@@ -69,6 +75,9 @@ export type Project = {
   scopeOfWork?: string;
   featured?: boolean;
   order?: number;
+  fallbackImageUrl?: string;
+  fallbackGalleryUrls?: string[];
+  team?: Array<{ role: string; members: string[] }>;
 };
 
 export type ServiceProjectCard = Pick<Project, "_id" | "title" | "slug" | "coverImage" | "category" | "location" | "homeTagline">;
@@ -125,34 +134,19 @@ export type Product = {
 };
 
 export function plainText(value: unknown): string {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    const localized = value as Record<string, unknown>;
-    for (const locale of ["id", "en", "ja", "fr", "de", "it"]) {
-      const selected: string = plainText(localized[locale]);
-      if (selected) return selected;
-    }
-    return "";
-  }
-
   return (typeof value === "string" ? value : "")
     .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
 }
 
 export function portableTextToPlainText(value: unknown): string {
-  if (value && !Array.isArray(value) && typeof value === "object") {
-    const localized = value as Record<string, unknown>;
-    for (const locale of ["id", "en", "ja", "fr", "de", "it"]) {
-      const selected = portableTextToPlainText(localized[locale]);
-      if (selected) return selected;
-    }
-    return "";
-  }
+  return portableTextToParagraphs(value).join("\n\n");
+}
 
-  if (!Array.isArray(value)) return "";
+export function portableTextToParagraphs(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
 
   return (value as PortableTextBlock[])
     .map((block) => block.children?.map((child) => child.text ?? "").join("") ?? "")
-    .filter(Boolean)
-    .join("\n\n") ?? "";
+    .filter(Boolean);
 }

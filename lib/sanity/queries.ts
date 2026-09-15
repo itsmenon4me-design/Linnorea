@@ -43,7 +43,8 @@ export const projectListQuery = `
     year,
     description,
     featured,
-    order
+    order,
+    team
   }
 `;
 
@@ -53,8 +54,8 @@ export const projectBySlugQuery = `
     _type,
     title,
     slug,
-    coverImage,
-    gallery,
+    coverImage{..., asset->{metadata{dimensions}}},
+    gallery[]{..., asset->{metadata{dimensions}}},
     heroVideo{asset->{url}},
     category,
     status,
@@ -64,6 +65,7 @@ export const projectBySlugQuery = `
     area,
     description,
     scopeOfWork,
+    team,
     featured,
     order
   }

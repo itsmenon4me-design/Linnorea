@@ -48,7 +48,15 @@ export const project = defineType({
       name: "category",
       title: "Category",
       type: "string",
-      description: "Free-text category. Current labels: Residential or Retail. Add any future category without changing the schema.",
+      options: {
+        list: [
+          { title: "Architecture", value: "Architecture" },
+          { title: "Art", value: "Art" },
+          { title: "Design", value: "Design" },
+        ],
+        layout: "radio",
+      },
+      description: "Choose one primary archive category for the project.",
     }),
     defineField({
       name: "status",
@@ -58,9 +66,9 @@ export const project = defineType({
     }),
     defineField({
       name: "styleTag",
-      title: "Style tag",
+      title: "Typology",
       type: "string",
-      description: "Example: Modern Tropical, Compact Tropical, American Classic.",
+      description: "Filter label for the project typology, for example Residential, Commercial, or Hospitality.",
     }),
     defineField({
       name: "homeTagline",
@@ -98,6 +106,22 @@ export const project = defineType({
       title: "Scope of work",
       type: "string",
       description: "Optional summary of scope.",
+    }),
+    defineField({
+      name: "team",
+      title: "Project team",
+      type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "role", title: "Role", type: "string", validation: (Rule) => Rule.required() }),
+          defineField({ name: "members", title: "Members", type: "array", of: [{ type: "string" }], validation: (Rule) => Rule.min(1) }),
+        ],
+        preview: {
+          select: { title: "role" },
+        },
+      }],
+      description: "People or companies involved in this project, grouped by role.",
     }),
     defineField({
       name: "featured",
