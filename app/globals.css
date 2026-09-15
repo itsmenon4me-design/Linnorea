@@ -322,7 +322,7 @@ button {
 
 .project-gallery-image {
   transform: scale(var(--project-image-scale));
-  transition: transform 1600ms ease-out;
+  transition: transform 1000ms ease-out;
 }
 
 .project-archive-grid .project-gallery-item:hover .project-gallery-image,
@@ -360,7 +360,7 @@ button {
 }
 
 .project-gallery-item--image-entering .project-gallery-image {
-  animation: project-archive-image-zoom-out 1600ms ease-out both;
+  animation: project-archive-image-zoom-out 1000ms ease-out both;
 }
 
 @keyframes project-archive-image-zoom-out {

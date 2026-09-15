@@ -197,7 +197,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsImageEntering(true);
-        entryTimer = window.setTimeout(() => setIsImageEntering(false), 1600);
+        entryTimer = window.setTimeout(() => setIsImageEntering(false), 1000);
         observer.disconnect();
       }
     }, { threshold: 0.08 });
