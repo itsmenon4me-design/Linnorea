@@ -327,7 +327,8 @@ button {
 
 .project-archive-grid .project-gallery-item:hover .project-gallery-image,
 .project-archive-grid .project-gallery-item:focus-visible .project-gallery-image {
-  transform: scale(1.05);
+  animation: none !important;
+  transform: scale(1.05) !important;
 }
 
 .project-card-meta {

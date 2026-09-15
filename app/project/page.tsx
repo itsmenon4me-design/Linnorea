@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
-import { ProjectListingGrid } from "@/components/sections/ProjectListingGrid";
+import { normalizeProjectCategory, ProjectListingGrid } from "@/components/sections/ProjectListingGrid";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ProjectListingPage({ searchParams }: { searchParams: Promise<{ demo?: string }> }) {
   const params = await searchParams;
   const projects = params.demo === "1" ? fallbackProjects : await fetchProjectsSafely();
-  const categories = Array.from(new Set(projects.map((project) => project.category?.trim()).filter((category): category is string => Boolean(category))));
+  const categories = Array.from(new Set(projects.map((project) => normalizeProjectCategory(project.category)).filter((category): category is string => Boolean(category))));
 
   return (
     <main className="project-archive-page min-h-screen bg-[var(--color-bg-base)] text-white">

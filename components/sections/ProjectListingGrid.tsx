@@ -53,7 +53,7 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
 
   const visibleProjects = useMemo(() => projects.filter((project) => {
     const matches = (value: string | undefined, selected: string | null) => !selected || value?.trim() === selected;
-    return matches(project.category, activeCategory)
+    return matches(normalizeProjectCategory(project.category), activeCategory)
       && matches(project.location, activeLocation)
       && matches(project.status, activeStatus)
       && matches(project.styleTag, activeTypology);
@@ -160,6 +160,14 @@ function uniqueProjectValues(values: Array<string | undefined>) {
   return Array.from(new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value))));
 }
 
+export function normalizeProjectCategory(category?: string) {
+  const normalized = category?.trim();
+  if (!normalized) return undefined;
+  if (normalized === "Residential" || normalized === "Commercial") return "Architecture";
+  if (normalized === "Retail") return "Design";
+  return normalized;
+}
+
 function FilterControl({ label, value, options, open, onToggle, onSelect }: { label: string; value: string | null; options: string[]; open: boolean; onToggle: () => void; onSelect: (value: string | null) => void }) {
   return (
     <div className="relative">
@@ -209,11 +217,11 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
         <div className={`project-card-meta pointer-events-none absolute bottom-2 left-2 mr-2 flex max-w-[calc(100%-1rem)] items-end rounded-xl bg-black/20 p-4 text-white ${isListView ? "sm:hidden" : ""}`}>
           <div>
             <p className="project-card-meta__title text-sm font-medium leading-tight transition-colors duration-200">{title}</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/75">{project.location || project.category || dictionary.ui.projectCategory}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/75">{project.location || normalizeProjectCategory(project.category) || dictionary.ui.projectCategory}</p>
           </div>
         </div>
       </div>
-      {isListView ? <div className="grid items-center gap-3 py-2 text-sm text-white/65 sm:grid-cols-[1fr_1fr_auto]"><span className="project-list-item__title text-base text-white/80 transition-colors duration-200">{title}</span><span className="text-[10px] uppercase tracking-[0.14em]">{project.location || project.category || dictionary.ui.projectCategory}</span><span className="text-[10px] uppercase tracking-[0.14em]">{project.year || ""}</span></div> : null}
+      {isListView ? <div className="grid items-center gap-3 py-2 text-sm text-white/65 sm:grid-cols-[1fr_1fr_auto]"><span className="project-list-item__title text-base text-white/80 transition-colors duration-200">{title}</span><span className="text-[10px] uppercase tracking-[0.14em]">{project.location || normalizeProjectCategory(project.category) || dictionary.ui.projectCategory}</span><span className="text-[10px] uppercase tracking-[0.14em]">{project.year || ""}</span></div> : null}
     </button>
   );
 }
@@ -307,7 +315,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
             <h2 id="project-viewer-title" className="max-w-xs text-3xl font-light leading-[0.95] tracking-[-0.06em] md:text-4xl">{title}</h2>
             <dl className="mt-8 grid grid-cols-2 gap-x-4 gap-y-3 text-[10px] uppercase tracking-[0.16em] text-white/50">
               {project.location ? <div><dt>{dictionary.ui.location}</dt><dd className="mt-1 text-white">{project.location}</dd></div> : null}
-              {project.category ? <div><dt>{dictionary.ui.projectCategory}</dt><dd className="mt-1 text-white">{project.category}</dd></div> : null}
+              {normalizeProjectCategory(project.category) ? <div><dt>{dictionary.ui.projectCategory}</dt><dd className="mt-1 text-white">{normalizeProjectCategory(project.category)}</dd></div> : null}
               {project.year ? <div><dt>{dictionary.ui.year}</dt><dd className="mt-1 text-white">{project.year}</dd></div> : null}
               {project.area ? <div><dt>{dictionary.ui.area}</dt><dd className="mt-1 text-white">{project.area}</dd></div> : null}
             </dl>
