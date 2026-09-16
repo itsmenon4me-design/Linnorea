@@ -98,6 +98,45 @@ const aboutContent = {
   ],
 };
 
+const insightSeeds = [
+  {
+    _id: "insight-watg-wimberly-august-2026",
+    title: "WATG and Wimberly Interiors in the Global Press: August 2026",
+    slug: { _type: "slug", current: "linnorea-design-works-in-focus" },
+    category: "NEWS",
+    publishedAt: "2026-08-31",
+    excerpt: "WATG and Wimberly Interiors' August 2026 media coverage: Lagen Island Resort's press spread, Four Seasons Cartagena recognition, and Hospitality Giants ranking.",
+    order: 0,
+  },
+  {
+    _id: "insight-guardians-lagen-island",
+    title: "The Guardians of Lagen Island",
+    slug: { _type: "slug", current: "regional-detail" },
+    category: "DESIGN + INNOVATION",
+    publishedAt: "2026-08-30",
+    excerpt: "Setting a new benchmark for how legacy properties can evolve responsibly.",
+    order: 1,
+  },
+  {
+    _id: "insight-wimberly-top-hospitality-firms",
+    title: "Wimberly Interiors is #7 in World's Top Hospitality Design Firms",
+    slug: { _type: "slug", current: "wimberly-interiors-press" },
+    category: "NEWS",
+    publishedAt: "2026-08-29",
+    excerpt: "Interior Design magazine's 2026 Giants of Design ranks Wimberly Interiors among the world's leading hospitality design firms.",
+    order: 2,
+  },
+  {
+    _id: "insight-hospitality-renovation",
+    title: "Bringing Hospitality Design to Renovation and Amenitization",
+    slug: { _type: "slug", current: "hospitality-renovation" },
+    category: "DESIGN + INNOVATION",
+    publishedAt: "2026-08-28",
+    excerpt: "Owners and developers are rethinking amenity strategy. Hospitality design principles now turn renovation into lasting value.",
+    order: 3,
+  },
+];
+
 async function seed() {
   await Promise.all(approachItems.map((item) => client.createIfNotExists(item)));
   const existingSettings = await client.fetch<{ _id: string } | null>(
@@ -106,7 +145,27 @@ async function seed() {
   const settingsId = existingSettings?._id ?? "site-settings";
   await client.createIfNotExists({ _id: settingsId, _type: "siteSettings" });
   await client.patch(settingsId).set(aboutContent).commit();
-  console.log(`Seeded ${approachItems.length} approach items and About content.`);
+  const projects = await client.fetch<Array<{ coverImage?: unknown }>>(
+    '*[_type == "project"] | order(order asc, _createdAt asc)[0...4]{coverImage}',
+  );
+  await Promise.all(
+    insightSeeds.map((insight, index) =>
+      client.createIfNotExists({
+        ...insight,
+        _type: "insight",
+        coverImage: projects[index]?.coverImage,
+        content: [],
+      }),
+    ),
+  );
+  const verification = await client.fetch<{ approach: number; settings: number; insights: number }>(`
+    {
+      "approach": count(*[_type == "approachItem"]),
+      "settings": count(*[_type == "siteSettings"]),
+      "insights": count(*[_type == "insight"])
+    }
+  `);
+  console.log(`Seeded ${approachItems.length} approach items, About content, and ${insightSeeds.length} Insight entries. Verified counts: ${JSON.stringify(verification)}`);
 }
 
 seed().catch((error) => {

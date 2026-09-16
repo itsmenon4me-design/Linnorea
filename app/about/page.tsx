@@ -71,24 +71,25 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
         summary: item.summary,
         href: `/preview/insight/${item.slug}?preview=1`,
       }))
-    : [
-        ...selectedProjects.map((project) => ({
-          _id: project._id,
-          title: project.title,
-          category: project.category ?? project.styleTag ?? "Project",
-          coverImage: project.coverImage,
-          summary: project.homeTagline || plainText(project.location),
-          href: project.slug?.current ? `/project/${project.slug.current}` : "/project",
-        })),
-        ...insightCards.map((item) => ({
+    : insightCards.length
+      ? insightCards.map((item) => ({
           _id: item._id,
           title: item.title,
           category: item.category ?? "Insight",
           coverImage: item.coverImage,
           summary: item.summary,
           href: `/preview/insight/${item.slug}?preview=1`,
-        })),
-      ];
+        }))
+      : [
+          ...selectedProjects.map((project) => ({
+          _id: project._id,
+          title: project.title,
+          category: project.category ?? project.styleTag ?? "Project",
+          coverImage: project.coverImage,
+          summary: project.homeTagline || plainText(project.location),
+          href: project.slug?.current ? `/project/${project.slug.current}` : "/project",
+          })),
+        ];
   const leadership = teamMembers.filter((member) => member.name && member.photo?.asset?._ref);
   const previewProcessItems = [
     { title: "Listen first", subtitle: "Preview process stage", description: "We begin with the character of a place, the people around it, and the everyday rituals the work should support.", image: selectedProjects[0]?.coverImage },
