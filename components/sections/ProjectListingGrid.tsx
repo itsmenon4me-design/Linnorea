@@ -44,14 +44,6 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
     );
   }, [projects, searchParams]);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-    const updateViewForViewport = () => setIsListView(mediaQuery.matches);
-    updateViewForViewport();
-    mediaQuery.addEventListener("change", updateViewForViewport);
-    return () => mediaQuery.removeEventListener("change", updateViewForViewport);
-  }, []);
-
   const visibleProjects = useMemo(() => projects.filter((project) => {
     const matches = (value: string | undefined, selected: string | null) => !selected || value?.trim() === selected;
     return matches(normalizeProjectCategory(project.category), activeCategory)
