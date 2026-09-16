@@ -101,39 +101,75 @@ const aboutContent = {
 const insightSeeds = [
   {
     _id: "insight-watg-wimberly-august-2026",
-    title: "WATG and Wimberly Interiors in the Global Press: August 2026",
+    title: "Design Works in Focus: August 2026",
     slug: { _type: "slug", current: "linnorea-design-works-in-focus" },
     category: "NEWS",
     publishedAt: "2026-08-31",
-    excerpt: "WATG and Wimberly Interiors' August 2026 media coverage: Lagen Island Resort's press spread, Four Seasons Cartagena recognition, and Hospitality Giants ranking.",
+    excerpt: "A monthly view of hospitality design, responsible renovation, and the teams shaping meaningful places.",
     order: 0,
   },
   {
     _id: "insight-guardians-lagen-island",
-    title: "The Guardians of Lagen Island",
+    title: "The Guardians of Island Light",
     slug: { _type: "slug", current: "regional-detail" },
     category: "DESIGN + INNOVATION",
     publishedAt: "2026-08-30",
-    excerpt: "Setting a new benchmark for how legacy properties can evolve responsibly.",
+    excerpt: "How a legacy island retreat can evolve with care for place, memory, and the people who return to it.",
     order: 1,
   },
   {
     _id: "insight-wimberly-top-hospitality-firms",
-    title: "Wimberly Interiors is #7 in World's Top Hospitality Design Firms",
+    title: "A New Chapter for Hospitality Design",
     slug: { _type: "slug", current: "wimberly-interiors-press" },
     category: "NEWS",
     publishedAt: "2026-08-29",
-    excerpt: "Interior Design magazine's 2026 Giants of Design ranks Wimberly Interiors among the world's leading hospitality design firms.",
+    excerpt: "A closer look at the ideas and collaborations shaping the next generation of hospitality spaces.",
     order: 2,
   },
   {
     _id: "insight-hospitality-renovation",
-    title: "Bringing Hospitality Design to Renovation and Amenitization",
+    title: "Designing the Next Chapter of a Stay",
     slug: { _type: "slug", current: "hospitality-renovation" },
     category: "DESIGN + INNOVATION",
     publishedAt: "2026-08-28",
-    excerpt: "Owners and developers are rethinking amenity strategy. Hospitality design principles now turn renovation into lasting value.",
+    excerpt: "Owners and developers are rethinking amenity strategy to create lasting value through renovation.",
     order: 3,
+  },
+  {
+    _id: "insight-hualuxe-conversation",
+    title: "In Conversation: A New Life for the City Hotel",
+    slug: { _type: "slug", current: "city-hotel-new-life" },
+    category: "PROJECT STORIES",
+    publishedAt: "2026-08-27",
+    excerpt: "How a former office tower became a welcoming hospitality destination shaped by local rhythms.",
+    order: 4,
+  },
+  {
+    _id: "insight-regional-growth",
+    title: "Beyond Growth: Designing What Comes Next",
+    slug: { _type: "slug", current: "beyond-growth-designing-whats-next" },
+    category: "STRATEGY + RESEARCH",
+    publishedAt: "2026-08-26",
+    excerpt: "A place-based view of how hospitality can grow with stronger regional identity and care.",
+    order: 5,
+  },
+  {
+    _id: "insight-landscape-leads",
+    title: "When the Landscape Leads",
+    slug: { _type: "slug", current: "when-the-landscape-leads" },
+    category: "PROJECT STORIES",
+    publishedAt: "2026-08-25",
+    excerpt: "A destination shaped by forest, lake, terrain, and the character of its setting.",
+    order: 6,
+  },
+  {
+    _id: "insight-designing-belonging",
+    title: "Designing for Belonging",
+    slug: { _type: "slug", current: "designing-for-belonging" },
+    category: "DESIGN + INNOVATION",
+    publishedAt: "2026-08-24",
+    excerpt: "A place-based hospitality approach that makes arrival, gathering, and return feel connected.",
+    order: 7,
   },
 ];
 
@@ -153,9 +189,18 @@ async function seed() {
       client.createIfNotExists({
         ...insight,
         _type: "insight",
-        coverImage: projects[index]?.coverImage,
+        coverImage: projects[index % projects.length]?.coverImage,
         content: [],
       }),
+    ),
+  );
+  await Promise.all(
+    insightSeeds.slice(0, 4).map((insight) =>
+      client.patch(insight._id).set({
+        title: insight.title,
+        category: insight.category,
+        excerpt: insight.excerpt,
+      }).commit(),
     ),
   );
   const verification = await client.fetch<{ approach: number; settings: number; insights: number }>(`

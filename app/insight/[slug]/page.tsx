@@ -54,6 +54,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
   const title = insight.title ?? "Insight";
   const coverUrl = insight.coverImage ? urlFor(insight.coverImage).width(2000).height(1200).fit("crop").auto("format").quality(82).url() : null;
   const relatedInsights = allInsights.filter((item) => item._id !== insight._id).slice(0, 4);
+  const additionalInsights = allInsights.filter((item) => item._id !== insight._id).slice(4);
   const contentBlocks = insight.content ?? [];
 
   return (
@@ -75,6 +76,39 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
           display: grid;
           grid-template-columns: 192px minmax(0, 539px);
           gap: 40px;
+        }
+        .insight-related-more {
+          display: flex;
+          flex-direction: column;
+        }
+        .insight-related-more summary {
+          order: 2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          width: fit-content;
+          min-height: 44px;
+          margin: 24px auto 0;
+          padding: 8px 24px;
+          border: 1px solid rgb(255 255 255 / 50%);
+          border-radius: 999px;
+          cursor: pointer;
+          list-style: none;
+        }
+        .insight-related-more summary::-webkit-details-marker {
+          display: none;
+        }
+        .insight-related-more summary::after {
+          content: "+";
+          font-size: 20px;
+          line-height: 1;
+        }
+        .insight-related-more[open] summary::after {
+          content: "−";
+        }
+        .insight-related-more .insight-related-list {
+          order: 1;
         }
         @media (max-width: 47.99rem) {
           .insight-related-item {
@@ -135,7 +169,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                   <p className="text-xs uppercase tracking-[0.18em] text-white/55">Latest Insights</p>
                   <div>
                     <h2 className="font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] md:text-7xl">Perspectives, trends, news.</h2>
-                    <div className="mt-14">
+                    <div className="mt-14 insight-related-list">
                       {relatedInsights.map((item) => {
                         const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
                         return (
@@ -151,6 +185,28 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                           </Link>
                         );
                       })}
+                      {additionalInsights.length ? (
+                        <details className="insight-related-more">
+                          <summary className="text-sm text-white">Show more</summary>
+                          <div className="insight-related-list">
+                            {additionalInsights.map((item) => {
+                              const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
+                              return (
+                                <Link key={item._id} href={`/insight/${item.slug?.current}`} className="insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
+                                  <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
+                                    {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={600} height={400} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+                                  </span>
+                                  <span className="block">
+                                    <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
+                                    <span className="mt-4 block text-xl font-medium leading-7 underline decoration-white/40 underline-offset-4">{item.title}</span>
+                                    {item.excerpt ? <span className="mt-5 block text-base leading-7 text-white/70">{item.excerpt}</span> : null}
+                                  </span>
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </details>
+                      ) : null}
                     </div>
                   </div>
                 </div>
