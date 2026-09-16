@@ -394,7 +394,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
           </div>
         ) : null}
         {!isGalleryOpen && images.length > 1 ? (
-          <div className="project-viewer-gallery-frame project-viewer-gallery-frame--mobile-continuation relative min-w-0">
+          <div className="project-viewer-gallery-frame project-viewer-gallery-frame--mobile-continuation order-3 relative min-w-0">
             <div className="project-viewer-gallery project-viewer-gallery--normal project-viewer-gallery--mobile-continuation min-h-0 min-w-0">
               {images.slice(1).map((entry, index) => {
                 const imageIndex = index + 1;
