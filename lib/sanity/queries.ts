@@ -135,6 +135,20 @@ export const insightListQuery = `
   }
 `;
 
+export const insightBySlugQuery = `
+  *[_type == "insight" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    category,
+    publishedAt,
+    excerpt,
+    coverImage,
+    content,
+    order
+  }
+`;
+
 export const serviceListQuery = `
   *[_type == "service"] | order(order asc, _createdAt asc) {
     _id, title, slug, image, description, order

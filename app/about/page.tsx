@@ -69,7 +69,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
         category: item.category,
         coverImage: item.coverImage,
         summary: item.summary,
-        href: `/preview/insight/${item.slug}?preview=1`,
+        href: `/insight/${item.slug}`,
       }))
     : insightCards.length
       ? insightCards.map((item) => ({
@@ -78,7 +78,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
           category: item.category ?? "Insight",
           coverImage: item.coverImage,
           summary: item.summary,
-          href: `/preview/insight/${item.slug}?preview=1`,
+          href: `/insight/${item.slug}`,
         }))
       : [
           ...selectedProjects.map((project) => ({

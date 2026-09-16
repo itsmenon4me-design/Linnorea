@@ -119,8 +119,11 @@ export type Insight = {
   publishedAt?: string;
   excerpt?: string;
   coverImage?: SanityImage;
+  content?: InsightContentBlock[];
   order?: number;
 };
+
+export type InsightContentBlock = PortableTextBlock | SanityImage;
 
 export type ApproachItem = {
   _id: string;
