@@ -57,7 +57,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
   const contentBlocks = insight.content ?? [];
 
   return (
-    <ScrollReveal as="main" className="min-h-screen bg-[var(--color-bg-base)] text-white">
+    <ScrollReveal className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <style>{`
         .insight-detail-hero,
         .insight-detail-grid {
