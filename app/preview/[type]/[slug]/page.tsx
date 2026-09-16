@@ -94,7 +94,7 @@ export default async function PreviewDetailPage({ params }: PreviewDetailPagePro
   const projectImage = project?.coverImage ? urlFor(project.coverImage).width(1800).height(1100).fit("crop").auto("format").quality(82).url() : null;
 
   return (
-    <ScrollReveal as="main" className="min-h-screen bg-[var(--color-bg-base)] text-white">
+    <ScrollReveal className="min-h-screen bg-[var(--color-bg-base)] text-white">
       <style>{`
         .preview-detail-hero,
         .preview-detail-grid {
