@@ -62,6 +62,33 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
     slug: insight.slug?.current ?? "",
     summary: "homeTagline" in insight ? insight.homeTagline : insight.excerpt,
   }));
+  const aboutCards = isPreview
+    ? insightCards.map((item) => ({
+        _id: item._id,
+        title: item.title,
+        category: item.category,
+        coverImage: item.coverImage,
+        summary: item.summary,
+        href: `/preview/insight/${item.slug}?preview=1`,
+      }))
+    : [
+        ...selectedProjects.map((project) => ({
+          _id: project._id,
+          title: project.title,
+          category: project.category ?? project.styleTag ?? "Project",
+          coverImage: project.coverImage,
+          summary: project.homeTagline || plainText(project.location),
+          href: project.slug?.current ? `/project/${project.slug.current}` : "/project",
+        })),
+        ...insightCards.map((item) => ({
+          _id: item._id,
+          title: item.title,
+          category: item.category ?? "Insight",
+          coverImage: item.coverImage,
+          summary: item.summary,
+          href: `/preview/insight/${item.slug}?preview=1`,
+        })),
+      ];
   const leadership = teamMembers.filter((member) => member.name && member.photo?.asset?._ref);
   const previewProcessItems = [
     { title: "Listen first", subtitle: "Preview process stage", description: "We begin with the character of a place, the people around it, and the everyday rituals the work should support.", image: selectedProjects[0]?.coverImage },
@@ -348,7 +375,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       </div>
       </ScrollReveal>
 
-      {insightCards.length ? (
+      {aboutCards.length ? (
         <ScrollReveal as="section" className="border-y border-white/15">
           <div className="mx-auto max-w-[88rem] px-5 py-24 md:px-8 md:py-36">
             <div data-reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -359,17 +386,17 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
               <Link href="/project" className="inline-flex min-h-11 w-fit items-center border-b border-white/45 pb-2 text-[10px] uppercase tracking-[0.22em] text-white/80 transition hover:border-white hover:text-white">{dictionary.ui.viewProjects}</Link>
             </div>
             <div data-reveal className="about-card-list about-card-list--editorial mt-16 md:mt-20">
-              {insightCards.map((insight) => {
-                const imageUrl = insight.coverImage ? urlFor(insight.coverImage).width(1600).height(1100).fit("crop").auto("format").quality(80).url() : null;
+              {aboutCards.map((card) => {
+                const imageUrl = card.coverImage ? urlFor(card.coverImage).width(1600).height(1100).fit("crop").auto("format").quality(80).url() : null;
                 return (
-                  <Link key={insight._id} href={`/preview/insight/${insight.slug}?preview=1`} className="group about-card-item min-w-0">
+                  <Link key={card._id} href={card.href} className="group about-card-item min-w-0">
                     <div className="about-card-media relative aspect-[3/2] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
-                      {imageUrl ? <Image src={imageUrl} alt={insight.title ?? "Insight"} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
+                      {imageUrl ? <Image src={imageUrl} alt={card.title ?? "Project or insight"} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
                     </div>
                     <div className="about-card-copy min-w-0">
-                      <p className="text-xs tracking-[0.16em] text-white/55">{insight.category}</p>
-                      <h3 className="mt-5 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 lg:text-2xl">{insight.title}</h3>
-                      <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{insight.summary}</p>
+                      <p className="text-xs tracking-[0.16em] text-white/55">{card.category}</p>
+                      <h3 className="mt-5 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 lg:text-2xl">{card.title}</h3>
+                      <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{card.summary}</p>
                     </div>
                   </Link>
                 );
