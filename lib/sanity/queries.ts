@@ -80,8 +80,17 @@ export const siteSettingsQuery = `
     aboutEstablished,
     aboutDescription,
     aboutKey | order(order asc),
+    aboutPrinciplesIntro,
+    aboutPrinciplesContext,
+    aboutPrinciples | order(order asc),
     aboutVision,
+    aboutVisionSupport,
+    aboutVisionImage,
     aboutMission,
+    aboutMissionLead,
+    aboutMissionSupport,
+    aboutMissionDetails | order(order asc),
+    aboutMissionImage,
     aboutProcess | order(order asc),
     studioVisualImage,
     studioVisualVideo {
@@ -95,6 +104,7 @@ export const siteSettingsQuery = `
     googleMapsUrl,
     whatsappNumber,
     whatsappCtaText,
+    aboutCtaHeading,
     socialLinks,
     seoDefaults
   }
@@ -109,6 +119,19 @@ export const approachItemsQuery = `
 export const teamMembersQuery = `
   *[_type == "teamMember"] | order(order asc, _createdAt asc) {
     _id, name, role, bio, photo, order
+  }
+`;
+
+export const insightListQuery = `
+  *[_type == "insight"] | order(order asc, publishedAt desc, _createdAt desc) {
+    _id,
+    title,
+    slug,
+    category,
+    publishedAt,
+    excerpt,
+    coverImage,
+    order
   }
 `;
 

@@ -54,15 +54,79 @@ export const siteSettings = defineType({
       }],
     }),
     defineField({
+      name: "aboutPrinciplesIntro",
+      title: "About principles introduction",
+      type: "text",
+    }),
+    defineField({
+      name: "aboutPrinciplesContext",
+      title: "About principles context note",
+      type: "text",
+    }),
+    defineField({
+      name: "aboutPrinciples",
+      title: "About principles",
+      type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "title", title: "Title", type: "string" }),
+          defineField({ name: "description", title: "Description", type: "text" }),
+          defineField({ name: "image", title: "Image", type: "image", options: { hotspot: true } }),
+          defineField({ name: "order", title: "Display order", type: "number" }),
+        ],
+      }],
+    }),
+    defineField({
       name: "aboutVision",
       title: "About vision",
       type: "text",
+    }),
+    defineField({
+      name: "aboutVisionSupport",
+      title: "About vision supporting text",
+      type: "text",
+    }),
+    defineField({
+      name: "aboutVisionImage",
+      title: "About vision image",
+      type: "image",
+      options: { hotspot: true },
     }),
     defineField({
       name: "aboutMission",
       title: "About mission points",
       type: "array",
       of: [{ type: "text" }],
+    }),
+    defineField({
+      name: "aboutMissionLead",
+      title: "About mission lead",
+      type: "text",
+    }),
+    defineField({
+      name: "aboutMissionSupport",
+      title: "About mission supporting text",
+      type: "text",
+    }),
+    defineField({
+      name: "aboutMissionDetails",
+      title: "About mission details",
+      type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "label", title: "Label", type: "string" }),
+          defineField({ name: "description", title: "Description", type: "text" }),
+          defineField({ name: "order", title: "Display order", type: "number" }),
+        ],
+      }],
+    }),
+    defineField({
+      name: "aboutMissionImage",
+      title: "About mission image",
+      type: "image",
+      options: { hotspot: true },
     }),
     defineField({
       name: "aboutProcess",
@@ -112,6 +176,11 @@ export const siteSettings = defineType({
     defineField({
       name: "whatsappCtaText",
       title: "WhatsApp CTA text",
+      type: "string",
+    }),
+    defineField({
+      name: "aboutCtaHeading",
+      title: "About closing CTA heading",
       type: "string",
     }),
     defineField({

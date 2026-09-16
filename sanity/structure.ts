@@ -39,6 +39,7 @@ export function structure(S: StructureBuilder) {
                 ),
               S.documentTypeListItem("approachItem").title("Approach Items"),
               S.documentTypeListItem("teamMember").title("Team Members"),
+              S.documentTypeListItem("insight").title("Insights"),
             ])
         ),
       S.listItem()

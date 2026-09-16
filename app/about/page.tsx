@@ -4,12 +4,13 @@ import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { StudioVisual } from "@/components/sections/StudioVisual";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
+import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
-import { projectListQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
-import { plainText, portableTextToPlainText, type Project, type SiteSettings, type TeamMember } from "@/lib/sanity/types";
+import { insightListQuery, projectListQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
+import { plainText, type Insight, type Project, type SiteSettings, type TeamMember } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,19 +18,62 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: { absolute: `${dictionary.nav.about} | ${seo.title}` }, description: seo.description };
 }
 
-export default async function AboutPage() {
-  const [settings, projects, teamMembers] = await Promise.all([
+export default async function AboutPage({ searchParams }: { searchParams: Promise<{ preview?: string }> }) {
+  const { preview } = await searchParams;
+  const isPreview = preview === "1";
+  const [settings, projects, teamMembers, insights] = await Promise.all([
     sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<TeamMember[]>(teamMembersQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<Insight[]>(insightListQuery, {}, { next: { revalidate } }),
   ]);
-  const established = plainText(settings?.aboutEstablished) || dictionary.about.establishedPlaceholder;
-  const description = plainText(settings?.aboutDescription) || dictionary.about.descriptionPlaceholder;
-  const keyItems = settings?.aboutKey ?? [];
-  const missionItems = settings?.aboutMission ?? [];
+  const established = isPreview ? "Preview studio timeline" : plainText(settings?.aboutEstablished) || dictionary.about.establishedPlaceholder;
+  const description = isPreview
+    ? "Preview introduction: Linnorea is a design studio shaping places, objects, and experiences through a close reading of landscape, culture, and everyday life."
+    : plainText(settings?.aboutDescription) || dictionary.about.descriptionPlaceholder;
   const processItems = settings?.aboutProcess ?? [];
+  const fallbackPrinciples = [
+    { title: "Place", description: "We begin with climate, memory, ritual, and the way a site belongs to the people who use it. The existing story sets the direction.", image: undefined },
+    { title: "Material", description: "We choose surfaces and textures for the atmosphere they create, and for the way they gather patina, warmth, and permanence over time.", image: undefined },
+    { title: "Experience", description: "Every room, threshold, and view is shaped around the way people move, gather, pause, and return to a place.", image: undefined },
+  ];
+  const principles = isPreview ? fallbackPrinciples : settings?.aboutPrinciples?.length ? settings.aboutPrinciples : fallbackPrinciples;
+  const fallbackMissionDetails = [
+    { label: "With context", description: "Every decision begins with the place, its conditions, and the lives that will unfold there." },
+    { label: "With care", description: "We stay close to the making, refining the details that turn an idea into an enduring experience." },
+  ];
+  const missionDetails = isPreview ? fallbackMissionDetails : settings?.aboutMissionDetails?.length ? settings.aboutMissionDetails : fallbackMissionDetails;
   const selectedProjects = projects.filter((project) => project.coverImage?.asset?._ref).slice(0, 4);
+  const previewProjects: Project[] = [
+    { _id: "preview-project-01", title: "Tropical Courtyard House", slug: { current: "preview-tropical-courtyard-house" }, category: "Residential", location: "Bali, Indonesia", homeTagline: "A quieter relationship between home and landscape.", coverImage: selectedProjects[0]?.coverImage },
+    { _id: "preview-project-02", title: "Marea House", slug: { current: "preview-marea-house" }, category: "Residential", location: "Lombok, Indonesia", homeTagline: "Material warmth shaped around coastal light.", coverImage: selectedProjects[1]?.coverImage },
+    { _id: "preview-project-03", title: "The River Rooms", slug: { current: "preview-the-river-rooms" }, category: "Hospitality", location: "Ubud, Indonesia", homeTagline: "A stay designed as a sequence of calm thresholds.", coverImage: selectedProjects[2]?.coverImage },
+    { _id: "preview-project-04", title: "Linnorea Objects", slug: { current: "preview-linnorea-objects" }, category: "Product", location: "Jakarta, Indonesia", homeTagline: "Small pieces with a sense of place.", coverImage: selectedProjects[3]?.coverImage },
+  ];
+  const previewInsights = [
+    { ...previewProjects[2], category: "NEWS", title: "WATG and Wimberly Interiors in the Global Press: August 2026", slug: { current: "preview-linnorea-design-works-in-focus" }, homeTagline: "WATG and Wimberly Interiors' August 2026 media coverage: Lagen Island Resort's press spread, Four Seasons Cartagena recognition, and Hospitality Giants ranking.", coverImage: selectedProjects[2]?.coverImage },
+    { ...previewProjects[3], category: "DESIGN + INNOVATION", title: "The Guardians of Lagen Island", slug: { current: "preview-regional-detail" }, homeTagline: "Setting a new benchmark for how legacy properties can evolve responsibly.", coverImage: selectedProjects[0]?.coverImage },
+    { ...previewProjects[1], category: "NEWS", title: "Wimberly Interiors is #7 in World's Top Hospitality Design Firms", slug: { current: "preview-wimberly-interiors-press" }, homeTagline: "Interior Design magazine's 2026 Giants of Design ranks Wimberly Interiors among the world's leading hospitality design firms.", coverImage: selectedProjects[1]?.coverImage },
+    { ...previewProjects[0], category: "DESIGN + INNOVATION", title: "Bringing Hospitality Design to Renovation and Amenitization", slug: { current: "preview-hospitality-renovation" }, homeTagline: "Owners and developers are rethinking amenity strategy. Hospitality design principles now turn renovation into lasting value.", coverImage: selectedProjects[3]?.coverImage },
+  ];
+  const aboutInsights = isPreview ? previewInsights : insights;
+  const insightCards = aboutInsights.map((insight) => ({
+    ...insight,
+    slug: insight.slug?.current ?? "",
+    summary: "homeTagline" in insight ? insight.homeTagline : insight.excerpt,
+  }));
   const leadership = teamMembers.filter((member) => member.name && member.photo?.asset?._ref);
+  const previewProcessItems = [
+    { title: "Listen first", subtitle: "Preview process stage", description: "We begin with the character of a place, the people around it, and the everyday rituals the work should support.", image: selectedProjects[0]?.coverImage },
+    { title: "Shape the idea", subtitle: "Preview process stage", description: "References, material studies, and spatial sketches become one clear direction that can be tested together.", image: selectedProjects[1]?.coverImage },
+    { title: "Make it real", subtitle: "Preview process stage", description: "The final work is refined through details, prototypes, and close collaboration from first drawing to handover.", image: selectedProjects[2]?.coverImage },
+  ];
+  const previewLeadership = [
+    { name: "Preview profile 01", role: "Creative direction", office: "Bali studio", slug: "preview-profile-01" },
+    { name: "Preview profile 02", role: "Spatial design", office: "Jakarta studio", slug: "preview-profile-02" },
+    { name: "Preview profile 03", role: "Project leadership", office: "Singapore studio", slug: "preview-profile-03" },
+    { name: "Preview profile 04", role: "Material research", office: "Yogyakarta studio", slug: "preview-profile-04" },
+  ];
   const whatsappNumber = settings?.whatsappNumber;
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}` : null;
 
@@ -48,33 +92,87 @@ export default async function AboutPage() {
         .about-card-item:first-child { padding-top: 0; }
         .about-card-item:last-child { border-bottom: 0; }
         .about-card-copy { margin-top: 0; }
+        .about-process-copy,
+        .about-process-section [data-reveal-image] {
+          transform: none !important;
+          translate: none !important;
+          scale: none !important;
+          rotate: none !important;
+        }
+        .about-process-section {
+          margin-top: 0 !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .about-card-list--editorial {
+          grid-template-columns: minmax(0, 1fr) !important;
+          column-gap: 0;
+          row-gap: 48px;
+        }
+        .about-card-list--editorial .about-card-item {
+          display: block;
+          padding-block: 0;
+          border-bottom: 0;
+        }
+        .about-card-list--editorial .about-card-copy {
+          margin-top: 20px;
+        }
         @media (min-width: 1024px) {
           .about-card-list {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 32px;
+            row-gap: 0;
+          }
+          .about-card-item {
+            grid-template-columns: minmax(140px, 0.42fr) minmax(0, 0.58fr);
+            gap: 24px;
+            padding-block: 28px;
+            border-bottom: 1px solid rgb(255 255 255 / 0.2);
+          }
+          .about-card-item:nth-child(-n + 2) { padding-top: 0; }
+          .about-card-item:nth-last-child(-n + 2) { border-bottom: 0; }
+          .about-card-copy { margin-top: 0; }
+          .about-card-list--leadership {
             grid-template-columns: repeat(4, minmax(0, 1fr));
             column-gap: 32px;
             row-gap: 56px;
           }
-          .about-card-item {
+          .about-card-list--leadership .about-card-item {
             display: block;
             padding-block: 0;
             border-bottom: 0;
           }
-          .about-card-copy { margin-top: 20px; }
+          .about-card-list--leadership .about-card-item:nth-child(-n + 2) {
+            padding-top: 0;
+          }
+          .about-card-list--leadership .about-card-item:nth-last-child(-n + 2) {
+            border-bottom: 0;
+          }
+          .about-card-list--leadership .about-card-copy {
+            margin-top: 20px;
+          }
+          .about-card-list--editorial {
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            column-gap: 40px;
+            row-gap: 64px;
+          }
         }
       `}</style>
       <Header dictionary={dictionary} />
       <section className="bg-[var(--color-bg-base)]">
         <div className="mx-auto max-w-[88rem] px-5 pb-20 pt-36 md:px-8 md:pb-32 md:pt-52">
-          <div className="grid gap-10 md:grid-cols-[0.78fr_1.22fr] md:gap-x-20 md:gap-y-8">
-            <div>
-              <p className="text-xs tracking-[0.2em] text-white/55">Linnorea design works</p>
-              <h1 className="mt-6 font-serif text-5xl font-normal leading-[0.95] tracking-[-0.055em] md:text-7xl lg:text-[6.5rem]">{dictionary.nav.about}</h1>
-            </div>
-            <div className="relative row-start-2 aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)] md:row-span-2 md:row-start-1 md:aspect-[1.2/1]">
-              <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} videoLabel={dictionary.ui.studioVideo} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
-            </div>
-            <p className="max-w-md text-base leading-7 text-white/75 md:row-start-2 md:text-lg md:leading-8">{description}</p>
+          <div className="max-w-6xl">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/55">{dictionary.nav.home}</p>
+            <h1 className="mt-8 max-w-5xl font-serif text-5xl font-normal leading-[0.95] tracking-[-0.055em] md:text-7xl lg:text-[5.25rem]">
+              {dictionary.nav.about}
+            </h1>
+            <p className="mt-10 max-w-4xl text-xl leading-[1.15] tracking-[-0.03em] text-white/85 md:mt-14 md:text-[28px] md:leading-[1.15]">
+              {description}
+            </p>
+          </div>
+          <div className="relative mt-16 aspect-[16/9] w-full overflow-hidden bg-[var(--color-bg-elevated)] md:mt-24">
+            <StudioVisual image={settings?.studioVisualImage} video={settings?.studioVisualVideo} videoLabel={dictionary.ui.studioVideo} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
           </div>
         </div>
       </section>
@@ -85,59 +183,116 @@ export default async function AboutPage() {
         </p>
       </div>
 
-      <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div data-reveal className="min-w-0 border-t border-white/15 pt-6">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.ourKey}</p>
-          <ul className="mt-12 grid min-w-0 gap-x-8 gap-y-10 text-left text-xl leading-8 tracking-[-0.03em] text-white/90 md:mt-20 md:grid-cols-3 md:gap-x-12 md:gap-y-16 md:text-3xl md:leading-tight">
-            {keyItems.length ? keyItems.map((item, index) => (
-              <li key={`${plainText(item.label)}-${index}`} className="border-t border-white/15 pt-5">
-                {plainText(item.label)}
-              </li>
-            )) : <li>{dictionary.about.keyPlaceholder}</li>}
-          </ul>
+      <ScrollReveal as="section" className="mx-auto max-w-[88rem] px-5 pb-28 md:px-8 md:pb-44">
+        <div data-reveal className="min-w-0 pt-6">
+          <div className="flex items-start justify-between gap-8">
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">Principles</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">A way of looking</span>
+          </div>
+          <div className="mt-16 grid gap-16 md:mt-24 lg:grid-cols-[0.7fr_1.3fr] lg:gap-24">
+            <div className="flex flex-col justify-between gap-12">
+              <p className="max-w-xl font-serif text-[2.9rem] leading-[0.9] tracking-[-0.065em] text-white md:text-[4.6rem] md:leading-[0.88] lg:max-w-md lg:text-[5.1rem]">
+                {plainText(settings?.aboutPrinciplesIntro) || "The character of a place is already there. Our work begins by noticing it."}
+              </p>
+              <p className="max-w-[15rem] border-l border-[var(--color-accent-gold)] pl-4 text-sm leading-6 text-white/45">
+                {plainText(settings?.aboutPrinciplesContext) || "Context is not a constraint. It is the material that gives a space its own voice."}
+              </p>
+            </div>
+            <div className="space-y-14 md:space-y-20">
+              {principles.map((item, index) => {
+                const imageUrl = item.image ? urlFor(item.image).width(900).height(600).fit("crop").auto("format").quality(80).url() : null;
+                return (
+                  <div key={`${item.title}-${index}`} className="grid gap-4 lg:grid-cols-[0.35fr_0.65fr] lg:gap-14">
+                    <div>
+                      <h2 className="font-serif text-3xl leading-none tracking-[-0.05em] text-white md:text-4xl">{item.title}</h2>
+                      {imageUrl ? <div className="relative mt-6 aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]"><Image src={imageUrl} alt={item.title ?? "Principle"} fill sizes="(max-width: 1024px) 100vw, 30vw" className="object-cover" /></div> : null}
+                    </div>
+                    <p className="max-w-xl text-base leading-7 text-white/70 md:text-[1.08rem] md:leading-8">{plainText(item.description)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </ScrollReveal>
 
-      <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-       <div className="border-t border-white/15 pt-6">
-         <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.vision}</p>
-         <div data-reveal className="mt-12 max-w-4xl text-3xl leading-[1.05] tracking-[-0.045em] text-white md:mt-20 md:text-[3.75rem] md:leading-[1.02]">
-           <p>{plainText(settings?.aboutVision) || dictionary.about.visionPlaceholder}</p>
-         </div>
+      <ScrollReveal as="section" className="mx-auto max-w-[88rem] border-t border-white/15 bg-[#0c0e10] px-5 pb-12 pt-20 md:px-8 md:pb-20 md:pt-24">
+        <div className="pt-6">
+          <div className="flex items-start justify-between gap-8">
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.vision}</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">A long view</span>
+          </div>
+          <div data-reveal className="mt-16 md:mt-24">
+            <p className="max-w-6xl font-serif text-[2.75rem] leading-[0.92] tracking-[-0.07em] text-white md:text-[4.25rem] md:leading-[0.9] lg:text-[5rem] lg:leading-[0.86]">
+              {isPreview ? "We design places that deepen the relationship between people, place, and time." : plainText(settings?.aboutVision) || dictionary.about.visionPlaceholder}
+            </p>
+            <div className="mt-12 grid gap-8 md:mt-16 md:grid-cols-[1.15fr_0.85fr] md:items-start md:gap-10 lg:mt-20 lg:grid-cols-[1.3fr_0.7fr] lg:gap-12">
+              <div className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
+                {(settings?.aboutVisionImage ?? selectedProjects[0]?.coverImage) ? (
+                  <Image src={urlFor(settings?.aboutVisionImage ?? selectedProjects[0].coverImage!).width(1600).height(1200).fit("crop").auto("format").quality(80).url()} alt="Linnorea project atmosphere" fill sizes="(max-width: 768px) 100vw, 65vw" className="object-cover" />
+                ) : <MediaPlaceholder className="h-full w-full" />}
+              </div>
+              <p className="max-w-sm pt-2 text-base leading-7 text-white/65 md:text-lg md:leading-8">{plainText(settings?.aboutVisionSupport) || "To make spaces that do not ask for attention, but reward it: spaces with an atmosphere that grows more meaningful through use, memory, and time."}</p>
+            </div>
+          </div>
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal as="section" className="border-t border-white/15 bg-[#0c0e10]">
+       <div className="mx-auto max-w-[88rem] px-5 pb-24 pt-16 md:px-8 md:pb-28 md:pt-24">
+        <div data-reveal className="min-w-0 pt-6">
+          <div className="flex items-start justify-between gap-8">
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.mission}</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">What we pursue</span>
+          </div>
+          <div className="mt-16 grid gap-14 md:mt-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
+            <div>
+              <p className="max-w-xl font-serif text-[2.9rem] leading-[0.9] tracking-[-0.065em] text-white md:text-[4.6rem] md:leading-[0.88] lg:max-w-md lg:text-[5rem]">
+                {plainText(settings?.aboutMissionLead) || "We create spaces that feel grounded, generous, and deeply lived in."}
+              </p>
+              <p className="mt-12 max-w-xs border-l border-[var(--color-accent-gold)] pl-4 text-sm leading-6 text-white/45">
+                {plainText(settings?.aboutMissionSupport) || "A practice of care, from first reading to final detail."}
+              </p>
+            </div>
+            <div className="lg:pt-16">
+              <p className="max-w-2xl text-xl leading-8 text-white/80 md:text-2xl md:leading-10">{plainText(settings?.aboutMission?.[0]) || "We work with the rhythms of daily life, the intelligence of materials, and the people who bring a place into being."}</p>
+              <div className="mt-12 grid lg:grid-cols-2">
+                {missionDetails.map((item, index) => (
+                  <div key={`${item.label}-${index}`} className={`border-b border-white/15 py-7 ${index === 0 ? "lg:border-r lg:pr-10" : "lg:pl-10"}`}>
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/40">{item.label}</p>
+                    <p className="mt-4 text-base leading-7 text-white/65">{plainText(item.description)}</p>
+                  </div>
+                ))}
+              </div>
+              {settings?.aboutMissionImage ? (
+                <div className="relative mt-12 aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
+                  <Image src={urlFor(settings.aboutMissionImage).width(1400).height(900).fit("crop").auto("format").quality(80).url()} alt="Linnorea mission" fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
        </div>
       </ScrollReveal>
 
-      <section className="border-y border-white/15 bg-[#0c0e10]">
-       <div className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36">
+      <ScrollReveal as="section" className="about-process-section mx-auto max-w-[88rem] px-5 pb-24 md:px-8 md:pb-36">
         <div className="min-w-0 border-t border-white/15 pt-6">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.mission}</p>
-          <ul className="mt-12 grid min-w-0 max-w-6xl gap-x-16 gap-y-10 text-left text-base leading-7 tracking-[-0.01em] text-white/90 md:mt-20 md:grid-cols-2 md:gap-y-16 md:text-lg md:leading-8">
-            {missionItems.length ? missionItems.map((item, index) => (
-              <li key={`${plainText(item)}-${index}`} className="border-b border-white/15 pb-10">
-                <span className="mb-7 block h-px w-12 bg-white/45" />
-                {plainText(item)}
-              </li>
-            )) : <li>{dictionary.about.missionPlaceholder}</li>}
-          </ul>
-        </div>
-       </div>
-      </section>
-
-      <ScrollReveal as="section" className="mx-auto max-w-7xl px-5 pb-24 md:px-8 md:pb-36">
-        <div data-reveal className="min-w-0 border-t border-white/15 pt-6">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.process}</p>
-          <div className="mt-14 min-w-0 space-y-16 md:mt-24 md:space-y-32">
-            {processItems.length ? processItems.map((item, index) => {
+          <div className="flex items-start justify-between gap-8">
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.process}</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">From reading to making</span>
+          </div>
+          <div className="mt-16 min-w-0 space-y-20 md:mt-24 md:space-y-36">
+            {(isPreview ? previewProcessItems : processItems).length ? (isPreview ? previewProcessItems : processItems).map((item, index) => {
               const title = plainText(item.title) || dictionary.about.processStage;
               const subtitle = plainText(item.subtitle);
               const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
               return (
-                <article key={`${title}-${index}`} data-reveal className="grid min-w-0 gap-10 border-b border-white/15 pb-16 md:grid-cols-2 md:items-center md:gap-20 md:pb-32">
-                  <div data-reveal-item className={`min-w-0 text-left ${index % 2 === 1 ? "md:order-2" : ""}`}>
-                    <div className="min-w-0 pl-0 text-left"><h2 className="text-4xl font-medium leading-[0.92] tracking-[-0.06em] md:text-6xl">{title}</h2>{subtitle ? <p className="mt-5 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60 md:text-base md:leading-7">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
+                <article key={`${title}-${index}`} data-reveal className={`grid min-w-0 gap-8 pb-20 md:grid-cols-2 md:items-center md:gap-10 md:pb-36 ${index < (isPreview ? previewProcessItems : processItems).length - 1 ? "border-b border-white/15" : ""}`}>
+                  <div className={`about-process-copy min-w-0 text-left ${index % 2 === 1 ? "md:order-2" : ""}`}>
+                    <div className="min-w-0 pl-0 text-left"><h2 className="text-4xl font-medium leading-[0.92] tracking-[-0.06em] md:text-5xl">{title}</h2>{subtitle && !isPreview ? <p className="mt-5 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60 md:text-base md:leading-7">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
                   </div>
-                  <div data-reveal-image className={`relative min-w-0 aspect-[4/3] overflow-hidden bg-[linear-gradient(135deg,#17191c,#07080a)] ${index % 2 === 1 ? "md:order-1" : ""}`}>
-                    {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" /> : null}
+                  <div className={`relative min-w-0 aspect-[16/9] overflow-hidden bg-[linear-gradient(135deg,#17191c,#07080a)] ${index % 2 === 1 ? "md:order-1" : ""}`}>
+                    {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 60vw" className="object-cover" /> : <div className="absolute inset-0 flex items-end justify-between p-6 text-[10px] uppercase tracking-[0.2em] text-white/40"><span>{title}</span><span>Material study</span></div>}
                   </div>
                 </article>
               );
@@ -148,16 +303,32 @@ export default async function AboutPage() {
 
       <ScrollReveal as="section" className="border-y border-white/15 bg-[#0c0e10]">
         <div className="mx-auto max-w-[88rem] px-5 py-24 md:px-8 md:py-36">
-          <div data-reveal className="border-t border-white/15 pt-6">
+          <div id="leadership" data-reveal className="pt-6">
             <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Leadership</p>
-            {leadership.length ? (
-              <div className="about-card-list mt-14 md:mt-20">
+            {isPreview ? (
+              <div className="about-card-list about-card-list--leadership mt-14 md:mt-20">
+                {previewLeadership.map((member) => (
+                  <Link key={member.name} href={`/preview/profile/${member.slug}?preview=1`} className="group about-card-item min-w-0">
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
+                      <MediaPlaceholder className="h-full w-full" />
+                      <span className="absolute bottom-3 left-3 bg-black/70 px-2 py-1 text-[9px] uppercase tracking-[0.16em] text-white/75">Preview</span>
+                    </div>
+                    <div className="about-card-copy min-w-0">
+                      <h2 className="text-xl font-medium leading-tight tracking-[-0.04em] lg:text-2xl">{member.name}</h2>
+                      <p className="mt-3 text-sm leading-6 text-white/65">{member.role}</p>
+                      <span className="mt-2 inline-flex min-h-11 items-center text-sm leading-6 text-white/45 underline decoration-white/25 underline-offset-4">Preview office: {member.office}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : leadership.length ? (
+              <div className="about-card-list about-card-list--leadership mt-14 md:mt-20">
                 {leadership.map((member) => {
                   const imageUrl = urlFor(member.photo!).width(900).height(675).fit("crop").auto("format").quality(80).url();
                   return (
                     <article key={member._id} data-reveal-item className="about-card-item min-w-0">
                       <div className="about-card-media relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
-                        <Image src={imageUrl} alt={member.name!} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover grayscale transition duration-700 hover:grayscale-0" />
+                        <Image src={imageUrl} alt={member.name!} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover grayscale" />
                       </div>
                       <div className="about-card-copy min-w-0">
                         <h2 className="text-xl font-medium leading-tight tracking-[-0.04em] lg:text-2xl">{member.name}</h2>
@@ -177,33 +348,31 @@ export default async function AboutPage() {
       </div>
       </ScrollReveal>
 
-      {selectedProjects.length ? (
+      {insightCards.length ? (
         <ScrollReveal as="section" className="border-y border-white/15">
           <div className="mx-auto max-w-[88rem] px-5 py-24 md:px-8 md:py-36">
             <div data-reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Projects &amp; insights</p>
-                <h2 className="mt-6 max-w-2xl text-4xl font-medium leading-[0.94] tracking-[-0.06em] md:text-6xl">Work that turns thinking into space.</h2>
+                <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Projects and Insights</p>
+                <h2 className="mt-6 max-w-4xl font-serif text-5xl font-normal leading-[0.92] tracking-[-0.055em] md:text-8xl">Projects and Insights</h2>
               </div>
               <Link href="/project" className="inline-flex min-h-11 w-fit items-center border-b border-white/45 pb-2 text-[10px] uppercase tracking-[0.22em] text-white/80 transition hover:border-white hover:text-white">{dictionary.ui.viewProjects}</Link>
             </div>
-            <div data-reveal className="about-card-list mt-16">
-              {selectedProjects.map((project, index) => {
-                const imageUrl = urlFor(project.coverImage!).width(1600).height(1100).fit("crop").auto("format").quality(80).url();
-                const content = (
-                  <>
-                    <div className="about-card-media relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
-                      <Image src={imageUrl} alt={plainText(project.title) || "Untitled project"} fill sizes={index === 0 ? "(max-width: 768px) 100vw, 62vw" : "(max-width: 768px) 100vw, 42vw"} className="object-cover transition-transform duration-700 hover:scale-[1.03]" />
+            <div data-reveal className="about-card-list about-card-list--editorial mt-16 md:mt-20">
+              {insightCards.map((insight) => {
+                const imageUrl = insight.coverImage ? urlFor(insight.coverImage).width(1600).height(1100).fit("crop").auto("format").quality(80).url() : null;
+                return (
+                  <Link key={insight._id} href={`/preview/insight/${insight.slug}?preview=1`} className="group about-card-item min-w-0">
+                    <div className="about-card-media relative aspect-[3/2] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
+                      {imageUrl ? <Image src={imageUrl} alt={insight.title ?? "Insight"} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
                     </div>
                     <div className="about-card-copy min-w-0">
-                      <p className="text-xs tracking-[0.16em] text-white/55">{plainText(project.category) || dictionary.ui.projectCategory}</p>
-                      <h3 className="mt-3 text-xl font-medium leading-tight tracking-[-0.04em] lg:text-2xl">{plainText(project.title) || "Untitled project"}</h3>
-                      {plainText(project.location) ? <p className="mt-2 text-sm text-white/50">{plainText(project.location)}</p> : null}
-                      {portableTextToPlainText(project.description) ? <p className="mt-4 max-w-sm text-sm leading-6 text-white/60">{portableTextToPlainText(project.description)}</p> : null}
+                      <p className="text-xs tracking-[0.16em] text-white/55">{insight.category}</p>
+                      <h3 className="mt-5 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 lg:text-2xl">{insight.title}</h3>
+                      <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{insight.summary}</p>
                     </div>
-                  </>
+                  </Link>
                 );
-                return project.slug?.current ? <Link key={project._id} href={`/project/${project.slug.current}`} className="group about-card-item min-w-0">{content}</Link> : <article key={project._id} className="about-card-item min-w-0">{content}</article>;
               })}
             </div>
           </div>
@@ -213,8 +382,8 @@ export default async function AboutPage() {
       <section className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-24 md:flex-row md:items-center md:justify-between md:px-8">
         <h2 className="max-w-xl text-4xl font-medium leading-[0.95] tracking-[-0.06em] md:text-6xl">Bring the next space into focus.</h2>
         <div className="flex flex-wrap gap-3">
-          <Link href="/project" className="inline-flex min-h-11 items-center border border-white/25 px-5 text-[10px] uppercase tracking-[0.22em] transition hover:bg-white hover:text-[var(--color-bg-base)]">{dictionary.ui.viewProjects}</Link>
-          {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-white/35 px-5 text-[10px] uppercase tracking-[0.22em] text-white/80 transition hover:border-white hover:bg-white hover:text-[var(--color-bg-base)]">{plainText(settings?.whatsappCtaText) || dictionary.home.cta}</a> : null}
+          <Link href="/project" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{dictionary.ui.viewProjects}</Link>
+          {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center border border-[var(--color-accent-gold)] px-5 text-[10px] uppercase tracking-[0.22em] text-[var(--color-accent-gold-light)] transition hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]">{plainText(settings?.whatsappCtaText) || dictionary.home.cta}</a> : null}
         </div>
       </section>
     </main>

@@ -88,9 +88,19 @@ export type SiteSettings = {
   aboutEstablished?: string;
   aboutDescription?: string;
   aboutKey?: Array<{ label?: string; order?: number }>;
+  aboutPrinciplesIntro?: string;
+  aboutPrinciplesContext?: string;
+  aboutPrinciples?: Array<{ title?: string; description?: string; image?: SanityImage; order?: number }>;
   aboutVision?: string;
+  aboutVisionSupport?: string;
+  aboutVisionImage?: SanityImage;
   aboutMission?: string[];
+  aboutMissionLead?: string;
+  aboutMissionSupport?: string;
+  aboutMissionDetails?: Array<{ label?: string; description?: string; order?: number }>;
+  aboutMissionImage?: SanityImage;
   aboutProcess?: Array<{ title?: string; subtitle?: string; description?: string; image?: SanityImage; order?: number }>;
+  aboutCtaHeading?: string;
   studioVisualImage?: SanityImage;
   studioVisualVideo?: MuxVideo;
   officeAddress?: string;
@@ -99,6 +109,17 @@ export type SiteSettings = {
   whatsappCtaText?: string;
   socialLinks?: SocialLink[];
   seoDefaults?: SeoDefaults;
+};
+
+export type Insight = {
+  _id: string;
+  title?: string;
+  slug?: { current?: string };
+  category?: string;
+  publishedAt?: string;
+  excerpt?: string;
+  coverImage?: SanityImage;
+  order?: number;
 };
 
 export type ApproachItem = {
