@@ -24,10 +24,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/_next/static/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
-      {
         source: "/:path*",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -55,13 +51,14 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
+    const legacyLocales = ["id", "en", "ja", "fr", "de", "it"];
     return [
-      ...["id", "en", "ja", "fr", "de", "it"].map((locale) => ({
+      ...legacyLocales.map((locale) => ({
         source: `/${locale}`,
         destination: "/",
         statusCode: 301,
       })),
-      ...["id", "en", "ja", "fr", "de", "it"].map((locale) => ({
+      ...legacyLocales.map((locale) => ({
         source: `/${locale}/:path*`,
         destination: "/:path*",
         statusCode: 301,

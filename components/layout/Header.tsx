@@ -5,42 +5,20 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { sanityClient } from "@/lib/sanity/client";
-import { urlFor } from "@/lib/sanity/image";
-import { siteSettingsQuery } from "@/lib/sanity/queries";
-import type { SanityImage } from "@/lib/sanity/types";
 
 type HeaderProps = {
   dictionary: Dictionary;
+  variant?: "default" | "project";
 };
 
 const headerContentClassName = "relative z-10 m-0 mt-[7px] mb-[8px] flex h-[25px] max-w-7xl items-center px-6";
 
-export function Header({ dictionary }: HeaderProps) {
+export function Header({ dictionary, variant = "default" }: HeaderProps) {
   const pathname = usePathname();
+  const isProjectHeader = variant === "project" || pathname === "/project";
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [logo, setLogo] = useState<SanityImage | null>(null);
   const previousScrollYRef = useRef(0);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    sanityClient
-      .fetch<{ logo?: SanityImage } | null>(siteSettingsQuery)
-      .then((settings) => {
-        if (isMounted) {
-          setLogo(settings?.logo ?? null);
-        }
-      })
-      .catch((error: unknown) => {
-        console.warn("Sanity logo could not be loaded. Using the static fallback.", error);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     const scrollThreshold = 8;
@@ -84,13 +62,15 @@ export function Header({ dictionary }: HeaderProps) {
   return (
     <header
       className={[
-        "header-site fixed inset-x-0 top-0 z-50 bg-[var(--color-bg-elevated)] text-white transition-[transform,opacity] duration-500 ease-out",
+        "header-site fixed inset-x-0 top-0 z-50 transition-[transform,opacity] duration-500 ease-out",
+        "bg-[var(--color-bg-elevated)] text-white",
         isHidden ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100",
       ].join(" ")}
+      data-project-header={isProjectHeader ? "true" : "false"}
     >
       <div className={headerContentClassName}>
         <Link href="/" aria-label={dictionary.ui.linnoreaHome} className="inline-flex min-h-11 items-center text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-          <Image src={logo ? urlFor(logo).width(48).height(48).fit("crop").auto("format").quality(78).url() : "/assets/logo-mark.png"} alt="" width={22} height={22} priority className="block h-[22px] w-[22px] object-contain" />
+          <Image src="/assets/logo-mark.png" alt="" width={22} height={22} priority className="block h-[22px] w-[22px] object-contain" />
         </Link>
 
         <nav className="header-desktop-nav ml-8 hidden items-center gap-7 text-[10px] font-medium uppercase tracking-[0.2em] text-white/80">

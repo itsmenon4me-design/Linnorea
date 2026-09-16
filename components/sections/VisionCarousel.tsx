@@ -282,17 +282,17 @@ export function VisionCarousel({ slides: cmsSlides, readMoreLabel, previousLabel
       gsap.set(currentPanel, { x: "0%" });
       gsap.set(incomingPanel, { x: `${transition.direction * 100}%` });
       gsap.set(incomingImage, { scale: 1.08, transformOrigin: "50% 50%" });
-      gsap.set(incomingElements, { opacity: 0, y: 24 });
+      gsap.set(incomingElements, { opacity: 0 });
       gsap.set(incomingHeadline, { clipPath: "inset(0 0 100% 0)" });
       timeline
-        .to(currentElements, { opacity: 0, y: -15, duration: 0.28, stagger: 0.04, ease: "power2.in" }, 0)
+        .to(currentElements, { opacity: 0, duration: 0.28, stagger: 0.04, ease: "power2.in" }, 0)
         .to(currentPanel, { x: `${-transition.direction * 100}%`, duration: 0.65 }, 0)
         .to(incomingPanel, { x: "0%", duration: 0.65 }, 0)
         .to(incomingImage, { scale: 1, duration: 0.65 }, 0)
-        .to(incomingElements[0], { opacity: 1, y: 0, duration: 0.18 }, 0.25)
-        .to(incomingHeadline, { opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)", duration: 0.2 }, 0.32)
-        .to(incomingElements[2], { opacity: 1, y: 0, duration: 0.18 }, 0.43)
-        .to(incomingElements[3], { opacity: 1, y: 0, duration: 0.18 }, 0.47);
+        .to(incomingElements[0], { opacity: 1, duration: 0.18 }, 0.25)
+        .to(incomingHeadline, { opacity: 1, clipPath: "inset(0 0 0% 0)", duration: 0.2 }, 0.32)
+        .to(incomingElements[2], { opacity: 1, duration: 0.18 }, 0.43)
+        .to(incomingElements[3], { opacity: 1, duration: 0.18 }, 0.47);
     }, sectionRef);
 
     return () => context.revert();

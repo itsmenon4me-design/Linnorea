@@ -41,7 +41,12 @@ function SocialIcon({ platform, className }: { platform?: string; className?: st
 }
 
 export async function Footer({ dictionary }: FooterProps) {
-  const settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
+  let settings: SiteSettings | null = null;
+  try {
+    settings = (await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery)) ?? null;
+  } catch (error) {
+    console.warn("Footer settings could not be loaded. Using local defaults.", error);
+  }
   const brandText = plainText(settings?.brandStatement) || "Linnorea Design Works";
   const officeAddress = plainText(settings?.officeAddress) || "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
   const whatsappText = plainText(settings?.whatsappCtaText) || dictionary.home.cta;
@@ -101,7 +106,7 @@ export async function Footer({ dictionary }: FooterProps) {
               href="https://wa.me/6281919452042"
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.25em] text-white transition-colors hover:bg-white hover:text-[var(--color-bg-base)]"
+              className="mt-5 inline-flex rounded-full border border-[var(--color-accent-gold)] bg-white/5 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--color-accent-gold)] transition-colors hover:bg-[var(--color-accent-gold)] hover:text-[var(--color-bg-base)]"
             >
               {whatsappText}
             </a>
