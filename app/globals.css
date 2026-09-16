@@ -188,6 +188,11 @@ button {
     overflow: visible;
   }
 
+  .project-viewer-gallery-frame--mobile {
+    height: auto;
+    min-height: 0;
+  }
+
   .project-viewer-gallery-frame--desktop {
     display: none;
   }
@@ -243,6 +248,13 @@ button {
 .project-viewer-gallery-frame {
   height: 100%;
   min-height: calc(95dvh - 1.5rem);
+}
+
+@media (max-width: 767px) {
+  .project-viewer-gallery-frame--mobile {
+    height: auto;
+    min-height: 0;
+  }
 }
 
 @media (min-width: 768px) {
