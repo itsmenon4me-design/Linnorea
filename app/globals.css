@@ -141,6 +141,7 @@ button {
 .project-viewer-scroll {
   scrollbar-color: rgba(255, 255, 255, 0.42) rgba(255, 255, 255, 0.08);
   scrollbar-width: thin;
+  overflow-anchor: none;
 }
 
 .project-viewer-scroll--hidden {

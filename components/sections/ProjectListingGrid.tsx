@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
@@ -226,6 +226,8 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
   const [animatedGalleryIndices, setAnimatedGalleryIndices] = useState<Set<number>>(() => new Set());
   const gallerySwiperRef = useRef<SwiperInstance | null>(null);
+  const viewerScrollRef = useRef<HTMLDivElement>(null);
+  const descriptionScrollTopRef = useRef(0);
   const images = [
     ...(project.coverImage ? [{ image: project.coverImage, url: null }] : []),
     ...(project.gallery ?? []).map((image) => ({ image, url: null })),
@@ -291,8 +293,24 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
     window.history.replaceState(null, "", `${window.location.pathname}${next.toString() ? `?${next.toString()}` : ""}`);
   };
 
+  const toggleDescription = () => {
+    descriptionScrollTopRef.current = viewerScrollRef.current?.scrollTop ?? 0;
+    onToggleDescription();
+  };
+
+  useLayoutEffect(() => {
+    const viewer = viewerScrollRef.current;
+    if (!viewer) return;
+    const scrollTop = descriptionScrollTopRef.current;
+    viewer.scrollTop = scrollTop;
+    const frame = window.requestAnimationFrame(() => {
+      viewer.scrollTop = scrollTop;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isDescriptionExpanded]);
+
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="project-viewer-title" onKeyDown={(event) => { if (event.key === "Escape") onClose(); }} tabIndex={-1} className={`project-viewer-scroll fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 backdrop-blur-sm md:p-6 ${isDescriptionExpanded ? "" : "project-viewer-scroll--hidden"}`}>
+    <div ref={viewerScrollRef} role="dialog" aria-modal="true" aria-labelledby="project-viewer-title" onKeyDown={(event) => { if (event.key === "Escape") onClose(); }} tabIndex={-1} className={`project-viewer-scroll fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 backdrop-blur-sm md:p-6 ${isDescriptionExpanded ? "" : "project-viewer-scroll--hidden"}`}>
       <div className={`project-viewer-shell relative mx-auto grid max-w-[1440px] gap-3 rounded-[0.8rem] bg-[#111315] p-3 text-white md:h-[90vh] md:overflow-hidden md:p-4 ${isGalleryOpen ? "project-viewer-shell--gallery md:grid-cols-1" : "md:grid-cols-[30%_70%]"}`}>
         {!isGalleryOpen ? <aside className={`project-viewer-scroll order-2 relative flex min-h-0 min-w-0 flex-col overflow-visible p-4 md:order-none md:p-6 ${isDescriptionExpanded ? "project-viewer-scroll--expanded" : ""}`}>
           <div className="flex items-center justify-between gap-3">
@@ -314,7 +332,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
                 {visibleDescriptionParagraphs.map((paragraph, index) => <p key={`${paragraph.slice(0, 24)}-${index}`} className={index > 0 ? "mt-5" : undefined}>{paragraph}</p>)}
               </div>
             ) : null}
-            {!isDescriptionExpanded && hasDescription ? <button type="button" onClick={onToggleDescription} className="mt-auto pt-8 text-left text-[10px] uppercase tracking-[0.2em] text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">{dictionary.ui.readMore}</button> : null}
+            {!isDescriptionExpanded && hasDescription ? <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={toggleDescription} className="mt-auto pt-8 text-left text-[10px] uppercase tracking-[0.2em] text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">{dictionary.ui.readMore}</button> : null}
             {isDescriptionExpanded && project.team?.length ? (
               <section className="mt-12" aria-labelledby="project-team-title">
                 <h3 id="project-team-title" className="text-2xl font-light tracking-[-0.05em]">Team</h3>
@@ -328,7 +346,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
                 </div>
               </section>
             ) : null}
-            {isDescriptionExpanded && hasDescription ? <button type="button" onClick={onToggleDescription} className="mt-10 text-left text-[10px] uppercase tracking-[0.2em] text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">{dictionary.ui.readLess}</button> : null}
+            {isDescriptionExpanded && hasDescription ? <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={toggleDescription} className="mt-10 text-left text-[10px] uppercase tracking-[0.2em] text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">{dictionary.ui.readLess}</button> : null}
           </div>
         </aside> : null}
         <div className={`project-viewer-gallery-frame relative min-w-0 ${isGalleryOpen ? "" : "project-viewer-gallery-frame--mobile order-1 md:order-none"}`}>
