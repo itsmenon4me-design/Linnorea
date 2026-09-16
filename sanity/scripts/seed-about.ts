@@ -173,6 +173,37 @@ const insightSeeds = [
   },
 ];
 
+const serviceSeeds = [
+  {
+    _id: "service-spatial-planning",
+    title: "Spatial planning",
+    slug: { _type: "slug", current: "spatial-planning" },
+    description: "We shape the relationship between rooms, movement, light, and daily use so every space feels clear from the first step inside.",
+    order: 0,
+  },
+  {
+    _id: "service-concept-development",
+    title: "Concept development",
+    slug: { _type: "slug", current: "concept-development" },
+    description: "We turn the character of a place and the needs of its people into a focused design direction with a distinct sense of atmosphere.",
+    order: 1,
+  },
+  {
+    _id: "service-material-direction",
+    title: "Material direction",
+    slug: { _type: "slug", current: "material-direction" },
+    description: "We bring surfaces, colour, furniture, lighting, and crafted details together into a material language that can endure.",
+    order: 2,
+  },
+  {
+    _id: "service-design-build",
+    title: "Design and build",
+    slug: { _type: "slug", current: "design-and-build" },
+    description: "We stay close to the making, coordinating design intent and execution so the finished space remains faithful to the idea.",
+    order: 3,
+  },
+];
+
 async function seed() {
   await Promise.all(approachItems.map((item) => client.createIfNotExists(item)));
   const existingSettings = await client.fetch<{ _id: string } | null>(
@@ -183,6 +214,15 @@ async function seed() {
   await client.patch(settingsId).set(aboutContent).commit();
   const projects = await client.fetch<Array<{ coverImage?: unknown }>>(
     '*[_type == "project"] | order(order asc, _createdAt asc)[0...4]{coverImage}',
+  );
+  await Promise.all(
+    serviceSeeds.map((service, index) =>
+      client.createIfNotExists({
+        ...service,
+        _type: "service",
+        image: projects[index]?.coverImage,
+      }),
+    ),
   );
   const editorialContent = [
     { _key: "editorial-intro", _type: "block", children: [{ _key: "intro-text", _type: "span", text: "A closer look at how thoughtful renovation can protect the character of a place while making room for new rituals, new uses, and a longer future." }] },
@@ -213,15 +253,16 @@ async function seed() {
       }).commit(),
     ),
   );
-  const verification = await client.fetch<{ approach: number; settings: number; insights: number; editorialBlocks: number }>(`
+  const verification = await client.fetch<{ approach: number; settings: number; insights: number; services: number; editorialBlocks: number }>(`
     {
       "approach": count(*[_type == "approachItem"]),
       "settings": count(*[_type == "siteSettings"]),
       "insights": count(*[_type == "insight"]),
+      "services": count(*[_type == "service"]),
       "editorialBlocks": count(*[_type == "insight" && slug.current == "linnorea-design-works-in-focus"][0].content)
     }
   `);
-  console.log(`Seeded ${approachItems.length} approach items, About content, and ${insightSeeds.length} Insight entries. Verified counts: ${JSON.stringify(verification)}`);
+  console.log(`Seeded ${approachItems.length} approach items, About content, ${serviceSeeds.length} Services, and ${insightSeeds.length} Insight entries. Verified counts: ${JSON.stringify(verification)}`);
 }
 
 seed().catch((error) => {
