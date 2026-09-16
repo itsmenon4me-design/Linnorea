@@ -184,6 +184,15 @@ async function seed() {
   const projects = await client.fetch<Array<{ coverImage?: unknown }>>(
     '*[_type == "project"] | order(order asc, _createdAt asc)[0...4]{coverImage}',
   );
+  const editorialContent = [
+    { _key: "editorial-intro", _type: "block", children: [{ _key: "intro-text", _type: "span", text: "A closer look at how thoughtful renovation can protect the character of a place while making room for new rituals, new uses, and a longer future." }] },
+    { _key: "editorial-place", _type: "block", children: [{ _key: "place-text", _type: "span", text: "The first reading is always the place itself. Climate, memory, craft, and the patterns of daily life become the material for a design that feels specific rather than applied." }] },
+    projects[0]?.coverImage ? { _key: "editorial-place-image", _type: "image", ...projects[0].coverImage } : null,
+    { _key: "editorial-quote", _type: "block", children: [{ _key: "quote-text", _type: "span", text: "The strongest spaces do not replace what was there. They make its meaning easier to feel." }] },
+    { _key: "editorial-making", _type: "block", children: [{ _key: "making-text", _type: "span", text: "Preservation becomes a design opportunity when existing structures, local materials, and careful making guide the next chapter. The result is quieter, more durable, and more connected to its setting." }] },
+    projects[1]?.coverImage ? { _key: "editorial-making-image", _type: "image", ...projects[1].coverImage } : null,
+    { _key: "editorial-conclusion", _type: "block", children: [{ _key: "conclusion-text", _type: "span", text: "This is the work of making spaces that welcome change without losing their sense of belonging." }] },
+  ].filter((block) => block !== null);
   await Promise.all(
     insightSeeds.map((insight, index) =>
       client.createIfNotExists({
@@ -200,14 +209,16 @@ async function seed() {
         title: insight.title,
         category: insight.category,
         excerpt: insight.excerpt,
+        ...(insight._id === "insight-watg-wimberly-august-2026" ? { content: editorialContent } : {}),
       }).commit(),
     ),
   );
-  const verification = await client.fetch<{ approach: number; settings: number; insights: number }>(`
+  const verification = await client.fetch<{ approach: number; settings: number; insights: number; editorialBlocks: number }>(`
     {
       "approach": count(*[_type == "approachItem"]),
       "settings": count(*[_type == "siteSettings"]),
-      "insights": count(*[_type == "insight"])
+      "insights": count(*[_type == "insight"]),
+      "editorialBlocks": count(*[_type == "insight" && slug.current == "linnorea-design-works-in-focus"][0].content)
     }
   `);
   console.log(`Seeded ${approachItems.length} approach items, About content, and ${insightSeeds.length} Insight entries. Verified counts: ${JSON.stringify(verification)}`);
