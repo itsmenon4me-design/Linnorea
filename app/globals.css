@@ -193,6 +193,12 @@ button {
     min-height: 0;
   }
 
+  .project-viewer-gallery-frame--mobile-continuation {
+    display: block;
+    height: auto;
+    min-height: 0;
+  }
+
   .project-viewer-gallery-frame--desktop {
     display: none;
   }
@@ -222,6 +228,10 @@ button {
   }
 
   .project-viewer-gallery--mobile {
+    display: none;
+  }
+
+  .project-viewer-gallery-frame--mobile-continuation {
     display: none;
   }
 
