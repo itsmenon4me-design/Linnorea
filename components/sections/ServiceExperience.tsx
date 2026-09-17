@@ -33,17 +33,29 @@ type ProjectCard = {
   url: string;
 };
 
+type InsightCard = {
+  id: string;
+  title: string;
+  href: string | null;
+  category: string;
+  excerpt: string;
+  url: string | null;
+};
+
 type ServiceExperienceProps = {
   services: ServiceItem[];
   projectImages: ProjectImage[];
   projectCards: ProjectCard[];
+  insights: InsightCard[];
 };
 
-export function ServiceExperience({ services, projectImages, projectCards = [] }: ServiceExperienceProps) {
+export function ServiceExperience({ services, projectImages, projectCards = [], insights = [] }: ServiceExperienceProps) {
   const [activeTab, setActiveTab] = useState(0);
+  const [isServiceMenuOpen, setIsServiceMenuOpen] = useState(false);
   const [activeProject, setActiveProject] = useState(0);
   const marketSwiper = useRef<SwiperInstance | null>(null);
   const suppressClick = useRef(false);
+  const serviceMenuRef = useRef<HTMLDivElement | null>(null);
   const activeService = services[activeTab % Math.max(services.length, 1)];
   const marketCards = projectCards.length ? projectCards : projectImages.map((image) => ({
     id: image.id,
@@ -59,6 +71,26 @@ export function ServiceExperience({ services, projectImages, projectCards = [] }
     marketSwiper.current?.slideTo(activeProject, 0);
   }, [activeProject]);
 
+  useEffect(() => {
+    function closeServiceMenu(event: MouseEvent) {
+      if (!serviceMenuRef.current?.contains(event.target as Node)) {
+        setIsServiceMenuOpen(false);
+      }
+    }
+    function closeServiceMenuWithEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsServiceMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", closeServiceMenu);
+    document.addEventListener("keydown", closeServiceMenuWithEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeServiceMenu);
+      document.removeEventListener("keydown", closeServiceMenuWithEscape);
+    };
+  }, []);
+
   function moveProject(direction: number) {
     if (marketCards.length < 2) return;
     const next = Math.max(0, Math.min(activeProject + direction, marketCards.length - 1));
@@ -68,58 +100,63 @@ export function ServiceExperience({ services, projectImages, projectCards = [] }
   return (
     <ScrollReveal as="section" className="border-b border-white/15">
       <div className="mx-auto max-w-[88rem] px-5 py-20 md:px-8 md:py-32">
-        <label className="sr-only" htmlFor="service-select">Choose a service</label>
-        <select
-          id="service-select"
-          value={activeTab}
-          onChange={(event) => setActiveTab(Number(event.target.value))}
-          className="min-h-12 w-full border border-white/35 bg-[var(--color-bg-base)] px-4 text-sm text-white md:hidden"
-        >
-          {services.map((service, index) => <option key={service.id} value={index}>{service.title}</option>)}
-        </select>
-        <div data-reveal className="hidden gap-7 overflow-x-auto border-b border-white/15 pb-5 text-sm [scrollbar-width:none] md:flex md:justify-center md:gap-16 [&::-webkit-scrollbar]:hidden">
-          {services.map((service, index) => (
-            <button
-              key={service.id}
-              type="button"
-              onClick={() => setActiveTab(index)}
-              className={`min-h-11 shrink-0 whitespace-nowrap border px-5 transition-colors ${
-                activeTab === index
-                  ? "border-white text-white"
-                  : "border-transparent text-white/55 hover:text-white"
-              }`}
-              aria-pressed={activeTab === index}
-            >
-              {service.title}
-            </button>
-          ))}
-        </div>
-
         {services.length ? (
           <div className="mt-12 md:mt-16">
-            <div data-reveal className="mx-auto max-w-3xl text-center">
-              <p className="text-sm text-white/60">A considered approach to every brief.</p>
-              <h2 className="mt-6 text-4xl font-medium leading-[0.95] tracking-[-0.06em] md:text-7xl">
-                From first conversation to final detail.
-              </h2>
+            <p className="mb-8 text-xs font-medium uppercase tracking-[0.16em] text-white/60 md:mb-10">Design services</p>
+            <div ref={serviceMenuRef} className="service-menu relative mx-auto w-full max-w-[50rem]">
+                      <button
+                        type="button"
+                        onClick={() => setIsServiceMenuOpen((isOpen) => !isOpen)}
+                        aria-expanded={isServiceMenuOpen}
+                        aria-controls="service-options"
+                        className="service-menu__trigger flex min-h-16 w-full items-center justify-between gap-6 border-b border-white/35 text-left text-xl tracking-[-0.04em] text-white transition-colors hover:text-white/65 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:min-h-20 md:text-2xl"
+                      >
+                        <span>{activeService?.title ?? "Choose a service"}</span>
+                        <span aria-hidden="true" className={`service-menu__chevron ${isServiceMenuOpen ? "service-menu__chevron--open" : ""}`} />
+                      </button>
+                      <div id="service-options" className={`service-menu__options ${isServiceMenuOpen ? "service-menu__options--open" : ""}`}>
+                        <div className="service-menu__options-inner" role="listbox" aria-label="Choose a service">
+                          {services.map((service, index) => (
+                            <button
+                              key={service.id}
+                              type="button"
+                              role="option"
+                              aria-selected={activeTab === index}
+                              onClick={() => {
+                                setActiveTab(index);
+                                setIsServiceMenuOpen(false);
+                              }}
+                              className={`service-menu__option ${activeTab === index ? "service-menu__option--active" : ""}`}
+                            >
+                              {service.title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
             </div>
-            <div data-reveal className="mx-auto mt-16 max-w-[41rem]">
-              <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                {activeService?.imageUrl ? (
-                  <Image src={activeService.imageUrl} alt={activeService.title} fill sizes="(max-width: 768px) 100vw, 832px" className="object-cover" />
-                ) : (
-                  <MediaPlaceholder className="absolute inset-0" />
-                )}
-              </div>
-              <div className="mt-6 flex flex-col gap-3 border-b border-white/15 pb-8 md:flex-row md:items-start md:justify-between md:gap-12">
-                <div>
-                  <p className="text-sm text-[var(--color-accent-gold)]">01</p>
-                  <h3 className="mt-3 text-3xl tracking-[-0.05em]">{activeService?.title ?? "Service details"}</h3>
-                </div>
-                <p className="max-w-md text-sm leading-6 text-white/60">
-                  {activeService?.description ?? "Service information will appear here once it is added in Sanity."}
-                </p>
-              </div>
+            <div key={`service-content-${activeService?.id ?? "empty"}`} className="service-selection-content">
+                      <div data-reveal className="mx-auto max-w-3xl text-center">
+                        <h2 className="mt-6 text-4xl font-medium leading-[0.95] tracking-[-0.06em] md:text-7xl">
+                          From first conversation to final detail.
+                        </h2>
+                      </div>
+                      <div data-reveal className="mx-auto mt-16 max-w-[41rem]">
+                        <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
+                          {activeService?.imageUrl ? (
+                            <Image src={activeService.imageUrl} alt={activeService.title} fill sizes="(max-width: 768px) 100vw, 832px" className="object-cover" />
+                          ) : (
+                            <MediaPlaceholder className="absolute inset-0" />
+                          )}
+                        </div>
+                        <div className="mt-6 flex flex-col gap-3 border-b border-white/15 pb-8 md:flex-row md:items-start md:justify-between md:gap-12">
+                          <div>
+                            <h3 className="mt-3 text-3xl tracking-[-0.05em]">{activeService?.title ?? "Service details"}</h3>
+                          </div>
+                          <p className="max-w-md text-sm leading-6 text-white/60">
+                            {activeService?.description ?? "Service information will appear here once it is added in Sanity."}
+                          </p>
+                        </div>
+                      </div>
             </div>
           </div>
         ) : <p className="mt-14 border-t border-white/15 py-8 text-sm text-white/60">Service information will appear here once it is added in Sanity.</p>}
@@ -223,34 +260,75 @@ export function ServiceExperience({ services, projectImages, projectCards = [] }
           )}
         </div>
       </div>
-      {projectCards.length ? (
+      <section className="border-t border-white/15 px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-[1336px]">
+        <p data-reveal className="text-sm tracking-[0.18em] text-white/60">PROJECTS</p>
+        {projectCards[0] ? (
+          <article data-reveal className="mt-8">
+            {projectCards[0].href ? (
+              <Link href={projectCards[0].href} className="block">
+                <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]">
+                  <Image src={projectCards[0].url} alt={projectCards[0].title} fill sizes="(max-width: 768px) 100vw, 1336px" className="object-cover" />
+                </div>
+              </Link>
+            ) : (
+              <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]">
+                <Image src={projectCards[0].url} alt={projectCards[0].title} fill sizes="(max-width: 768px) 100vw, 1336px" className="object-cover" />
+              </div>
+            )}
+            <div className="mt-5">
+              {projectCards[0].href ? (
+                <Link href={projectCards[0].href} className="text-xl underline decoration-white/40 underline-offset-4">{projectCards[0].title}</Link>
+              ) : (
+                <p className="text-xl">{projectCards[0].title}</p>
+              )}
+            </div>
+          </article>
+        ) : null}
+        <div data-reveal className="mx-auto mt-24 max-w-2xl md:mt-32">
+          <p className="text-lg leading-8 text-white/70 md:text-xl md:leading-9">
+            Linnorea brings together spatial planning, concept development, material direction, furniture selection, visualisation, and final styling to shape spaces with clarity, warmth, and character.
+          </p>
+          <Link
+            href="/project"
+            className="mt-12 inline-flex min-h-11 w-fit items-center gap-3 rounded-full border border-white/45 px-7 text-sm text-white transition hover:border-white hover:bg-white hover:text-[var(--color-bg-base)] focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white"
+          >
+            See our projects
+            <span aria-hidden="true" className="text-lg leading-none">→</span>
+          </Link>
+        </div>
+      </div>
+      </section>
+      {insights.length ? (
         <div className="border-t border-white/15 px-5 py-20 md:px-8 md:py-32">
           <div className="mx-auto max-w-[1336px]">
             <p data-reveal className="text-sm tracking-[0.18em] text-white/60">INSIGHTS</p>
             <div data-reveal className="mt-8 grid gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
-              {projectCards.map((card) => (
-                <article key={card.id} className="grid grid-cols-[134px_minmax(0,1fr)] gap-x-7 border-b border-white/15 pb-12 last:border-b-0 sm:block sm:border-b-0 sm:pb-0">
-                  {card.href ? (
-                    <Link href={card.href} className="block">
-                      <div className="relative col-start-1 row-span-4 aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                        <Image src={card.url} alt={card.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover transition-transform duration-500 hover:scale-[1.03]" />
+              {insights.map((insight) => (
+                <article key={insight.id} className="min-w-0 border-b border-white/15 pb-12 last:border-b-0 sm:border-b-0 sm:pb-0">
+                  {insight.href ? (
+                    <Link href={insight.href} className="group block">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
+                        {insight.url ? <Image src={insight.url} alt={insight.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                       </div>
+                      <p className="mt-7 text-xs tracking-[0.16em] text-white/60">{insight.category}</p>
+                      <h3 className="mt-4 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 sm:text-2xl">{insight.title}</h3>
+                      {insight.excerpt ? <p className="mt-4 text-base leading-7 text-white/65">{insight.excerpt}</p> : null}
                     </Link>
-                  ) : (
-                    <div className="relative col-start-1 row-span-4 aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                      <Image src={card.url} alt={card.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" />
-                    </div>
-                  )}
-                  <p className="col-start-2 text-xs tracking-[0.16em] text-white/60 sm:mt-7">{card.category}</p>
-                  {card.href ? <h3 className="col-start-2 mt-4 text-xl font-medium leading-tight tracking-[-0.04em] sm:mt-5 sm:text-2xl"><Link href={card.href} className="hover:underline">{card.title}</Link></h3> : <h3 className="col-start-2 mt-4 text-xl font-medium leading-tight tracking-[-0.04em] sm:mt-5 sm:text-2xl">{card.title}</h3>}
-                  {card.tagline ? <p className="col-start-2 mt-4 text-base leading-7 text-white/65">{card.tagline}</p> : null}
-                  {card.location ? <p className="col-start-2 mt-4 text-sm text-white/45">{card.location}</p> : null}
+                  ) : null}
                 </article>
               ))}
             </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="border-t border-white/15 px-5 py-20 md:px-8 md:py-32">
+          <div className="mx-auto max-w-[1336px]">
+            <p className="text-sm tracking-[0.18em] text-white/60">INSIGHTS</p>
+            <p className="mt-8 border-t border-white/15 pt-8 text-sm text-white/60">No insights have been published yet.</p>
+          </div>
+        </div>
+      )}
     </ScrollReveal>
   );
 }

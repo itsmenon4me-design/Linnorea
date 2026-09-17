@@ -19,6 +19,7 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
   const playbackId = video?.asset?.status === "ready" ? video.asset.playbackId : null;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isNearViewport, setIsNearViewport] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
 
   useEffect(() => {
     if (!playbackId) return;
@@ -40,10 +41,19 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
     return () => observer.disconnect();
   }, [playbackId]);
 
+  useEffect(() => {
+    setVideoFailed(false);
+  }, [playbackId]);
+
   if (playbackId) {
+    const imageUrl = image ? urlFor(image).width(1920).height(1280).fit("crop").auto("format").quality(78).url() : null;
+
     return (
       <div ref={containerRef} className="absolute inset-0">
-        {isNearViewport ? (
+        {imageUrl ? (
+          <Image src={imageUrl} alt="Linnorea studio" fill sizes="100vw" className="object-cover" />
+        ) : null}
+        {isNearViewport && !videoFailed ? (
           <MuxPlayer
             playbackId={playbackId}
             autoPlay
@@ -63,11 +73,13 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
               "--media-control-display": "none",
               "--media-control-bar-display": "none",
             }}
+            onError={() => setVideoFailed(true)}
+            onStalled={() => setVideoFailed(true)}
             className="absolute inset-0 h-full w-full object-cover"
           />
-        ) : (
+        ) : !imageUrl ? (
           <div aria-hidden="true" className="absolute inset-0 bg-[var(--color-bg-elevated)]" />
-        )}
+        ) : null}
       </div>
     );
   }

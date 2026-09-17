@@ -2,8 +2,9 @@ import { defineField, defineType } from "sanity";
 
 export const visionSlide = defineType({
   name: "visionSlide",
-  title: "Vision / goals slide",
+  title: "HOME - Vision / goals slide",
   type: "document",
+  description: "Satu slide untuk bagian vision atau goals pada halaman Home.",
   fields: [
     defineField({
       name: "label",

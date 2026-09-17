@@ -2,8 +2,15 @@ import { defineField, defineType } from "sanity";
 
 export const project = defineType({
   name: "project",
-  title: "Project",
+  title: "PROJECTS - Project",
   type: "document",
+  description: "Satu project untuk listing Projects, highlight Home, dan halaman detail project.",
+  fieldsets: [
+    { name: "archive", title: "Archive and listing", options: { collapsible: true, collapsed: false } },
+    { name: "story", title: "Project story", options: { collapsible: true, collapsed: false } },
+    { name: "media", title: "Images and media", options: { collapsible: true, collapsed: false } },
+    { name: "people", title: "Project team", options: { collapsible: true, collapsed: true } },
+  ],
   fields: [
     defineField({
       name: "title",
@@ -11,6 +18,7 @@ export const project = defineType({
       type: "string",
       description: "Single project title. Write in the preferred editorial language.",
       validation: (Rule) => Rule.required(),
+      fieldset: "archive",
     }),
     defineField({
       name: "slug",
@@ -21,6 +29,7 @@ export const project = defineType({
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
+      fieldset: "archive",
     }),
     defineField({
       name: "coverImage",
@@ -29,6 +38,7 @@ export const project = defineType({
       options: { hotspot: true },
       description: "Primary image for the project listing and detail page hero.",
       validation: (Rule) => Rule.required(),
+      fieldset: "media",
     }),
     defineField({
       name: "gallery",
@@ -36,13 +46,7 @@ export const project = defineType({
       type: "array",
       of: [{ type: "image", options: { hotspot: true } }],
       description: "Additional project photos for the story narrative.",
-    }),
-    defineField({
-      name: "heroVideo",
-      title: "Hero video",
-      type: "file",
-      description: "Optional video for an immersive project hero.",
-      options: { accept: "video/*" },
+      fieldset: "media",
     }),
     defineField({
       name: "category",
@@ -57,42 +61,49 @@ export const project = defineType({
         layout: "radio",
       },
       description: "Choose one primary archive category for the project.",
+      fieldset: "archive",
     }),
     defineField({
       name: "status",
       title: "Status",
       type: "string",
       description: "Free-text project status. Use Ongoing for current work; blank values are treated as completed.",
+      fieldset: "archive",
     }),
     defineField({
       name: "styleTag",
       title: "Typology",
       type: "string",
       description: "Filter label for the project typology, for example Residential, Commercial, or Hospitality.",
+      fieldset: "archive",
     }),
     defineField({
       name: "homeTagline",
       title: "Home highlight tagline",
       type: "string",
       description: "Short supporting line shown under this project when it appears in the Home highlights.",
+      fieldset: "archive",
     }),
     defineField({
       name: "location",
       title: "Location",
       type: "string",
       description: "Project location.",
+      fieldset: "archive",
     }),
     defineField({
       name: "year",
       title: "Year",
       type: "string",
       description: "Project completion year or period.",
+      fieldset: "archive",
     }),
     defineField({
       name: "area",
       title: "Area",
       type: "string",
       description: "Project size such as 120 m².",
+      fieldset: "archive",
     }),
     defineField({
       name: "description",
@@ -100,12 +111,53 @@ export const project = defineType({
       type: "array",
       of: [{ type: "block" }],
       description: "Narrative description for the concept/design story.",
+      fieldset: "story",
+    }),
+    defineField({
+      name: "atAGlance",
+      title: "At a glance",
+      type: "array",
+      of: [{ type: "block" }],
+      description: "Short editorial introduction shown before the project data.",
+      fieldset: "story",
+    }),
+    defineField({
+      name: "editorialSections",
+      title: "Editorial sections",
+      type: "array",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "label", title: "Section label", type: "string" }),
+          defineField({ name: "heading", title: "Heading", type: "string" }),
+          defineField({ name: "body", title: "Body", type: "array", of: [{ type: "block" }] }),
+          defineField({ name: "image", title: "Section image", type: "image", options: { hotspot: true } }),
+        ],
+        preview: { select: { title: "heading", subtitle: "label", media: "image" } },
+      }],
+      description: "Flexible story sections. Each project can have different sections.",
+      fieldset: "story",
+    }),
+    defineField({
+      name: "quote",
+      title: "Quote",
+      type: "text",
+      rows: 4,
+      description: "Optional statement to feature in the project story.",
+      fieldset: "story",
+    }),
+    defineField({
+      name: "quoteAuthor",
+      title: "Quote author",
+      type: "string",
+      fieldset: "story",
     }),
     defineField({
       name: "scopeOfWork",
       title: "Scope of work",
       type: "string",
       description: "Optional summary of scope.",
+      fieldset: "archive",
     }),
     defineField({
       name: "team",
@@ -122,18 +174,21 @@ export const project = defineType({
         },
       }],
       description: "People or companies involved in this project, grouped by role.",
+      fieldset: "people",
     }),
     defineField({
       name: "featured",
       title: "Featured on home",
       type: "boolean",
       initialValue: false,
+      fieldset: "archive",
     }),
     defineField({
       name: "order",
       title: "Display order",
       type: "number",
       description: "Used to define listing and next/previous project browsing order.",
+      fieldset: "archive",
     }),
   ],
   preview: {

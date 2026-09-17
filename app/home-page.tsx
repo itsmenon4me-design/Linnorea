@@ -7,8 +7,8 @@ import { HighlightProjectsCarousel, type HighlightProject } from "@/components/s
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
-import { heroSlidesQuery, projectListQuery } from "@/lib/sanity/queries";
-import { plainText, type HeroSlide, type SanityImage } from "@/lib/sanity/types";
+import { heroSlidesQuery, projectListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
+import { plainText, type HeroSlide, type SanityImage, type SiteSettings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
@@ -37,9 +37,10 @@ function normalizeHeroEyebrows(slides: HeroSlide[]) {
 }
 
 export default async function HomePage() {
-  const [projects, heroSlides] = await Promise.all([
+  const [projects, heroSlides, settings] = await Promise.all([
     sanityClient.fetch<ProjectListItem[]>(projectListQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<HeroSlide[]>(heroSlidesQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
   ]);
   const normalizedHeroSlides = normalizeHeroEyebrows(heroSlides);
   const featuredProjects = projects.filter((project) => project.featured);
@@ -47,7 +48,7 @@ export default async function HomePage() {
     ...featuredProjects,
     ...projects.filter((project) => !project.featured),
   ];
-  const highlightsEyebrow = `${highlightProjects.length} ${dictionary.home.highlightProject}${highlightProjects.length === 1 ? "" : "s"}`;
+  const highlightsEyebrow = plainText(settings?.homeHighlightsLabel) || `${highlightProjects.length} ${dictionary.home.highlightProject}${highlightProjects.length === 1 ? "" : "s"}`;
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
@@ -58,8 +59,8 @@ export default async function HomePage() {
         <div id="collections" data-reveal className="mx-auto max-w-7xl">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/75">{highlightsEyebrow}</p>
           <div className="mt-5 flex flex-col justify-between gap-6 border-b border-white/15 pb-8 md:flex-row md:items-end">
-            <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{dictionary.home.highlightsTitle}</h2>
-            {highlightProjects.length === 0 ? <p className="max-w-xs text-sm leading-6 text-white/55">{dictionary.home.featuredProjectsEmpty}</p> : null}
+            <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.05em] md:text-5xl">{plainText(settings?.homeHighlightsTitle) || dictionary.home.highlightsTitle}</h2>
+            {highlightProjects.length === 0 ? <p className="max-w-xs text-sm leading-6 text-white/55">{plainText(settings?.homeHighlightsEmpty) || dictionary.home.featuredProjectsEmpty}</p> : null}
           </div>
           {highlightProjects.length > 0 ? (
             <div className="mt-10 -mx-5 overflow-hidden px-5 md:-mx-8 md:px-8">
@@ -80,7 +81,7 @@ export default async function HomePage() {
             href="/project"
             className="mt-12 inline-flex text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--color-accent-gold)]"
           >
-            <ArrowAction label={dictionary.home.discoverMore} className="text-[10px] uppercase tracking-[0.25em]" />
+            <ArrowAction label={plainText(settings?.homeDiscoverLabel) || dictionary.home.discoverMore} className="text-[10px] uppercase tracking-[0.25em]" />
           </Link>
         </div>
       </ScrollReveal>

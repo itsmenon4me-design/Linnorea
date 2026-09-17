@@ -7,8 +7,9 @@ import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
-import { projectListQuery, serviceListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
-import { plainText, type Service, type ServiceProjectCard, type SiteSettings } from "@/lib/sanity/types";
+import { insightListQuery, projectListQuery, serviceListQuery, siteSettingsQuery } from "@/lib/sanity/queries";
+import { plainText, type Insight, type Service, type ServiceProjectCard, type SiteSettings } from "@/lib/sanity/types";
+import { uniqueImageInsights } from "@/lib/sanity/insights";
 
 export const revalidate = 60;
 
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: { absolute: `${dictionary.nav.service} | ${seo.title}` }, description: seo.description };
 }
 
-const process = [
+const defaultProcess = [
   ["Understand", "We begin with the brief, context, needs, and constraints."],
   ["Define", "We establish a clear spatial and material direction."],
   ["Develop", "We refine the design through visuals, selections, and detail."],
@@ -25,10 +26,11 @@ const process = [
 ];
 
 export default async function ServicePage() {
-  const [services, settings, projects] = await Promise.all([
+  const [services, settings, projects, insights] = await Promise.all([
     sanityClient.fetch<Service[]>(serviceListQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<ServiceProjectCard[]>(projectListQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<Insight[]>(insightListQuery, {}, { next: { revalidate } }),
   ]);
   const whatsappNumber = settings?.whatsappNumber?.replace(/\D/g, "");
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : null;
@@ -55,6 +57,17 @@ export default async function ServicePage() {
       tagline: plainText(project.homeTagline),
       url: urlFor(project.coverImage!).width(1400).height(934).fit("crop").auto("format").quality(78).url(),
     }));
+  const insightItems = uniqueImageInsights(insights).map((insight) => ({
+    id: insight._id,
+    title: plainText(insight.title) || "Untitled insight",
+    href: insight.slug?.current ? `/insight/${insight.slug.current}` : null,
+    category: plainText(insight.category),
+    excerpt: plainText(insight.excerpt),
+    url: insight.coverImage ? urlFor(insight.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null,
+  }));
+  const process = settings?.servicesProcess?.length
+    ? settings.servicesProcess.map((item) => [plainText(item.title), plainText(item.description)] as [string, string])
+    : defaultProcess;
 
   return (
     <main className="bg-[var(--color-bg-base)] text-white">
@@ -62,13 +75,13 @@ export default async function ServicePage() {
 
       <header className="mx-auto max-w-7xl px-5 pb-16 pt-36 md:px-8 md:pb-24 md:pt-48">
         <div className="grid gap-12 md:grid-cols-[0.65fr_1.35fr] md:gap-20">
-          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/70">Services</p>
+          <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/70">{plainText(settings?.servicesPageLabel) || "Services"}</p>
           <div>
             <h1 className="max-w-5xl text-5xl font-medium leading-[0.9] tracking-[-0.08em] md:text-8xl">
-              Considered spaces, shaped around the way they are lived.
+              {plainText(settings?.servicesPageHeading) || "Considered spaces, shaped around the way they are lived."}
             </h1>
             <p className="mt-8 max-w-2xl text-base leading-7 text-white/65 md:text-lg md:leading-8">
-              Linnorea brings spatial planning, material direction, and detail together to create interiors with a clear sense of place.
+              {plainText(settings?.servicesPageDescription) || "Linnorea brings spatial planning, material direction, and detail together to create interiors with a clear sense of place."}
             </p>
           </div>
         </div>
@@ -81,18 +94,18 @@ export default async function ServicePage() {
           </div>
         </div>
       </ScrollReveal>
-      <ServiceExperience services={serviceItems} projectImages={projectImageItems} projectCards={projectCardItems} />
+      <ServiceExperience services={serviceItems} projectImages={projectImageItems} projectCards={projectCardItems} insights={insightItems} />
 
       <ScrollReveal as="section" className="border-b border-white/15">
         <div id="process" className="mx-auto max-w-[88rem] px-5 py-20 md:px-8 md:py-32">
           <div className="grid gap-12 md:grid-cols-[0.75fr_1.25fr] md:gap-20">
             <div data-reveal>
-              <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Our approach</p>
-              <h2 className="mt-6 max-w-sm text-4xl font-medium tracking-[-0.06em] md:text-6xl">From first direction to considered detail.</h2>
+              <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{plainText(settings?.servicesProcessLabel) || "Our approach"}</p>
+              <h2 className="mt-6 max-w-sm text-4xl font-medium tracking-[-0.06em] md:text-6xl">{plainText(settings?.servicesProcessHeading) || "From first direction to considered detail."}</h2>
             </div>
             <div data-reveal>
               <p className="max-w-2xl border-t border-white/15 pt-6 text-lg leading-8 text-white/70 md:pt-8 md:text-xl md:leading-9">
-                Linnorea brings together spatial planning, concept development, material direction, furniture selection, visualisation, and final styling to shape spaces with clarity, warmth, and character.
+                {plainText(settings?.servicesProcessDescription) || "Linnorea brings together spatial planning, concept development, material direction, furniture selection, visualisation, and final styling to shape spaces with clarity, warmth, and character."}
               </p>
               <div className="mt-16 grid border-t border-white/15 md:mt-24 md:grid-cols-4">
                 {process.map(([title, description]) => (

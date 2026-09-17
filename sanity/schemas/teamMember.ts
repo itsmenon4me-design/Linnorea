@@ -2,8 +2,9 @@ import { defineField, defineType } from "sanity";
 
 export const teamMember = defineType({
   name: "teamMember",
-  title: "Team member",
+  title: "ABOUT - Team member",
   type: "document",
+  description: "Data orang yang ditampilkan pada bagian team halaman About.",
   fields: [
     defineField({ name: "name", title: "Name", type: "string", validation: (Rule) => Rule.required() }),
     defineField({ name: "role", title: "Role", type: "string", validation: (Rule) => Rule.required() }),

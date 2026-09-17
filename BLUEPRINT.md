@@ -68,7 +68,6 @@ Situs memakai satu bahasa publik dan setiap field copy di Sanity adalah input tu
 | slug | slug | dari title (id atau en) |
 | coverImage | image | untuk listing & hero detail |
 | gallery | array of image | galeri proyek |
-| heroVideo | file (opsional) | jika ada video showcase |
 | category | reference / string | mis. residential, commercial, dsb |
 | styleTag | string | mis. "Modern Tropical", "Compact Tropical", "American Classic" — ditampilkan di card listing |
 | location | string | opsional |

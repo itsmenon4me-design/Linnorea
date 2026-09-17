@@ -170,15 +170,42 @@ function FilterControl({ label, value, options, open, onToggle, onSelect }: { la
 }
 
 function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter, isListView }: { project: Project; index: number; dictionary: Dictionary; onOpen: () => void; onPointerEnter: () => void; isListView: boolean }) {
-  const [isImageEntering, setIsImageEntering] = useState(false);
+  const [isImageEntering, setIsImageEntering] = useState(isListView);
   const itemRef = useRef<HTMLButtonElement>(null);
   const title = plainText(project.title) || dictionary.home.untitledProject;
   const imageUrl = project.coverImage
-    ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(80).url()
+    ? urlFor(project.coverImage).width(1800).height(1200).fit("crop").auto("format").quality(90).url()
     : project.fallbackImageUrl ?? fallbackProjectImages[index % fallbackProjectImages.length];
   const aspectRatio = getImageAspectRatio(project.coverImage);
 
   useEffect(() => {
+    if (isListView) {
+      const item = itemRef.current;
+      let revealFrame: number | undefined;
+      if (!item || typeof IntersectionObserver === "undefined") {
+        setIsImageEntering(false);
+        return;
+      }
+
+      setIsImageEntering(true);
+      const reveal = () => {
+        revealFrame = window.requestAnimationFrame(() => setIsImageEntering(false));
+      };
+      const observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          reveal();
+          observer.disconnect();
+        }
+      }, { threshold: 0.01 });
+      observer.observe(item);
+      const rect = item.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) reveal();
+      return () => {
+        observer.disconnect();
+        if (revealFrame !== undefined) window.cancelAnimationFrame(revealFrame);
+      };
+    }
+
     const item = itemRef.current;
     let entryTimer: number | undefined;
     if (!item || typeof IntersectionObserver === "undefined") {
@@ -189,7 +216,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsImageEntering(true);
-        entryTimer = window.setTimeout(() => setIsImageEntering(false), 1000);
+        entryTimer = window.setTimeout(() => setIsImageEntering(false), 1100);
         observer.disconnect();
       }
     }, { threshold: 0.08 });
@@ -201,15 +228,19 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
   }, [isListView]);
 
   return (
-    <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isImageEntering && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? "project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)]" : ""}`}>
+    <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isImageEntering && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? `project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)] ${isImageEntering ? "project-list-item--entering" : ""}` : ""}`}>
       <div className={`project-gallery-media relative overflow-hidden rounded-[0.65rem] bg-[var(--color-bg-elevated)] ${isListView ? "project-list-thumb h-16 w-[5.5rem]" : ""}`} style={isListView ? undefined : { aspectRatio }}>
-        {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="project-gallery-image object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
-        <div className={`project-card-meta pointer-events-none absolute bottom-2 left-2 mr-2 flex max-w-[calc(100%-1rem)] items-end rounded-xl bg-black/20 p-4 text-white ${isListView ? "sm:hidden" : ""}`}>
-          <div>
-            <p className="project-card-meta__title text-sm font-medium leading-tight transition-colors duration-200">{title}</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/75">{project.location || normalizeProjectCategory(project.category) || dictionary.ui.projectCategory}</p>
-          </div>
+        <div className="project-gallery-image-hover absolute inset-0">
+          {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="project-gallery-image object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
         </div>
+        {!isListView ? (
+          <div className="project-card-meta pointer-events-none absolute bottom-2 left-2 mr-2 flex max-w-[calc(100%-1rem)] items-end rounded-xl bg-black/20 p-4 text-white">
+            <div>
+              <p className="project-card-meta__title text-sm font-medium leading-tight transition-colors duration-200">{title}</p>
+              <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/75">{project.location || normalizeProjectCategory(project.category) || dictionary.ui.projectCategory}</p>
+            </div>
+          </div>
+        ) : null}
       </div>
       {isListView ? <div className="grid items-center gap-3 py-2 text-sm text-white/65 sm:grid-cols-[1fr_1fr_auto]"><span className="project-list-item__title text-base text-white/80 transition-colors duration-200">{title}</span><span className="text-[10px] uppercase tracking-[0.14em]">{project.location || normalizeProjectCategory(project.category) || dictionary.ui.projectCategory}</span><span className="text-[10px] uppercase tracking-[0.14em]">{project.year || ""}</span></div> : null}
     </button>
@@ -224,8 +255,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   const visibleDescriptionParagraphs = isDescriptionExpanded ? descriptionParagraphs : descriptionParagraphs.slice(0, 1);
   const [isGalleryOpen, setIsGalleryOpen] = useState(initialGalleryOpen);
   const [animateNormalImages, setAnimateNormalImages] = useState(true);
-  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
-  const [animatedGalleryIndices, setAnimatedGalleryIndices] = useState<Set<number>>(() => new Set());
+  const [initialGalleryIndex, setInitialGalleryIndex] = useState(0);
   const gallerySwiperRef = useRef<SwiperInstance | null>(null);
   const viewerScrollRef = useRef<HTMLDivElement>(null);
   const descriptionScrollTopRef = useRef(0);
@@ -251,27 +281,8 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
     };
   }, [onClose]);
 
-  useEffect(() => {
-    if (isGalleryOpen && gallerySwiperRef.current) {
-      gallerySwiperRef.current.slideTo(activeGalleryIndex, 0);
-    }
-  }, [activeGalleryIndex, isGalleryOpen]);
-
-  useEffect(() => {
-    if (!isGalleryOpen || animatedGalleryIndices.has(activeGalleryIndex)) return;
-    const timer = window.setTimeout(() => {
-      setAnimatedGalleryIndices((current) => {
-        const next = new Set(current);
-        next.add(activeGalleryIndex);
-        return next;
-      });
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [activeGalleryIndex, animatedGalleryIndices, isGalleryOpen]);
-
   const toggleGallery = () => {
     if (!isGalleryOpen) {
-      setAnimatedGalleryIndices(new Set());
       setAnimateNormalImages(true);
     } else {
       setAnimateNormalImages(false);
@@ -280,8 +291,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   };
 
   const openGalleryAt = (index: number) => {
-    setActiveGalleryIndex(index);
-    setAnimatedGalleryIndices(new Set());
+    setInitialGalleryIndex(index);
     setAnimateNormalImages(true);
     setIsGalleryOpen(true);
   };
@@ -371,13 +381,19 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
             <Swiper
               onSwiper={(swiper) => {
                 gallerySwiperRef.current = swiper;
-                swiper.slideTo(0, 0);
+                swiper.slideTo(initialGalleryIndex, 0);
+                revealVisibleGalleryImages(swiper);
               }}
-              onSlideChange={(swiper) => setActiveGalleryIndex(swiper.activeIndex)}
+              onProgress={revealVisibleGalleryImages}
               slidesPerView="auto"
               spaceBetween={12}
-              speed={700}
+              speed={400}
+              longSwipesRatio={0.25}
+              longSwipesMs={300}
+              threshold={6}
+              touchRatio={0.8}
               resistanceRatio={0}
+              watchSlidesProgress
               watchOverflow
               grabCursor
               allowTouchMove
@@ -391,7 +407,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
                   className="project-viewer-gallery-item--strip"
                   style={{ width: `${getImageAspectRatio(entry.image) * 90}vh` }}
                 >
-                  <ProjectViewerImage image={entry.image} imageUrl={entry.url} title={title} index={index} isGalleryOpen isGalleryActive={index === activeGalleryIndex} animateEntry={!animatedGalleryIndices.has(index)} />
+                  <ProjectViewerImage image={entry.image} imageUrl={entry.url} title={title} index={index} isGalleryOpen />
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -449,16 +465,14 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   );
 }
 
-function ProjectViewerImage({ image, imageUrl: fallbackUrl, title, index, isGalleryOpen, isGalleryActive = false, animateEntry = true, onClick }: { image: Project["coverImage"] | null; imageUrl: string | null; title: string; index: number; isGalleryOpen: boolean; isGalleryActive?: boolean; animateEntry?: boolean; onClick?: () => void }) {
-  const [isInView, setIsInView] = useState(isGalleryOpen ? isGalleryActive : false);
+function ProjectViewerImage({ image, imageUrl: fallbackUrl, title, index, isGalleryOpen, animateEntry = true, onClick }: { image: Project["coverImage"] | null; imageUrl: string | null; title: string; index: number; isGalleryOpen: boolean; animateEntry?: boolean; onClick?: () => void }) {
+  const [isInView, setIsInView] = useState(!isGalleryOpen);
+  const [isGalleryZooming] = useState(isGalleryOpen);
   const imageRef = useRef<HTMLButtonElement>(null);
   const imageUrl = image ? urlFor(image).width(1800).height(1200).fit("crop").auto("format").quality(82).url() : fallbackUrl;
 
   useEffect(() => {
-    if (isGalleryOpen) {
-      setIsInView(isGalleryActive);
-      return;
-    }
+    if (isGalleryOpen) return;
 
     const item = imageRef.current;
     if (!item || typeof IntersectionObserver === "undefined") {
@@ -474,7 +488,7 @@ function ProjectViewerImage({ image, imageUrl: fallbackUrl, title, index, isGall
     }, { threshold: 0.2 });
     observer.observe(item);
     return () => observer.disconnect();
-  }, [isGalleryActive, isGalleryOpen]);
+  }, [isGalleryOpen]);
 
   if (!imageUrl) return null;
   return (
@@ -486,9 +500,16 @@ function ProjectViewerImage({ image, imageUrl: fallbackUrl, title, index, isGall
       className={`project-viewer-gallery-item w-full min-w-0 overflow-hidden rounded-[0.65rem] bg-white/5 ${index === 0 ? "first" : ""} ${isGalleryOpen ? "project-viewer-gallery-item--strip" : ""}`}
       style={!isGalleryOpen ? { aspectRatio: getImageAspectRatio(image) } : undefined}
     >
-      <Image src={imageUrl} alt={`${title} ${index + 1}`} fill draggable={false} sizes="(max-width: 768px) 100vw, 66vw" className={`project-viewer-gallery-image object-cover ${isInView && animateEntry ? "project-viewer-gallery-image--entry" : ""}`} />
+      <Image src={imageUrl} alt={`${title} ${index + 1}`} fill draggable={false} sizes="(max-width: 768px) 100vw, 66vw" className={`project-viewer-gallery-image object-cover ${isGalleryOpen ? (isGalleryZooming ? "project-viewer-gallery-image--zooming" : "") : isInView && animateEntry ? "project-viewer-gallery-image--entry" : ""}`} />
     </button>
   );
+}
+
+function revealVisibleGalleryImages(swiper: SwiperInstance) {
+  swiper.slides.forEach((slide) => {
+    if (!slide.classList.contains("swiper-slide-visible")) return;
+    slide.querySelector(".project-viewer-gallery-image--zooming")?.classList.remove("project-viewer-gallery-image--zooming");
+  });
 }
 
 const fallbackProjectImages = [

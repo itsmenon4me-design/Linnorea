@@ -2,8 +2,9 @@ import { defineField, defineType } from "sanity";
 
 export const insight = defineType({
   name: "insight",
-  title: "Insight",
+  title: "ABOUT - Insight",
   type: "document",
+  description: "Artikel atau insight yang dapat tampil di About dan Services.",
   fields: [
     defineField({ name: "title", title: "Title", type: "string", validation: (Rule) => Rule.required() }),
     defineField({

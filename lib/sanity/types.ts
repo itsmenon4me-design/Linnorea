@@ -63,7 +63,6 @@ export type Project = {
   slug?: { current?: string };
   coverImage?: SanityImage;
   gallery?: SanityImage[];
-  heroVideo?: { asset?: { _ref?: string; url?: string } };
   category?: string;
   status?: string;
   styleTag?: string;
@@ -73,6 +72,15 @@ export type Project = {
   area?: string;
   description?: PortableTextBlock[];
   scopeOfWork?: string;
+  atAGlance?: PortableTextBlock[];
+  editorialSections?: Array<{
+    label?: string;
+    heading?: string;
+    body?: PortableTextBlock[];
+    image?: SanityImage;
+  }>;
+  quote?: string;
+  quoteAuthor?: string;
   featured?: boolean;
   order?: number;
   fallbackImageUrl?: string;
@@ -83,7 +91,12 @@ export type Project = {
 export type ServiceProjectCard = Pick<Project, "_id" | "title" | "slug" | "coverImage" | "category" | "location" | "homeTagline">;
 
 export type SiteSettings = {
+  logo?: SanityImage;
   projectHighlightImages?: SanityImage[];
+  homeHighlightsLabel?: string;
+  homeHighlightsTitle?: string;
+  homeHighlightsEmpty?: string;
+  homeDiscoverLabel?: string;
   brandStatement?: string;
   aboutEstablished?: string;
   aboutDescription?: string;
@@ -100,6 +113,22 @@ export type SiteSettings = {
   aboutMissionDetails?: Array<{ label?: string; description?: string; order?: number }>;
   aboutMissionImage?: SanityImage;
   aboutProcess?: Array<{ title?: string; subtitle?: string; description?: string; image?: SanityImage; order?: number }>;
+  aboutPageLabel?: string;
+  aboutPrinciplesLabel?: string;
+  aboutVisionLabel?: string;
+  aboutMissionLabel?: string;
+  aboutProcessLabel?: string;
+  aboutPrinciplesAside?: string;
+  aboutVisionAside?: string;
+  aboutMissionAside?: string;
+  aboutProcessAside?: string;
+  servicesPageLabel?: string;
+  servicesPageHeading?: string;
+  servicesPageDescription?: string;
+  servicesProcessLabel?: string;
+  servicesProcessHeading?: string;
+  servicesProcessDescription?: string;
+  servicesProcess?: Array<{ title?: string; description?: string; order?: number }>;
   aboutCtaHeading?: string;
   studioVisualImage?: SanityImage;
   studioVisualVideo?: MuxVideo;

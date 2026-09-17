@@ -192,7 +192,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       <section className="bg-[var(--color-bg-base)]">
         <div className="mx-auto max-w-[88rem] px-5 pb-20 pt-36 md:px-8 md:pb-32 md:pt-52">
           <div className="max-w-6xl">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/55">{dictionary.nav.home}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/55">{plainText(settings?.aboutPageLabel) || dictionary.nav.home}</p>
             <h1 className="mt-8 max-w-5xl font-serif text-5xl font-normal leading-[0.95] tracking-[-0.055em] md:text-7xl lg:text-[5.25rem]">
               {dictionary.nav.about}
             </h1>
@@ -216,8 +216,8 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       <ScrollReveal as="section" className="mx-auto max-w-[88rem] px-5 pb-28 md:px-8 md:pb-44">
         <div data-reveal className="min-w-0 pt-6">
           <div className="flex items-start justify-between gap-8">
-            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">Principles</p>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">A way of looking</span>
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{plainText(settings?.aboutPrinciplesLabel) || "Principles"}</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">{plainText(settings?.aboutPrinciplesAside) || "A way of looking"}</span>
           </div>
           <div className="mt-16 grid gap-16 md:mt-24 lg:grid-cols-[0.7fr_1.3fr] lg:gap-24">
             <div className="flex flex-col justify-between gap-12">
@@ -249,8 +249,8 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       <ScrollReveal as="section" className="mx-auto max-w-[88rem] border-t border-white/15 bg-[#0c0e10] px-5 pb-12 pt-0 md:px-8 md:pb-20 md:pt-0">
         <div className="pt-6">
           <div className="flex items-start justify-between gap-8">
-            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.vision}</p>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">A long view</span>
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{plainText(settings?.aboutVisionLabel) || dictionary.about.vision}</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">{plainText(settings?.aboutVisionAside) || "A long view"}</span>
           </div>
           <div data-reveal className="mt-16 md:mt-24">
             <p className="max-w-6xl font-serif text-[2.75rem] leading-[0.92] tracking-[-0.07em] text-white md:text-[4.25rem] md:leading-[0.9] lg:text-[5rem] lg:leading-[0.86]">
@@ -273,7 +273,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
         <div data-reveal className="min-w-0 pt-6">
           <div className="flex items-start justify-between gap-8">
             <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.mission}</p>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">What we pursue</span>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">{plainText(settings?.aboutMissionAside) || "What we pursue"}</span>
           </div>
           <div className="mt-16 grid gap-14 md:mt-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
             <div>
@@ -308,8 +308,8 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       <ScrollReveal as="section" className="about-process-section mx-auto max-w-[88rem] px-5 pb-24 md:px-8 md:pb-36">
         <div className="min-w-0 border-t border-white/15 pt-6">
           <div className="flex items-start justify-between gap-8">
-            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.process}</p>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">From reading to making</span>
+            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{plainText(settings?.aboutProcessLabel) || dictionary.about.process}</p>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">{plainText(settings?.aboutProcessAside) || "From reading to making"}</span>
           </div>
           <div className="mt-16 min-w-0 space-y-20 md:mt-24 md:space-y-36">
             {(isPreview ? previewProcessItems : processItems).length ? (isPreview ? previewProcessItems : processItems).map((item, index) => {

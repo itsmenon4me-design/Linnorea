@@ -8,7 +8,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 type HeaderProps = {
   dictionary: Dictionary;
-  variant?: "default" | "project";
+  variant?: "default" | "project" | "editorial";
 };
 
 const headerContentClassName = "relative z-10 m-0 mt-[7px] mb-[8px] flex h-[25px] max-w-7xl items-center px-6";
@@ -16,6 +16,7 @@ const headerContentClassName = "relative z-10 m-0 mt-[7px] mb-[8px] flex h-[25px
 export function Header({ dictionary, variant = "default" }: HeaderProps) {
   const pathname = usePathname();
   const isProjectHeader = variant === "project" || pathname === "/project";
+  const isEditorialHeader = variant === "editorial";
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const previousScrollYRef = useRef(0);
@@ -55,8 +56,10 @@ export function Header({ dictionary, variant = "default" }: HeaderProps) {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
   const navLinkClass = (isActive: boolean) =>
-    `relative inline-flex transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${
-      isActive ? "opacity-100 after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-white after:transition-transform after:duration-300" : "opacity-80"
+    `relative inline-flex transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 ${
+      isEditorialHeader ? "focus-visible:outline-white" : "focus-visible:outline-white"
+    } ${
+      isActive ? "opacity-100 after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-[var(--color-accent-gold)] after:transition-transform after:duration-300" : "opacity-80"
     }`;
 
   return (
@@ -97,7 +100,7 @@ export function Header({ dictionary, variant = "default" }: HeaderProps) {
       </div>
 
       {isMenuOpen ? (
-        <div className="header-mobile-menu border-t border-white/10 bg-[#0b0b0d] px-5 py-5">
+        <div className="header-mobile-menu border-t border-white/10 bg-[var(--color-bg-base)] px-5 py-5">
           <nav className="flex flex-col gap-4 text-sm uppercase tracking-[0.2em] text-white/80">
             {navItems.map((item, index) => (
               <Link key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)} className={navLinkClass(isNavItemActive(item.href, index))}>

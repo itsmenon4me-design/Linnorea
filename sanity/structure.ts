@@ -10,19 +10,19 @@ export function structure(S: StructureBuilder) {
           S.list()
             .title("Home Page Content")
             .items([
-              S.documentTypeListItem("heroSlide").title("Hero Slides"),
-              S.documentTypeListItem("visionSlide").title("Vision / Goals Slides"),
+              S.documentTypeListItem("heroSlide").title("HOME - Hero slides (tambah/edit)"),
+              S.documentTypeListItem("visionSlide").title("HOME - Vision / goals slides"),
               S.listItem()
-                .title("Collections / Highlight Projects")
+                .title("HOME - Project highlight")
                 .child(
                   S.documentList()
-                    .title("Featured Projects")
+                    .title("Project yang tampil di Home")
                     .filter('_type == "project" && featured == true')
                 ),
               S.listItem()
-                .title("Home Settings")
+                .title("HOME - Teks & pengaturan highlight")
                 .child(
-                  S.documentTypeList("siteSettings").title("Home Settings")
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("HOME - Teks & pengaturan highlight")
                 ),
             ])
         ),
@@ -33,35 +33,29 @@ export function structure(S: StructureBuilder) {
             .title("About Page Content")
             .items([
               S.listItem()
-                .title("About Settings")
+                .title("ABOUT - Teks halaman & media")
                 .child(
-                  S.documentTypeList("siteSettings").title("About Settings")
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("ABOUT - Teks halaman & media")
                 ),
-              S.documentTypeListItem("approachItem").title("Approach Items"),
-              S.documentTypeListItem("teamMember").title("Team Members"),
-              S.documentTypeListItem("insight").title("Insights"),
+              S.documentTypeListItem("teamMember").title("ABOUT - Team members"),
+              S.documentTypeListItem("insight").title("ABOUT - Insights"),
             ])
         ),
       S.listItem()
-        .title("Project")
+        .title("Projects")
         .child(
-          S.documentTypeList("project").title("Projects")
+          S.documentTypeList("project").title("PROJECTS - Daftar project")
         ),
       S.listItem()
-        .title("Service")
+        .title("Services")
         .child(
-          S.documentTypeList("service").title("Services")
-        ),
-      S.listItem()
-        .title("Product")
-        .child(
-          S.documentTypeList("product").title("Products")
+          S.documentTypeList("service").title("SERVICES - Daftar layanan")
         ),
       S.divider(),
       S.listItem()
-        .title("Site Settings")
+        .title("GLOBAL - Kontak, footer & SEO")
         .child(
-          S.documentTypeList("siteSettings").title("Global Site Settings")
+          S.document().schemaType("siteSettings").documentId("siteSettings").title("GLOBAL - Kontak, footer & SEO")
         ),
     ]);
 }

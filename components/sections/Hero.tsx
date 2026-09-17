@@ -83,7 +83,9 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragPlayingIndex, setDragPlayingIndex] = useState<number | null>(null);
   const [playingIndex, setPlayingIndex] = useState(0);
+  const [failedVideoIndexes, setFailedVideoIndexes] = useState<Set<number>>(() => new Set());
   const playingIndexRef = useRef(0);
+  const failedVideoIndexesRef = useRef<Set<number>>(new Set());
   const dragCommitRef = useRef(false);
   const transitionRef = useRef<HeroTransition | null>(null);
   const dragSwapActiveRef = useRef(false);
@@ -141,6 +143,12 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     targetIndex: number | null;
     swapActive: boolean;
   } | null>(null);
+  useEffect(() => {
+    failedVideoIndexesRef.current = new Set(
+      [...failedVideoIndexesRef.current].filter((index) => Boolean(playbackIds[index])),
+    );
+    setFailedVideoIndexes(new Set(failedVideoIndexesRef.current));
+  }, [playbackIds]);
   useEffect(() => {
     activeIndexRef.current = activeIndex;
     nextIndexRef.current = nextIndex;
@@ -223,6 +231,10 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     if (!media) {
       return;
     }
+    if (media.readyState === 0) {
+      media.preload = "auto";
+      media.load();
+    }
     const startPlayback = () => {
       pendingPlayCleanupRef.current?.();
       pendingPlayCleanupRef.current = null;
@@ -295,6 +307,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
   };
 
   const handleVideoFailure = (index: number) => {
+    failedVideoIndexesRef.current.add(index);
+    setFailedVideoIndexes(new Set(failedVideoIndexesRef.current));
     if (index === activeIndex) {
       window.dispatchEvent(new Event("linnorea:hero-ready"));
     }
@@ -309,6 +323,9 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     const retryTimers = mediaRetryTimersRef.current;
 
     const retryVideoAfterError = (index: number, player: MuxPlayerElement, errorEvent: Event) => {
+      if (failedVideoIndexesRef.current.has(index)) {
+        return;
+      }
       const eventTarget = errorEvent.currentTarget as (HTMLMediaElement | MuxPlayerElement | null);
       const eventMedia = eventTarget instanceof HTMLMediaElement ? eventTarget : null;
       const media = player.mediaController?.media ?? eventMedia;
@@ -486,11 +503,11 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     const syncPlayers = () => {
       node.querySelectorAll<MuxPlayerElement>("mux-player").forEach((player, index) => {
         muxPlayerRefs.current[index] = player;
-        player.preload = "auto";
+        player.preload = index === activeIndex ? "auto" : "none";
         if (playbackIds[index]) {
           player.minPreloadSegments = 1;
           const media = player.mediaController?.media;
-          if (media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
+          if (index === activeIndex && media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
             preloadStartedRef.current.add(index);
             requestManagedPreload(index, async (queuedMedia) => {
               queuedMedia.preload = "auto";
@@ -660,8 +677,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         });
       }
       const isActive = index === activeIndex;
-      const isNext = index === nextIndex;
-      const preloadMode = isActive || isNext ? "auto" : "none";
+      const preloadMode = isActive ? "auto" : "none";
       player.setAttribute("preload", preloadMode);
       const media = player.mediaController?.media;
       if (media) {
@@ -701,7 +717,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         return;
       }
 
-      const shouldLoad = index === activeIndex || index === nextIndex;
+      const shouldLoad = index === activeIndex;
       const preloadMode = shouldLoad ? "auto" : "none";
       player.preload = preloadMode;
       const media = player.mediaController?.media;
@@ -1171,12 +1187,12 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                 ) : (
                   <MediaPlaceholder className="h-full w-full bg-[linear-gradient(135deg,rgba(116,120,127,0.25),rgba(14,17,21,0.82))]" />
                 )}
-                {slidePlaybackId && mounted ? (
+                {slidePlaybackId && mounted && !failedVideoIndexes.has(index) ? (
                   <MuxPlayer
                     ref={(player) => {
                       muxPlayerRefs.current[index] = player;
                       if (player) {
-                        const preloadMode = index === activeIndex || index === nextIndex ? "auto" : "none";
+                        const preloadMode = index === activeIndex ? "auto" : "none";
                         player.preload = preloadMode;
                         const media = player.mediaController?.media;
                         if (media) {
