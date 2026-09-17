@@ -117,9 +117,16 @@ export type Insight = {
   slug?: { current?: string };
   category?: string;
   publishedAt?: string;
+  author?: string;
   excerpt?: string;
+  atAGlanceLabel?: string;
   coverImage?: SanityImage;
+  contributors?: Array<{ name?: string; role?: string; profileUrl?: string }>;
   content?: InsightContentBlock[];
+  sections?: Array<{ label?: string; heading?: string; body?: InsightContentBlock[] }>;
+  latestInsightsLabel?: string;
+  latestInsightsHeading?: string;
+  relatedInsights?: Insight[];
   order?: number;
 };
 

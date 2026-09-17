@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { Header } from "@/components/layout/Header";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
+import { formatEditorialDate } from "@/lib/formatDate";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
@@ -52,10 +53,26 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
   if (!insight) notFound();
 
   const title = insight.title ?? "Insight";
+  const publishedDate = formatEditorialDate(insight.publishedAt);
   const coverUrl = insight.coverImage ? urlFor(insight.coverImage).width(2000).height(1200).fit("crop").auto("format").quality(82).url() : null;
-  const relatedInsights = allInsights.filter((item) => item._id !== insight._id).slice(0, 4);
-  const additionalInsights = allInsights.filter((item) => item._id !== insight._id).slice(4);
+  const relatedInsights = insight.relatedInsights?.length
+    ? insight.relatedInsights.filter((item) => item._id !== insight._id)
+    : allInsights.filter((item) => item._id !== insight._id).slice(0, 4);
+  const additionalInsights = insight.relatedInsights?.length
+    ? []
+    : allInsights.filter((item) => item._id !== insight._id).slice(4);
   const contentBlocks = insight.content ?? [];
+  const editorialSections = insight.sections ?? [];
+  const renderBlocks = (blocks: InsightContentBlock[], keyPrefix: string) =>
+    blocks.map((block, index) => {
+      if (isImageBlock(block)) {
+        const imageUrl = urlFor(block).width(1600).height(1000).fit("crop").auto("format").quality(80).url();
+        return <Image key={block._key ?? `${keyPrefix}-image-${index}`} src={imageUrl} alt={`${title} image ${index + 1}`} width={1600} height={1000} className="my-14 h-auto w-full object-cover" />;
+      }
+      if (!isPortableTextBlock(block)) return null;
+      const text = block.children?.map((child) => child.text ?? "").join("") ?? "";
+      return text ? <p key={block._key ?? `${keyPrefix}-paragraph-${index}`}>{text}</p> : null;
+    });
 
   return (
     <ScrollReveal className="min-h-screen bg-[var(--color-bg-base)] text-white">
@@ -118,16 +135,44 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
         }
       `}</style>
       <Header dictionary={dictionary} />
-      <article className="mx-auto max-w-[88rem] px-5 pb-24 pt-36 md:px-8 md:pb-36 md:pt-52">
+      <article className="mx-auto max-w-[88rem] px-5 pb-16 pt-24 md:px-8 md:pb-24 md:pt-32">
         <div className="insight-detail-hero md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
           <Link href="/insight" className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4">Insights</Link>
           <div className="min-w-0">
             <h1 className="max-w-[720px] font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] sm:text-6xl md:text-7xl lg:text-[5.5rem]">{title}</h1>
-            {insight.publishedAt ? <p className="mt-10 font-serif text-3xl leading-tight text-white md:mt-12 md:text-5xl">{insight.publishedAt}</p> : null}
-            <div className="mt-8 flex gap-3" aria-label="Share article">
-              <a href={`mailto:?subject=${encodeURIComponent(title)}`} aria-label="Share by email" className="flex h-9 w-9 items-center justify-center transition-colors hover:text-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"><ShareIcon type="email" /></a>
-              <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="Share on LinkedIn" className="flex h-9 w-9 items-center justify-center transition-colors hover:text-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"><ShareIcon type="linkedin" /></a>
-              <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Share on Instagram" className="flex h-9 w-9 items-center justify-center transition-colors hover:text-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"><ShareIcon type="instagram" /></a>
+            <div className="mt-6 grid gap-8 text-base leading-7 md:mt-8 md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
+              <div>
+                {publishedDate ? <p className="font-serif text-xl leading-tight text-white md:text-2xl">{publishedDate}</p> : null}
+                <div className="mt-5 flex gap-3" aria-label="Share article">
+                  <a href={`mailto:?subject=${encodeURIComponent(title)}`} aria-label="Share by email" className="flex h-9 w-9 items-center justify-center transition-colors hover:text-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"><ShareIcon type="email" /></a>
+                  <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="Share on LinkedIn" className="flex h-9 w-9 items-center justify-center transition-colors hover:text-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"><ShareIcon type="linkedin" /></a>
+                  <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Share on Instagram" className="flex h-9 w-9 items-center justify-center transition-colors hover:text-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"><ShareIcon type="instagram" /></a>
+                </div>
+              </div>
+              <div className="md:pt-1">
+                <p className="text-white/55">By</p>
+                <p className="mt-2">{insight.author || "Linnorea"}</p>
+                {insight.contributors?.length ? (
+                  <div className="mt-8">
+                    <p className="text-white/55">With contributions by:</p>
+                    <ul className="mt-2 space-y-2">
+                      {insight.contributors.map((contributor, index) => {
+                        if (!contributor.name) return null;
+                        const label = contributor.role ? `${contributor.name} / ${contributor.role}` : contributor.name;
+                        return (
+                          <li key={`${contributor.name}-${index}`}>
+                            {contributor.profileUrl ? (
+                              <a href={contributor.profileUrl} target="_blank" rel="noreferrer" className="underline decoration-white/35 underline-offset-4 transition hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+                                {label}
+                              </a>
+                            ) : label}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
@@ -139,7 +184,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
             </div>
             <div className="mt-3 text-xs text-white/50">{title}</div>
             <div className="insight-detail-grid mt-20 border-t border-white/15 pt-8 md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/55">At a glance</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-white/55">{insight.atAGlanceLabel || "At a glance"}</p>
               <div className="max-w-2xl space-y-6 text-lg leading-8 text-white/75">
                 {insight.excerpt ? <p>{insight.excerpt}</p> : <p>This insight is ready for its editorial introduction to be added in Sanity Studio.</p>}
               </div>
@@ -149,16 +194,14 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
               <div className="insight-detail-grid md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
                 <p className="text-xs uppercase tracking-[0.18em] text-white/55">{insight.category || "Insight"}</p>
                 <div className="max-w-2xl space-y-8 text-lg leading-8 text-white/75">
-                  {contentBlocks.map((block, index) => {
-                    if (isImageBlock(block)) {
-                      const imageUrl = urlFor(block).width(1600).height(1000).fit("crop").auto("format").quality(80).url();
-                      return <Image key={block._key ?? `image-${index}`} src={imageUrl} alt={`${title} image ${index + 1}`} width={1600} height={1000} className="my-14 h-auto w-full object-cover" />;
-                    }
-                    if (!isPortableTextBlock(block)) return null;
-                    const text = block.children?.map((child) => child.text ?? "").join("") ?? "";
-                    return text ? <p key={block._key ?? `paragraph-${index}`}>{text}</p> : null;
-                  })}
-                  {!contentBlocks.length ? <p className="text-white/60">The full article will appear here after the editorial content is added in Sanity Studio.</p> : null}
+                  {editorialSections.length ? editorialSections.map((section, sectionIndex) => (
+                    <section key={`${section.label ?? "section"}-${sectionIndex}`} className="space-y-6">
+                      {section.label ? <p className="text-xs uppercase tracking-[0.18em] text-white/55">{section.label}</p> : null}
+                      {section.heading ? <h2 className="font-serif text-4xl leading-tight text-white md:text-5xl">{section.heading}</h2> : null}
+                      {renderBlocks(section.body ?? [], `section-${sectionIndex}`)}
+                    </section>
+                  )) : renderBlocks(contentBlocks, "content")}
+                  {!editorialSections.length && !contentBlocks.length ? <p className="text-white/60">The full article will appear here after the editorial content is added in Sanity Studio.</p> : null}
                 </div>
               </div>
             </div>
@@ -166,9 +209,9 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
             {relatedInsights.length ? (
               <div className="mt-24 border-t border-white/15 pt-8">
                 <div className="insight-detail-grid md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">Latest Insights</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">{insight.latestInsightsLabel || "Latest Insights"}</p>
                   <div>
-                    <h2 className="font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] md:text-7xl">Perspectives, trends, news.</h2>
+                    <h2 className="font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] md:text-7xl">{insight.latestInsightsHeading || "Perspectives, trends, news."}</h2>
                     <div className="mt-14 insight-related-list">
                       {relatedInsights.map((item) => {
                         const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;

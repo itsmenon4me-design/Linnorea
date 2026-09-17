@@ -220,6 +220,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   const title = plainText(project.title) || dictionary.home.untitledProject;
   const descriptionParagraphs = portableTextToParagraphs(project.description);
   const hasDescription = descriptionParagraphs.length > 0;
+  const hasExpandableContent = descriptionParagraphs.length > 1 || Boolean(project.team?.length);
   const visibleDescriptionParagraphs = isDescriptionExpanded ? descriptionParagraphs : descriptionParagraphs.slice(0, 1);
   const [isGalleryOpen, setIsGalleryOpen] = useState(initialGalleryOpen);
   const [animateNormalImages, setAnimateNormalImages] = useState(true);
@@ -332,7 +333,18 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
                 {visibleDescriptionParagraphs.map((paragraph, index) => <p key={`${paragraph.slice(0, 24)}-${index}`} className={index > 0 ? "mt-5" : undefined}>{paragraph}</p>)}
               </div>
             ) : null}
-            {!isDescriptionExpanded && hasDescription ? <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={toggleDescription} className="mt-auto pt-8 text-left text-[10px] uppercase tracking-[0.2em] text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">{dictionary.ui.readMore}</button> : null}
+            {!isDescriptionExpanded ? (
+              <button
+                type="button"
+                disabled={!hasExpandableContent}
+                aria-disabled={!hasExpandableContent}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={hasExpandableContent ? toggleDescription : undefined}
+                className={`mt-6 text-left text-[10px] uppercase tracking-[0.2em] underline decoration-white/25 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${hasExpandableContent ? "text-white/60 transition hover:text-white" : "cursor-not-allowed text-white/35"}`}
+              >
+                {dictionary.ui.readMore}
+              </button>
+            ) : null}
             {isDescriptionExpanded && project.team?.length ? (
               <section className="mt-12" aria-labelledby="project-team-title">
                 <h3 id="project-team-title" className="text-2xl font-light tracking-[-0.05em]">Team</h3>

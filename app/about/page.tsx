@@ -3,11 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { StudioVisual } from "@/components/sections/StudioVisual";
+import { AboutInsightCards } from "@/components/sections/AboutInsightCards";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
+import { uniqueImageInsights } from "@/lib/sanity/insights";
 import { urlFor } from "@/lib/sanity/image";
 import { insightListQuery, projectListQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
 import { plainText, type Insight, type Project, type SiteSettings, type TeamMember } from "@/lib/sanity/types";
@@ -56,7 +58,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
     { ...previewProjects[1], category: "NEWS", title: "A New Chapter for Hospitality Design", slug: { current: "preview-wimberly-interiors-press" }, homeTagline: "Ideas and collaborations shaping the next generation of hospitality spaces.", coverImage: selectedProjects[1]?.coverImage },
     { ...previewProjects[0], category: "DESIGN + INNOVATION", title: "Bringing Hospitality Design to Renovation and Amenitization", slug: { current: "preview-hospitality-renovation" }, homeTagline: "Owners and developers are rethinking amenity strategy. Hospitality design principles now turn renovation into lasting value.", coverImage: selectedProjects[3]?.coverImage },
   ];
-  const aboutInsights = isPreview ? previewInsights : insights;
+  const aboutInsights = isPreview ? previewInsights : uniqueImageInsights(insights);
   const insightCards = aboutInsights.map((insight) => ({
     ...insight,
     slug: insight.slug?.current ?? "",
@@ -244,7 +246,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
         </div>
       </ScrollReveal>
 
-      <ScrollReveal as="section" className="mx-auto max-w-[88rem] border-t border-white/15 bg-[#0c0e10] px-5 pb-12 pt-20 md:px-8 md:pb-20 md:pt-24">
+      <ScrollReveal as="section" className="mx-auto max-w-[88rem] border-t border-white/15 bg-[#0c0e10] px-5 pb-12 pt-0 md:px-8 md:pb-20 md:pt-0">
         <div className="pt-6">
           <div className="flex items-start justify-between gap-8">
             <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{dictionary.about.vision}</p>
@@ -267,7 +269,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       </ScrollReveal>
 
       <ScrollReveal as="section" className="border-t border-white/15 bg-[#0c0e10]">
-       <div className="mx-auto max-w-[88rem] px-5 pb-24 pt-16 md:px-8 md:pb-28 md:pt-24">
+       <div className="mx-auto max-w-[88rem] px-5 pb-24 pt-0 md:px-8 md:pb-28 md:pt-0">
         <div data-reveal className="min-w-0 pt-6">
           <div className="flex items-start justify-between gap-8">
             <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.mission}</p>
@@ -330,7 +332,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
       </ScrollReveal>
 
       <ScrollReveal as="section" className="border-y border-white/15 bg-[#0c0e10]">
-        <div className="mx-auto max-w-[88rem] px-5 py-24 md:px-8 md:py-36">
+        <div className="mx-auto max-w-[88rem] px-5 pb-24 pt-0 md:px-8 md:pb-36 md:pt-0">
           <div id="leadership" data-reveal className="pt-6">
             <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Leadership</p>
             {isPreview ? (
@@ -378,31 +380,14 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
 
       {aboutCards.length ? (
         <ScrollReveal as="section" className="border-y border-white/15">
-          <div className="mx-auto max-w-[88rem] px-5 py-24 md:px-8 md:py-36">
-            <div data-reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="mx-auto max-w-[88rem] px-5 pb-24 pt-6 md:px-8 md:pb-36 md:pt-6">
+            <div data-reveal className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
               <div>
                 <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Projects and Insights</p>
-                <h2 className="mt-6 max-w-4xl font-serif text-5xl font-normal leading-[0.92] tracking-[-0.055em] md:text-8xl">Projects and Insights</h2>
               </div>
               <Link href="/project" className="inline-flex min-h-11 w-fit items-center border-b border-white/45 pb-2 text-[10px] uppercase tracking-[0.22em] text-white/80 transition hover:border-white hover:text-white">{dictionary.ui.viewProjects}</Link>
             </div>
-            <div data-reveal className="about-card-list about-card-list--editorial mt-16 md:mt-20">
-              {aboutCards.map((card) => {
-                const imageUrl = card.coverImage ? urlFor(card.coverImage).width(1600).height(1100).fit("crop").auto("format").quality(80).url() : null;
-                return (
-                  <Link key={card._id} href={card.href} className="group about-card-item min-w-0">
-                    <div className="about-card-media relative aspect-[3/2] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
-                      {imageUrl ? <Image src={imageUrl} alt={card.title ?? "Project or insight"} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
-                    </div>
-                    <div className="about-card-copy min-w-0">
-                      <p className="text-xs tracking-[0.16em] text-white/55">{card.category}</p>
-                      <h3 className="mt-5 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 lg:text-2xl">{card.title}</h3>
-                      <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{card.summary}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            <AboutInsightCards cards={aboutCards} />
           </div>
         </ScrollReveal>
       ) : null}

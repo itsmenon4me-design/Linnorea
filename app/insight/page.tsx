@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { MediaPlaceholder } from "@/components/media/MediaPlaceholder";
 import { dictionary } from "@/lib/i18n/dictionaries";
+import { uniqueImageInsights } from "@/lib/sanity/insights";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { insightListQuery } from "@/lib/sanity/queries";
@@ -19,6 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function InsightListingPage() {
   const insights = await sanityClient.fetch<Insight[]>(insightListQuery, {}, { next: { revalidate } });
+  const visibleInsights = uniqueImageInsights(insights);
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-base)] text-white">
@@ -26,9 +28,9 @@ export default async function InsightListingPage() {
       <section className="mx-auto max-w-[88rem] px-5 pb-24 pt-36 md:px-8 md:pb-36 md:pt-52">
         <p className="text-xs uppercase tracking-[0.2em] text-white/55">Insights</p>
         <h1 className="mt-8 max-w-5xl font-serif text-5xl font-normal leading-[0.92] tracking-[-0.06em] md:text-8xl">Perspectives, trends, news.</h1>
-        {insights.length ? (
+        {visibleInsights.length ? (
           <div className="mt-20 grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-4">
-            {insights.map((insight) => {
+            {visibleInsights.map((insight) => {
               const imageUrl = insight.coverImage ? urlFor(insight.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null;
               return (
                 <Link key={insight._id} href={`/insight/${insight.slug?.current}`} className="group min-w-0">

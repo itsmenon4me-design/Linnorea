@@ -142,9 +142,24 @@ export const insightBySlugQuery = `
     slug,
     category,
     publishedAt,
+    author,
     excerpt,
+    atAGlanceLabel,
     coverImage,
+    contributors,
     content,
+    sections,
+    latestInsightsLabel,
+    latestInsightsHeading,
+    relatedInsights[]->{
+      _id,
+      title,
+      slug,
+      category,
+      excerpt,
+      coverImage,
+      order
+    },
     order
   }
 `;
