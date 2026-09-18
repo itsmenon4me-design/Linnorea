@@ -25,8 +25,8 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [activeStatus, setActiveStatus] = useState<string | null>(null);
-  const [activeTypology, setActiveTypology] = useState<string | null>(null);
-  const [openFilter, setOpenFilter] = useState<"location" | "status" | "typology" | null>(null);
+  const [activeMarket, setActiveMarket] = useState<string | null>(null);
+  const [openFilter, setOpenFilter] = useState<"location" | "status" | "market" | null>(null);
   const [isListView, setIsListView] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -35,7 +35,7 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
     setActiveCategory(searchParams.get("category"));
     setActiveLocation(searchParams.get("location"));
     setActiveStatus(searchParams.get("status"));
-    setActiveTypology(searchParams.get("typology"));
+    setActiveMarket(searchParams.get("market"));
     const projectKey = searchParams.get("project");
     setSelectedProject(
       projectKey
@@ -49,10 +49,10 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
     return matches(normalizeProjectCategory(project.category), activeCategory)
       && matches(project.location, activeLocation)
       && matches(project.status, activeStatus)
-      && matches(project.styleTag, activeTypology);
-  }), [activeCategory, activeLocation, activeStatus, activeTypology, projects]);
+      && matches(project.market, activeMarket);
+  }), [activeCategory, activeLocation, activeStatus, activeMarket, projects]);
 
-  const updateFilter = (key: "category" | "location" | "status" | "typology", value: string | null) => {
+  const updateFilter = (key: "category" | "location" | "status" | "market", value: string | null) => {
     const next = new URLSearchParams(searchParams.toString());
     if (value) next.set(key, value);
     else next.delete(key);
@@ -100,21 +100,21 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
             <div className="project-secondary-controls flex w-full flex-wrap gap-3">
               <FilterControl label={dictionary.ui.location} value={activeLocation} options={uniqueProjectValues(projects.map((project) => project.location))} open={openFilter === "location"} onToggle={() => setOpenFilter(openFilter === "location" ? null : "location")} onSelect={(value) => updateFilter("location", value)} />
               <FilterControl label={dictionary.ui.status} value={activeStatus} options={uniqueProjectValues(projects.map((project) => project.status))} open={openFilter === "status"} onToggle={() => setOpenFilter(openFilter === "status" ? null : "status")} onSelect={(value) => updateFilter("status", value)} />
-              <FilterControl label="Typology" value={activeTypology} options={uniqueProjectValues(projects.map((project) => project.styleTag))} open={openFilter === "typology"} onToggle={() => setOpenFilter(openFilter === "typology" ? null : "typology")} onSelect={(value) => updateFilter("typology", value)} />
+              <FilterControl label="Markets" value={activeMarket} options={uniqueProjectValues(projects.map((project) => project.market))} open={openFilter === "market"} onToggle={() => setOpenFilter(openFilter === "market" ? null : "market")} onSelect={(value) => updateFilter("market", value)} />
+              <button type="button" aria-label={isListView ? "Switch to grid view" : "Switch to list view"} aria-pressed={isListView} onClick={toggleView} className="project-view-toggle flex min-h-11 items-center justify-center text-white transition hover:text-white/65 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                <span aria-hidden="true" className={`grid gap-1 ${isListView ? "grid-flow-col auto-cols-max" : ""}`}>
+                  <span className={`block bg-current ${isListView ? "h-4 w-px" : "h-px w-6"}`} />
+                  <span className={`block bg-current ${isListView ? "h-4 w-px" : "h-px w-6"}`} />
+                  <span className={`block bg-current ${isListView ? "h-4 w-px" : "h-px w-6"}`} />
+                </span>
+              </button>
             </div>
-            <button type="button" aria-label={isListView ? "Switch to grid view" : "Switch to list view"} aria-pressed={isListView} onClick={toggleView} className="project-view-toggle flex min-h-11 items-center justify-center rounded-xl bg-white/[0.08] px-5 text-[10px] uppercase tracking-[0.16em] text-white transition hover:bg-white/[0.14] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-              <span aria-hidden="true" className={`grid gap-1 ${isListView ? "grid-flow-col auto-cols-max" : ""}`}>
-                <span className={`block bg-current ${isListView ? "h-4 w-px" : "h-px w-4"}`} />
-                <span className={`block bg-current ${isListView ? "h-4 w-px" : "h-px w-4"}`} />
-                <span className={`block bg-current ${isListView ? "h-4 w-px" : "h-px w-4"}`} />
-              </span>
-            </button>
           </div>
         </div>
       ) : null}
       {visibleProjects.length > 0 ? (
         <div
-          key={`${isListView ? "list" : "grid"}-${activeCategory ?? ""}-${activeLocation ?? ""}-${activeStatus ?? ""}-${activeTypology ?? ""}`}
+          key={`${isListView ? "list" : "grid"}-${activeCategory ?? ""}-${activeLocation ?? ""}-${activeStatus ?? ""}-${activeMarket ?? ""}`}
           className={`project-archive-grid grid grid-cols-1 gap-4 pt-8 sm:grid-cols-2 lg:grid-cols-3 ${isListView ? "project-archive-grid--list" : ""} ${suppressCardHover ? "project-archive-grid--hover-suppressed" : ""}`}
           onPointerLeave={() => setSuppressCardHover(false)}
         >
@@ -156,12 +156,15 @@ function uniqueProjectValues(values: Array<string | undefined>) {
 function FilterControl({ label, value, options, open, onToggle, onSelect }: { label: string; value: string | null; options: string[]; open: boolean; onToggle: () => void; onSelect: (value: string | null) => void }) {
   return (
     <div className="relative">
-      <button type="button" onClick={onToggle} aria-expanded={open} className="project-filter-control flex min-h-9 w-full items-center justify-between rounded-lg bg-white/[0.08] px-3 text-left text-[9px] uppercase tracking-[0.12em] text-white/80 transition hover:bg-white/[0.14] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-        <span>{label}{value ? " (1)" : ""}</span><span aria-hidden="true" className="text-lg leading-none">{open || value ? "−" : "+"}</span>
+      <button type="button" onClick={onToggle} aria-expanded={open} className="project-filter-control group flex min-h-16 w-full items-center justify-between border-b border-white/35 px-0 text-left text-[10px] uppercase tracking-[0.16em] text-white/75 transition hover:border-white hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+        <span className={value ? "text-white" : undefined}>{label}</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
+          <path d="m5 9 7 7 7-7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
       </button>
       {open ? (
-        <div className="project-filter-menu absolute left-0 top-[calc(100%+0.4rem)] z-20 grid max-h-56 min-w-full w-max max-w-[min(15rem,calc(100vw-2rem))] gap-0 overflow-y-auto rounded-lg border border-white/10 bg-[#17191c] p-1 shadow-2xl">
-          <button type="button" onClick={() => onSelect(null)} className={`project-filter-option min-h-8 px-2.5 text-left text-[9px] uppercase tracking-[0.1em] transition hover:bg-white/10 ${value ? "text-white/60" : "text-white"}`}>All</button>
+        <div className="project-filter-menu project-filter-menu--opening absolute left-0 top-[calc(100%+0.4rem)] z-20 grid max-h-56 min-w-full w-max max-w-[min(15rem,calc(100vw-2rem))] gap-0 overflow-y-auto rounded-lg border border-white/10 bg-[#17191c] p-1 shadow-2xl">
+          <button type="button" onClick={() => onSelect(null)} className={`project-filter-option min-h-8 px-2.5 text-left text-[9px] tracking-[0.1em] transition hover:bg-white/10 ${value ? "text-white/60" : "text-white"}`}>All</button>
           {options.map((option) => <button key={option} type="button" onClick={() => onSelect(option)} className={`project-filter-option min-h-8 whitespace-normal px-2.5 text-left text-xs transition hover:bg-white/10 ${value === option ? "text-white" : "text-white/65"}`}>{value === option ? "• " : ""}{option}</button>)}
         </div>
       ) : null}
@@ -332,15 +335,18 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
           </div>
           <div className="mt-12 flex min-h-0 flex-1 flex-col">
             <h2 id="project-viewer-title" className="max-w-xs text-3xl font-light leading-[0.95] tracking-[-0.06em] md:text-4xl">{title}</h2>
-            <dl className="mt-8 grid grid-cols-2 gap-x-4 gap-y-3 text-[10px] uppercase tracking-[0.16em] text-white/50">
+            <dl className="mt-7 grid grid-cols-2 gap-x-4 gap-y-3 text-[10px] uppercase tracking-[0.16em] text-white/50">
               {project.location ? <div><dt>{dictionary.ui.location}</dt><dd className="mt-1 text-white">{project.location}</dd></div> : null}
               {normalizeProjectCategory(project.category) ? <div><dt>{dictionary.ui.projectCategory}</dt><dd className="mt-1 text-white">{normalizeProjectCategory(project.category)}</dd></div> : null}
+              {project.market ? <div><dt>Market</dt><dd className="mt-1 text-white">{project.market}</dd></div> : null}
+              {project.styleTag ? <div><dt>Style</dt><dd className="mt-1 text-white">{project.styleTag}</dd></div> : null}
+              {project.status ? <div><dt>Status</dt><dd className="mt-1 text-white">{project.status}</dd></div> : null}
               {project.year ? <div><dt>{dictionary.ui.year}</dt><dd className="mt-1 text-white">{project.year}</dd></div> : null}
               {project.area ? <div><dt>{dictionary.ui.area}</dt><dd className="mt-1 text-white">{project.area}</dd></div> : null}
             </dl>
             {hasDescription ? (
-              <div className="mt-8 text-sm leading-6 text-white/75">
-                {visibleDescriptionParagraphs.map((paragraph, index) => <p key={`${paragraph.slice(0, 24)}-${index}`} className={index > 0 ? "mt-5" : undefined}>{paragraph}</p>)}
+              <div className="mt-7 text-sm leading-6 text-white/75">
+                {visibleDescriptionParagraphs.map((paragraph, index) => <p key={`${paragraph.slice(0, 24)}-${index}`} className={`${index > 0 ? "mt-5" : ""} ${!isDescriptionExpanded && hasExpandableContent && index === 0 ? "project-viewer-description-preview" : ""}`}>{paragraph}</p>)}
               </div>
             ) : null}
             {!isDescriptionExpanded ? (
@@ -350,7 +356,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
                 aria-disabled={!hasExpandableContent}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={hasExpandableContent ? toggleDescription : undefined}
-                className={`mt-6 text-left text-[10px] uppercase tracking-[0.2em] underline decoration-white/25 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${hasExpandableContent ? "text-white/60 transition hover:text-white" : "cursor-not-allowed text-white/35"}`}
+                className={`project-viewer-read-more mt-4 flex-none text-left text-[10px] uppercase tracking-[0.2em] underline decoration-white/25 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${hasExpandableContent ? "text-white/60 transition hover:text-white" : "cursor-not-allowed text-white/35"}`}
               >
                 {dictionary.ui.readMore}
               </button>

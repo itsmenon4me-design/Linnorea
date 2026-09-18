@@ -12,6 +12,7 @@ type ProjectCardProps = {
 
 export function ProjectCard({ project, dictionary }: ProjectCardProps) {
   const title = plainText(project.title) || dictionary.home.untitledProject;
+  const market = plainText(project.market);
   const style = plainText(project.styleTag);
   const slug = project.slug?.current;
   const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
@@ -40,7 +41,10 @@ export function ProjectCard({ project, dictionary }: ProjectCardProps) {
         </div>
         <div className="flex items-start justify-between gap-4 border-b border-white/15 py-4">
           <h2 className="text-sm font-medium tracking-[0.02em] text-white/75 md:text-base">{project.category || dictionary.ui.projectCategory}</h2>
-          {style ? <p className="max-w-[45%] text-right text-[10px] uppercase tracking-[0.2em] text-white/55">{style}</p> : null}
+          <div className="max-w-[55%] text-right text-[10px] uppercase tracking-[0.2em] text-white/55">
+            {market ? <p>{market}</p> : null}
+            {style ? <p className={market ? "mt-1 text-white/40" : undefined}>{style}</p> : null}
+          </div>
         </div>
       </article>
     </Link>

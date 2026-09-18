@@ -109,7 +109,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
           ) : null}
         </section>
       ) : (
-        <MediaPlaceholder className="mx-5 min-h-40 border-y border-white/20 md:mx-10" />
+        <MediaPlaceholder className="mx-auto aspect-[16/9] w-[calc(100%-2.5rem)] max-w-[110rem] border-y border-white/20 md:w-[calc(100%-5rem)]" />
       )}
 
       {project.quote ? (
@@ -176,7 +176,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
                     {image ? <Image src={urlFor(image).width(1000).height(750).fit("crop").auto("format").quality(78).url()} alt={itemTitle} fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}
                   </div>
                   <p className="mt-5 text-[10px] uppercase tracking-[0.28em] text-white/55">{plainText(item.location) || plainText(item.styleTag) || "Project"}</p>
-                  <h2 className="mt-3 max-w-sm text-2xl leading-tight tracking-[-0.04em] transition-colors group-hover:opacity-60">{itemTitle}</h2>
+                  <h2 className="mt-3 max-w-sm text-2xl leading-tight tracking-[-0.04em] underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-white/40 group-hover:opacity-60">{itemTitle}</h2>
                   {itemDescription || item.homeTagline ? <p className="mt-4 max-w-sm text-base leading-snug text-white/70">{itemDescription || plainText(item.homeTagline)}</p> : null}
                 </Link>
               );

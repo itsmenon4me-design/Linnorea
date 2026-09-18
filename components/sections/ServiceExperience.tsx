@@ -225,7 +225,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
                           }}
                         >
                           {card.href ? (
-                            <Link href={card.href} className="text-xl underline decoration-white/40 underline-offset-4">{card.title}</Link>
+                            <Link href={card.href} className="text-xl underline decoration-transparent underline-offset-4 transition hover:decoration-white/40 focus-visible:decoration-white/40">{card.title}</Link>
                           ) : (
                             <p className="text-xl">{card.title}</p>
                           )}
@@ -278,7 +278,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
             )}
             <div className="mt-5">
               {projectCards[0].href ? (
-                <Link href={projectCards[0].href} className="text-xl underline decoration-white/40 underline-offset-4">{projectCards[0].title}</Link>
+                <Link href={projectCards[0].href} className="text-xl underline decoration-transparent underline-offset-4 transition hover:decoration-white/40 focus-visible:decoration-white/40">{projectCards[0].title}</Link>
               ) : (
                 <p className="text-xl">{projectCards[0].title}</p>
               )}
@@ -294,7 +294,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
             className="mt-12 inline-flex min-h-11 w-fit items-center gap-3 rounded-full border border-white/45 px-7 text-sm text-white transition hover:border-white hover:bg-white hover:text-[var(--color-bg-base)] focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white"
           >
             See our projects
-            <span aria-hidden="true" className="text-lg leading-none">→</span>
+            <span aria-hidden="true" className="text-lg leading-none">â†’</span>
           </Link>
         </div>
       </div>
@@ -312,7 +312,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
                         {insight.url ? <Image src={insight.url} alt={insight.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                       </div>
                       <p className="mt-7 text-xs tracking-[0.16em] text-white/60">{insight.category}</p>
-                      <h3 className="mt-4 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 sm:text-2xl">{insight.title}</h3>
+                      <h3 className="mt-4 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40 sm:text-2xl">{insight.title}</h3>
                       {insight.excerpt ? <p className="mt-4 text-base leading-7 text-white/65">{insight.excerpt}</p> : null}
                     </Link>
                   ) : null}

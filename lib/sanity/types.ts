@@ -65,6 +65,7 @@ export type Project = {
   gallery?: SanityImage[];
   category?: string;
   status?: string;
+  market?: string;
   styleTag?: string;
   homeTagline?: string;
   location?: string;
@@ -128,7 +129,7 @@ export type SiteSettings = {
   servicesProcessLabel?: string;
   servicesProcessHeading?: string;
   servicesProcessDescription?: string;
-  servicesProcess?: Array<{ title?: string; description?: string; order?: number }>;
+  servicesProcess?: Array<{ title?: string; description?: string; image?: SanityImage; order?: number }>;
   aboutCtaHeading?: string;
   studioVisualImage?: SanityImage;
   studioVisualVideo?: MuxVideo;
@@ -155,6 +156,7 @@ export type Insight = {
   sections?: Array<{ label?: string; heading?: string; body?: InsightContentBlock[] }>;
   latestInsightsLabel?: string;
   latestInsightsHeading?: string;
+  relatedProject?: Project;
   relatedInsights?: Insight[];
   order?: number;
 };

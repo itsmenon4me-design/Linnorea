@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { projectMarkets } from "@/lib/projectMarkets";
 
 export const project = defineType({
   name: "project",
@@ -55,7 +56,6 @@ export const project = defineType({
       options: {
         list: [
           { title: "Architecture", value: "Architecture" },
-          { title: "Art", value: "Art" },
           { title: "Design", value: "Design" },
         ],
         layout: "radio",
@@ -71,10 +71,21 @@ export const project = defineType({
       fieldset: "archive",
     }),
     defineField({
-      name: "styleTag",
-      title: "Typology",
+      name: "market",
+      title: "Market",
       type: "string",
-      description: "Filter label for the project typology, for example Residential, Commercial, or Hospitality.",
+      options: {
+        list: projectMarkets.map((market) => ({ title: market, value: market })),
+        layout: "radio",
+      },
+      description: "Sector this project serves. Use Hospitality, Residential, Commercial, or Workplace. This is separate from the project's design style.",
+      fieldset: "archive",
+    }),
+    defineField({
+      name: "styleTag",
+      title: "Style",
+      type: "string",
+      description: "Design character or visual language, for example Modern Tropical, American Classic, Adaptive Reuse, or Culture.",
       fieldset: "archive",
     }),
     defineField({

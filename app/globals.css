@@ -13,7 +13,8 @@
   --color-accent-progress: #d51f2c;
   --color-accent-gold: #bdff00;
   --color-accent-gold-light: #bdff00;
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-montserrat);
+  --font-serif: var(--font-montserrat);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -29,7 +30,7 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -73,6 +74,9 @@ button {
 }
 
 .project-archive-controls {
+  align-items: flex-end;
+  display: flex !important;
+  flex-wrap: nowrap;
   margin-top: 1.25rem;
   padding-top: 0.75rem;
 }
@@ -85,6 +89,18 @@ button {
   flex: 0 0 auto;
 }
 
+.project-secondary-controls {
+  flex: 1 1 auto;
+  width: auto !important;
+}
+
+.project-secondary-controls .project-view-toggle {
+  flex: 0 0 3.25rem;
+  min-height: 2.75rem;
+  width: 3.25rem;
+  padding: 0;
+}
+
 .project-category-list .project-filter-button {
   width: max-content !important;
 }
@@ -92,20 +108,96 @@ button {
 .project-filter-control {
   width: auto;
   min-width: 10rem;
-  min-height: 2.25rem;
-  padding-inline: 0.75rem;
-  font-size: 0.5625rem;
-  letter-spacing: 0.12em;
+  min-height: 2.75rem;
+  padding-inline: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
 }
 
 .project-filter-menu {
   isolation: isolate;
   font-size: 0.75rem;
+  scrollbar-color: rgb(255 255 255 / 0.28) transparent;
+  scrollbar-width: thin;
+}
+
+.project-filter-menu::-webkit-scrollbar {
+  width: 0.35rem;
+}
+
+.project-filter-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-filter-menu::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.28);
+  border-radius: 999px;
+}
+
+.project-filter-menu::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.48);
+}
+
+.project-filter-menu--opening {
+  animation: project-filter-menu-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top center;
+}
+
+@keyframes project-filter-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem) scaleY(0.72);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
 }
 
 .project-filter-option {
+  animation: project-filter-option-enter 240ms ease-out both;
   width: 100%;
   line-height: 1.25;
+}
+
+.project-filter-option:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.project-filter-option:nth-child(3) {
+  animation-delay: 75ms;
+}
+
+.project-filter-option:nth-child(4) {
+  animation-delay: 100ms;
+}
+
+.project-filter-option:nth-child(5) {
+  animation-delay: 125ms;
+}
+
+.project-filter-option:nth-child(6) {
+  animation-delay: 150ms;
+}
+
+@keyframes project-filter-option-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-filter-menu--opening,
+  .project-filter-option {
+    animation: none;
+  }
 }
 
 .project-view-toggle {
@@ -152,6 +244,20 @@ button {
 .project-viewer-scroll--hidden::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+.project-viewer-description-preview {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  max-height: 9rem;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+}
+
+.project-viewer-read-more {
+  align-self: flex-start;
+  white-space: nowrap;
 }
 
 .project-viewer-shell > aside.project-viewer-scroll {
@@ -508,6 +614,8 @@ button {
   }
 
   .project-archive-controls {
+    align-items: stretch;
+    display: flex !important;
     margin-top: 1rem;
   }
 
@@ -553,6 +661,7 @@ button {
   .project-filter-control {
     width: 100%;
     min-width: 0;
+    min-height: 2.75rem;
   }
 
   .project-archive-controls > button:last-child {

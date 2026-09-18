@@ -9,9 +9,9 @@ import { formatEditorialDate } from "@/lib/formatDate";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
-import { insightBySlugQuery, insightListQuery } from "@/lib/sanity/queries";
+import { insightBySlugQuery, insightListQuery, projectListQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
-import type { Insight, InsightContentBlock, PortableTextBlock, SanityImage } from "@/lib/sanity/types";
+import type { Insight, InsightContentBlock, PortableTextBlock, Project, SanityImage } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
@@ -46,9 +46,10 @@ export async function generateMetadata({ params }: InsightDetailProps): Promise<
 
 export default async function InsightDetailPage({ params }: InsightDetailProps) {
   const { slug } = await params;
-  const [insight, allInsights] = await Promise.all([
+  const [insight, allInsights, projects] = await Promise.all([
     sanityClient.fetch<Insight | null>(insightBySlugQuery, { slug }, { next: { revalidate } }),
     sanityClient.fetch<Insight[]>(insightListQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } }),
   ]);
   if (!insight) notFound();
 
@@ -61,6 +62,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
   const additionalInsights = insight.relatedInsights?.length
     ? []
     : allInsights.filter((item) => item._id !== insight._id).slice(4);
+  const relatedProject = insight.relatedProject ?? projects.find((project) => project.featured) ?? projects[0];
   const contentBlocks = insight.content ?? [];
   const editorialSections = insight.sections ?? [];
   const renderBlocks = (blocks: InsightContentBlock[], keyPrefix: string) =>
@@ -206,6 +208,44 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
               </div>
             </div>
 
+            {relatedProject ? (
+              <div className="mt-24 border-t border-white/15 pt-8">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/55">Project</p>
+                <article className="mt-8 min-w-0">
+                  <Link href={relatedProject.slug?.current ? `/project/${relatedProject.slug.current}` : "/project"} className="group block text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white">
+                    <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]">
+                      {relatedProject.coverImage ? (
+                        <Image
+                          src={urlFor(relatedProject.coverImage).width(1400).height(700).fit("crop").auto("format").quality(82).url()}
+                          alt={relatedProject.title ?? "Project"}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 1336px"
+                          className="object-cover"
+                        />
+                      ) : <MediaPlaceholder className="absolute inset-0" />}
+                    </div>
+                  </Link>
+                  <div className="mt-5">
+                    <Link href={relatedProject.slug?.current ? `/project/${relatedProject.slug.current}` : "/project"} className="text-xl text-white underline decoration-transparent underline-offset-4 transition hover:text-white/65 hover:decoration-white/40 focus-visible:decoration-white/40">
+                      {relatedProject.title}
+                    </Link>
+                  </div>
+                  <div className="mx-auto mt-24 max-w-2xl md:mt-32">
+                    <p className="text-lg leading-8 text-white/70 md:text-xl md:leading-9">
+                      Linnorea brings together spatial planning, concept development, material direction, furniture selection, visualisation, and final styling to shape spaces with clarity, warmth, and character.
+                    </p>
+                    <Link
+                      href="/project"
+                      className="mt-12 inline-flex min-h-11 w-fit items-center gap-3 rounded-full border border-white/45 px-7 text-sm text-white transition hover:border-white hover:bg-white hover:text-[var(--color-bg-base)] focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white"
+                    >
+                      See our projects
+                      <span aria-hidden="true" className="text-lg leading-none">→</span>
+                    </Link>
+                  </div>
+                </article>
+              </div>
+            ) : null}
+
             {relatedInsights.length ? (
               <div className="mt-24 border-t border-white/15 pt-8">
                 <div className="insight-detail-grid md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
@@ -216,13 +256,13 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                       {relatedInsights.map((item) => {
                         const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
                         return (
-                          <Link key={item._id} href={`/insight/${item.slug?.current}`} className="insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
+                          <Link key={item._id} href={`/insight/${item.slug?.current}`} className="group insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
                             <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
                               {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={600} height={400} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                             </span>
                             <span className="block">
                               <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
-                              <span className="mt-4 block text-xl font-medium leading-7 underline decoration-white/40 underline-offset-4">{item.title}</span>
+                              <span className="mt-4 block text-xl font-medium leading-7 underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40">{item.title}</span>
                               {item.excerpt ? <span className="mt-5 block text-base leading-7 text-white/70">{item.excerpt}</span> : null}
                             </span>
                           </Link>
@@ -235,13 +275,13 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                             {additionalInsights.map((item) => {
                               const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
                               return (
-                                <Link key={item._id} href={`/insight/${item.slug?.current}`} className="insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
+                                <Link key={item._id} href={`/insight/${item.slug?.current}`} className="group insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
                                   <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
                                     {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={600} height={400} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                                   </span>
                                   <span className="block">
                                     <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
-                                    <span className="mt-4 block text-xl font-medium leading-7 underline decoration-white/40 underline-offset-4">{item.title}</span>
+                                    <span className="mt-4 block text-xl font-medium leading-7 underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40">{item.title}</span>
                                     {item.excerpt ? <span className="mt-5 block text-base leading-7 text-white/70">{item.excerpt}</span> : null}
                                   </span>
                                 </Link>
@@ -255,6 +295,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                 </div>
               </div>
             ) : null}
+
           </div>
         </div>
       </article>

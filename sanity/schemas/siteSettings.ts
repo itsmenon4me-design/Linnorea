@@ -316,6 +316,7 @@ export const siteSettings = defineType({
         fields: [
           defineField({ name: "title", title: "Stage title", type: "string" }),
           defineField({ name: "description", title: "Stage description", type: "text" }),
+          defineField({ name: "image", title: "Stage image", type: "image", options: { hotspot: true } }),
           defineField({ name: "order", title: "Display order", type: "number" }),
         ],
         preview: { select: { title: "title", subtitle: "description" } },

@@ -4,7 +4,8 @@
     "about": "About",
     "project": "Project",
     "service": "Service",
-    "product": "Product"
+    "product": "Product",
+    "contact": "Contact"
   },
   "about": {
     "establishedPlaceholder": "23 August 2023",
@@ -67,7 +68,7 @@
     "projectEmpty": "Featured projects will appear here when they are marked in Sanity.",
     "filteredProjectEmpty": "No projects in this category.",
     "filterProjects": "Filter projects",
-    "allProjects": "All projects",
+    "allProjects": "All",
     "projectHighlights": "Project highlights",
     "ongoingProjects": "On-Going Project",
     "ongoingProjectsDescription": "Projects currently being developed by Linnorea.",

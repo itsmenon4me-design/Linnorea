@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { ScrollReveal } from "@/components/animation/ScrollReveal";
@@ -19,10 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const defaultProcess = [
-  ["Understand", "We begin with the brief, context, needs, and constraints."],
-  ["Define", "We establish a clear spatial and material direction."],
-  ["Develop", "We refine the design through visuals, selections, and detail."],
-  ["Deliver", "We support the transition from approved design to finished space."],
+  { title: "Understand", description: "We begin with the brief, context, needs, and constraints.", imageUrl: null },
+  { title: "Define", description: "We establish a clear spatial and material direction.", imageUrl: null },
+  { title: "Develop", description: "We refine the design through visuals, selections, and detail.", imageUrl: null },
+  { title: "Deliver", description: "We support the transition from approved design to finished space.", imageUrl: null },
 ];
 
 export default async function ServicePage() {
@@ -66,7 +67,11 @@ export default async function ServicePage() {
     url: insight.coverImage ? urlFor(insight.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null,
   }));
   const process = settings?.servicesProcess?.length
-    ? settings.servicesProcess.map((item) => [plainText(item.title), plainText(item.description)] as [string, string])
+    ? settings.servicesProcess.map((item) => ({
+        title: plainText(item.title),
+        description: plainText(item.description),
+        imageUrl: item.image ? urlFor(item.image).width(1400).height(1050).fit("crop").auto("format").quality(78).url() : null,
+      }))
     : defaultProcess;
 
   return (
@@ -94,31 +99,43 @@ export default async function ServicePage() {
           </div>
         </div>
       </ScrollReveal>
-      <ServiceExperience services={serviceItems} projectImages={projectImageItems} projectCards={projectCardItems} insights={insightItems} />
-
       <ScrollReveal as="section" className="border-b border-white/15">
         <div id="process" className="mx-auto max-w-[88rem] px-5 py-20 md:px-8 md:py-32">
-          <div className="grid gap-12 md:grid-cols-[0.75fr_1.25fr] md:gap-20">
-            <div data-reveal>
+          <div data-reveal className="mb-16 grid gap-10 md:mb-24 md:grid-cols-[0.72fr_1.28fr] md:gap-20">
+            <div>
               <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">{plainText(settings?.servicesProcessLabel) || "Our approach"}</p>
               <h2 className="mt-6 max-w-sm text-4xl font-medium tracking-[-0.06em] md:text-6xl">{plainText(settings?.servicesProcessHeading) || "From first direction to considered detail."}</h2>
             </div>
-            <div data-reveal>
-              <p className="max-w-2xl border-t border-white/15 pt-6 text-lg leading-8 text-white/70 md:pt-8 md:text-xl md:leading-9">
-                {plainText(settings?.servicesProcessDescription) || "Linnorea brings together spatial planning, concept development, material direction, furniture selection, visualisation, and final styling to shape spaces with clarity, warmth, and character."}
-              </p>
-              <div className="mt-16 grid border-t border-white/15 md:mt-24 md:grid-cols-4">
-                {process.map(([title, description]) => (
-                  <div key={title} className="border-b border-white/15 py-8 md:min-h-64 md:border-r md:px-5 md:first:pl-0 md:last:border-r-0 md:py-8">
-                    <h3 className="text-2xl tracking-[-0.04em]">{title}</h3>
-                    <p className="mt-4 text-sm leading-6 text-white/60">{description}</p>
+            <p className="max-w-2xl border-t border-white/15 pt-6 text-lg leading-8 text-white/70 md:pt-8 md:text-xl md:leading-9">
+              {plainText(settings?.servicesProcessDescription) || "Linnorea brings together spatial planning, concept development, material direction, furniture selection, visualisation, and final styling to shape spaces with clarity, warmth, and character."}
+            </p>
+          </div>
+
+          <div className="space-y-5 md:space-y-8">
+            {process.map((stage, index) => {
+              const title = stage.title;
+              const description = stage.description;
+              const serviceVisual = stage.imageUrl || serviceItems[index]?.imageUrl;
+              const projectVisual = projectImageItems[index % Math.max(projectImageItems.length, 1)];
+              const visualUrl = serviceVisual || projectVisual?.url;
+              const visualAlt = serviceItems[index]?.title || projectVisual?.alt || title;
+              const reversed = index % 2 === 1;
+              return (
+                <article key={title} data-reveal className="grid min-h-[26rem] md:grid-cols-2">
+                  <div className={`relative min-h-[20rem] overflow-hidden bg-[var(--color-bg-elevated)] ${reversed ? "md:order-2" : ""}`}>
+                    {visualUrl ? <Image src={visualUrl} alt={visualAlt} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" /> : <div className="absolute inset-0 bg-[var(--color-bg-elevated)]" aria-hidden="true" />}
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className={`flex flex-col justify-center bg-white/[0.045] px-7 py-12 md:px-14 md:py-16 ${reversed ? "md:order-1" : ""}`}>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/45">Our approach</p>
+                    <h3 className="mt-5 max-w-md text-4xl font-medium leading-[0.95] tracking-[-0.06em] md:text-5xl">{title}</h3>
+                    <p className="mt-6 max-w-md text-base leading-7 text-white/62 md:text-lg md:leading-8">{description}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
-      </ScrollReveal>
+      </ScrollReveal>      <ServiceExperience services={serviceItems} projectImages={projectImageItems} projectCards={projectCardItems} insights={insightItems} />
 
       {whatsappHref ? (
         <section className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-20 md:flex-row md:items-end md:justify-between md:px-8 md:py-32">

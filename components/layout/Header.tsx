@@ -47,6 +47,7 @@ export function Header({ dictionary, variant = "default" }: HeaderProps) {
     { label: dictionary.nav.project, href: "/project" },
     { label: dictionary.nav.service, href: "/service" },
     { label: dictionary.nav.product, href: "/product" },
+    { label: dictionary.nav.contact, href: "/contact" },
   ];
   const isNavItemActive = (href: string, index: number) => {
     if (index === 0) {

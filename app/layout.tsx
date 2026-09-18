@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Montserrat } from "next/font/google";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { Footer } from "@/components/layout/Footer";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
   display: "optional",
 });
@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${montserrat.variable} ${geistMono.variable} h-full antialiased`}>
       <head>
         <link rel="preconnect" href="https://stream.mux.com" />
         <link rel="preconnect" href="https://image.mux.com" />

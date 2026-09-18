@@ -272,7 +272,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
        <div className="mx-auto max-w-[88rem] px-5 pb-24 pt-0 md:px-8 md:pb-28 md:pt-0">
         <div data-reveal className="min-w-0 pt-6">
           <div className="flex items-start justify-between gap-8">
-            <p className="border-l border-[var(--color-accent-gold)] pl-4 text-left text-sm text-white/60">{dictionary.about.mission}</p>
+            <p className="text-left text-sm text-white/60">{dictionary.about.mission}</p>
             <span className="text-[10px] uppercase tracking-[0.22em] text-white/35">{plainText(settings?.aboutMissionAside) || "What we pursue"}</span>
           </div>
           <div className="mt-16 grid gap-14 md:mt-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
@@ -280,15 +280,15 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
               <p className="max-w-xl font-serif text-[2.9rem] leading-[0.9] tracking-[-0.065em] text-white md:text-[4.6rem] md:leading-[0.88] lg:max-w-md lg:text-[5rem]">
                 {plainText(settings?.aboutMissionLead) || "We create spaces that feel grounded, generous, and deeply lived in."}
               </p>
-              <p className="mt-12 max-w-xs border-l border-[var(--color-accent-gold)] pl-4 text-sm leading-6 text-white/45">
+              <p className="mt-12 max-w-xs text-sm leading-6 text-white/45">
                 {plainText(settings?.aboutMissionSupport) || "A practice of care, from first reading to final detail."}
               </p>
             </div>
             <div className="lg:pt-16">
               <p className="max-w-2xl text-xl leading-8 text-white/80 md:text-2xl md:leading-10">{plainText(settings?.aboutMission?.[0]) || "We work with the rhythms of daily life, the intelligence of materials, and the people who bring a place into being."}</p>
-              <div className="mt-12 grid lg:grid-cols-2">
+              <div className="mt-12 grid border-t border-white/15 lg:grid-cols-2 lg:gap-x-10">
                 {missionDetails.map((item, index) => (
-                  <div key={`${item.label}-${index}`} className={`border-b border-white/15 py-7 ${index === 0 ? "lg:border-r lg:pr-10" : "lg:pl-10"}`}>
+                  <div key={`${item.label}-${index}`} className="border-b border-white/15 py-7">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-white/40">{item.label}</p>
                     <p className="mt-4 text-base leading-7 text-white/65">{plainText(item.description)}</p>
                   </div>
@@ -385,7 +385,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
               <div>
                 <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/60">Projects and Insights</p>
               </div>
-              <Link href="/project" className="inline-flex min-h-11 w-fit items-center border-b border-white/45 pb-2 text-[10px] uppercase tracking-[0.22em] text-white/80 transition hover:border-white hover:text-white">{dictionary.ui.viewProjects}</Link>
+              <Link href="/project" className="inline-flex min-h-11 w-fit items-center border-b border-transparent pb-2 text-[10px] uppercase tracking-[0.22em] text-white/80 transition hover:border-white hover:text-white focus-visible:border-white">{dictionary.ui.viewProjects}</Link>
             </div>
             <AboutInsightCards cards={aboutCards} />
           </div>

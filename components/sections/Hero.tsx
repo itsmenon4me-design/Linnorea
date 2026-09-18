@@ -21,6 +21,7 @@ type HeroTransition = {
   from: number;
   to: number;
   direction: 1 | -1;
+  isLoop: boolean;
 };
 
 const AUTO_ADVANCE_MS = 6000;
@@ -31,6 +32,7 @@ const DRAG_PLAY_TRIGGER_RATIO = 0.5;
 const MEDIA_ERROR_RETRY_DELAY_MS = 900;
 const MEDIA_ERROR_RETRY_TIMEOUT_MS = 6500;
 const MAX_MEDIA_ERROR_RETRIES = 3;
+const HERO_MIN_PRELOAD_SEGMENTS = 3;
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
 const waitForMediaReady = (media: HTMLMediaElement, timeoutMs: number) => {
@@ -505,7 +507,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         muxPlayerRefs.current[index] = player;
         player.preload = index === activeIndex ? "auto" : "none";
         if (playbackIds[index]) {
-          player.minPreloadSegments = 1;
+          player.minPreloadSegments = HERO_MIN_PRELOAD_SEGMENTS;
           const media = player.mediaController?.media;
           if (index === activeIndex && media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
             preloadStartedRef.current.add(index);
@@ -717,7 +719,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         return;
       }
 
-      const shouldLoad = index === activeIndex;
+      const shouldLoad = index === activeIndex || index === nextIndex;
       const preloadMode = shouldLoad ? "auto" : "none";
       player.preload = preloadMode;
       const media = player.mediaController?.media;
@@ -725,7 +727,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         media.preload = preloadMode;
       }
       if (playbackIds[index] && shouldLoad) {
-        player.minPreloadSegments = 1;
+        player.minPreloadSegments = HERO_MIN_PRELOAD_SEGMENTS;
         if (index === nextIndex && player.readyState === 0 && !preloadStartedRef.current.has(index)) {
           preloadStartedRef.current.add(index);
           requestManagedPreload(index, (media) => media.load());
@@ -753,9 +755,9 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     const normalizedIndex = (index + resolvedSlides.length) % resolvedSlides.length;
     if (normalizedIndex === activeIndex || transitionRef.current) return;
 
-    const direction: 1 | -1 =
-      normalizedIndex > activeIndex || (activeIndex === resolvedSlides.length - 1 && normalizedIndex === 0) ? 1 : -1;
-    const nextTransition = { from: activeIndex, to: normalizedIndex, direction };
+    const isLoop = activeIndex === resolvedSlides.length - 1 && normalizedIndex === 0;
+    const direction: 1 | -1 = isLoop || normalizedIndex > activeIndex ? 1 : -1;
+    const nextTransition = { from: activeIndex, to: normalizedIndex, direction, isLoop };
     transitionRef.current = nextTransition;
     setTransition(nextTransition);
     setIsPaused(false);
@@ -965,18 +967,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     setDragPlayingIndex(null);
   }, [activeIndex, transition]);
 
-  const pauseDragMedia = (index: number) => {
-    const player = muxPlayerRefs.current[index];
-    if (!player) {
-      return;
-    }
-
-    player.mediaController?.media?.pause();
-    void queueMediaOperation(index, player, (media) => media.pause()).catch((error: unknown) => {
-      console.warn("Hero drag video could not be paused.", { index, error });
-    });
-  };
-
   const handlePointerDown = (event: React.PointerEvent<HTMLElement>) => {
     if (transitionRef.current || resolvedSlides.length <= 1 || event.target instanceof Element && event.target.closest("button, a")) return;
     slideTimelineRef.current?.kill();
@@ -1051,7 +1041,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     if (passedPlayTrigger && !drag.swapActive && incomingPlayer) {
       dragSwapActiveRef.current = true;
       playbackGenerationRef.current += 1;
-      pauseDragMedia(activeIndex);
       playActiveVideo(incomingPlayer);
       setDragPlayingIndex(targetIndex);
       drag.swapActive = true;
@@ -1192,13 +1181,13 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                     ref={(player) => {
                       muxPlayerRefs.current[index] = player;
                       if (player) {
-                        const preloadMode = index === activeIndex ? "auto" : "none";
+                        const preloadMode = index === activeIndex || index === nextIndex ? "auto" : "none";
                         player.preload = preloadMode;
                         const media = player.mediaController?.media;
                         if (media) {
                           media.preload = preloadMode;
                         }
-                        player.minPreloadSegments = 1;
+                        player.minPreloadSegments = HERO_MIN_PRELOAD_SEGMENTS;
                       }
                     }}
                     playbackId={slidePlaybackId}
@@ -1207,7 +1196,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                     muted
                     playsInline
                     preload={isActive || index === nextIndex || isTransitionIncoming ? "auto" : "none"}
-                    minPreloadSegments={slidePlaybackId ? 1 : undefined}
+                    minPreloadSegments={slidePlaybackId ? HERO_MIN_PRELOAD_SEGMENTS : undefined}
                     poster={slidePosterUrl ?? undefined}
                     theme="microvideo"
                     nohotkeys

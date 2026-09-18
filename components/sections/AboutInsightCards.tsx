@@ -51,7 +51,7 @@ export function AboutInsightCards({ cards }: { cards: AboutCard[] }) {
                     alt={card.title ?? "Project or insight"}
                     fill
                     sizes="(max-width: 768px) 100vw, 25vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    className="object-cover"
                   />
                 ) : (
                   <MediaPlaceholder className="h-full w-full" />
@@ -59,7 +59,7 @@ export function AboutInsightCards({ cards }: { cards: AboutCard[] }) {
               </div>
               <div className="about-card-copy min-w-0">
                 <p className="text-xs tracking-[0.16em] text-white/55">{card.category}</p>
-                <h3 className="mt-5 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-white/40 underline-offset-4 lg:text-2xl">{card.title}</h3>
+                <h3 className="mt-5 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40 lg:text-2xl">{card.title}</h3>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{card.summary}</p>
               </div>
             </Link>
