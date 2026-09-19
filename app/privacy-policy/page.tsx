@@ -40,8 +40,8 @@ const defaultSections = [
   {
     title: "Third-party services",
     paragraphs: [
-      "Our website content is managed through Sanity. The website also relies on hosting, media, and infrastructure providers required to deliver the site. These providers may process technical information needed to operate their services.",
-      "We do not list a service as collecting inquiry information unless it is part of the current implementation.",
+      "We engage third-party service providers to host the website, deliver media content, and facilitate communications initiated through the site.",
+      "These providers may process limited technical information where necessary to deliver their services and maintain the website.",
     ],
   },
   {
