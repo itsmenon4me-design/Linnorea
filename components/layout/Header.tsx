@@ -42,7 +42,6 @@ export function Header({ dictionary, variant = "default" }: HeaderProps) {
   }, []);
 
   const navItems = [
-    { label: dictionary.nav.home, href: "/" },
     { label: dictionary.nav.about, href: "/about" },
     { label: dictionary.nav.project, href: "/project" },
     { label: dictionary.nav.service, href: "/service" },

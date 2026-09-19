@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { ContactInquiryForm } from "@/components/sections/ContactInquiryForm";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
-import { plainText, type SiteSettings } from "@/lib/sanity/types";
+import type { SiteSettings } from "@/lib/sanity/types";
 
 export const revalidate = 60;
 
@@ -17,10 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const settings = await sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } });
-  const officeAddress = plainText(settings?.officeAddress) || "Sovereign Plaza 12th Floor - Jl. TB Simatupang No.36, Cilandak, Jakarta 12430";
   const whatsappNumber = settings?.whatsappNumber?.replace(/\D/g, "") || "6281919452042";
-  const whatsappHref = `https://wa.me/${whatsappNumber}`;
-  const socialLinks = settings?.socialLinks?.filter((link) => link.url) ?? [];
 
   return (
     <main className="bg-[var(--color-bg-base)] text-white">
@@ -39,24 +35,6 @@ export default async function ContactPage() {
           </div>
         </div>
       </header>
-
-      <section className="border-y border-white/15" aria-labelledby="studio-contact">
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-14 md:grid-cols-[0.55fr_1.45fr] md:gap-20 md:px-8 md:py-20">
-          <p id="studio-contact" className="text-[10px] uppercase tracking-[0.22em] text-white/50">Jakarta studio</p>
-          <div className="grid gap-10 sm:grid-cols-2">
-            <div>
-              <p className="max-w-xs text-lg leading-7 text-white/85">{officeAddress}</p>
-              <a href={whatsappHref} target="_blank" rel="noreferrer" className="mt-7 inline-flex min-h-11 items-center border-b border-white/35 pb-2 text-sm text-white transition-colors hover:border-[var(--color-accent-gold)] hover:text-[var(--color-accent-gold)]">WhatsApp the studio</a>
-            </div>
-            <div className="flex flex-col gap-4 text-sm text-white/65">
-              {socialLinks.map((link) => (
-                <a key={`${link.platform}-${link.url}`} href={link.url} target="_blank" rel="noreferrer" className="w-fit transition-colors hover:text-white">{link.platform}</a>
-              ))}
-              <Link href="/about" className="w-fit transition-colors hover:text-white">About Linnorea</Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section className="mx-auto grid max-w-7xl gap-12 px-5 py-20 md:grid-cols-[0.55fr_1.45fr] md:gap-20 md:px-8 md:py-28" aria-labelledby="project-inquiry">
         <div>

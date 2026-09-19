@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { sanityClient } from "@/lib/sanity/client";
 import { siteSettingsQuery } from "@/lib/sanity/queries";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -66,19 +67,38 @@ export async function Footer({ dictionary }: FooterProps) {
     <footer className="bg-[var(--color-bg-base)] text-white">
       <div className="Footer_content mx-auto max-w-7xl px-5 md:px-8">
         <div className="min-w-0">
-          <section
-            className="min-w-0 border-t border-b border-white/10 py-10 md:py-12"
-            aria-label="Connect"
-          >
-            <div className="flex flex-col md:flex-row md:flex-wrap gap-x-16 gap-y-2 md:gap-y-4">
+          <section className="border-t border-white/10 py-10 md:py-14" aria-label="Site map">
+            <div className="grid gap-10 sm:grid-cols-2 lg:mx-0 lg:max-w-3xl lg:grid-cols-3 lg:gap-6">
+              <div>
+                <nav className="flex flex-col items-start gap-3" aria-label="Explore">
+                  <Link href="/about" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">About</Link>
+                  <Link href="/service" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Services</Link>
+                  <Link href="/project" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Projects</Link>
+                  <Link href="/product" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Products</Link>
+                </nav>
+              </div>
+              <div>
+                <nav className="flex flex-col items-start gap-3" aria-label="Studio">
+                  <Link href="/about#leadership" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Studio profile</Link>
+                  <Link href="/service#process" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Process</Link>
+                  <Link href="/insight" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Insights</Link>
+                  <Link href="/privacy-policy" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Privacy policy</Link>
+                </nav>
+              </div>
+              <div>
+                <nav className="flex flex-col items-start gap-3" aria-label="Contact">
+                  <Link href="/contact" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Contact Linnorea</Link>
+                  <a href="mailto:hello@linnorea.com" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Email studio</a>
+                  <a href="https://wa.me/6281919452042" target="_blank" rel="noreferrer" className="text-base text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">WhatsApp</a>
+                </nav>
+              </div>
+            </div>
+          </section>
+
+          <section           className="min-w-0 border-t border-b border-white/10 py-7 md:py-9" aria-label="Connect">
+            <div className="flex flex-col gap-y-2 md:flex-row md:flex-wrap md:gap-x-16 md:gap-y-4">
               {socialLinks.map((link) => (
-                <a
-                  key={link.platform}
-                  href={link.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex w-full md:w-auto items-center justify-between md:justify-start gap-3 border-none py-4 md:py-0"
-                >
+                <a key={link.platform} href={link.url} target="_blank" rel="noreferrer" className="flex w-full items-center justify-between gap-3 border-none py-4 md:w-auto md:justify-start md:py-0">
                   <span className="flex items-center gap-3">
                     <link.icon className="w-4 h-4" />
                     <span className="text-sm md:text-base">{link.label}</span>
@@ -89,7 +109,7 @@ export async function Footer({ dictionary }: FooterProps) {
           </section>
 
           <section
-            className="min-w-0 w-full border-b border-white/25 pt-8 pb-10 text-center md:pt-10 md:pb-12"
+            className="min-w-0 w-full border-b border-white/25 pt-6 pb-8 text-center md:pt-8 md:pb-10"
             aria-labelledby="footer-brand"
           >
             <Image

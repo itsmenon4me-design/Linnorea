@@ -294,7 +294,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
             className="mt-12 inline-flex min-h-11 w-fit items-center gap-3 rounded-full border border-white/45 px-7 text-sm text-white transition hover:border-white hover:bg-white hover:text-[var(--color-bg-base)] focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white"
           >
             See our projects
-            <span aria-hidden="true" className="text-lg leading-none">â†’</span>
+            <span aria-hidden="true" className="text-lg leading-none">→</span>
           </Link>
         </div>
       </div>

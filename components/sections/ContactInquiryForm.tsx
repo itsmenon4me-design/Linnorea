@@ -26,9 +26,9 @@ export function ContactInquiryForm({ whatsappNumber }: ContactInquiryFormProps) 
       `Name: ${form.get("name") || "-"}`,
       `Email: ${form.get("email") || "-"}`,
       `Company: ${form.get("company") || "-"}`,
+      `How they heard about Linnorea: ${form.get("referralSource") || "-"}`,
       `Project market: ${form.get("projectType") || "-"}`,
       `Project location: ${form.get("location") || "-"}`,
-      `Timeline: ${form.get("timeline") || "-"}`,
       "",
       `Brief: ${form.get("message") || "-"}`,
     ].join("\n");
@@ -50,15 +50,19 @@ export function ContactInquiryForm({ whatsappNumber }: ContactInquiryFormProps) 
       <div className="grid gap-x-8 md:grid-cols-2">
         <label className="block">
           <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Name</span>
-          <input className={inputClassName} name="name" required autoComplete="name" placeholder="Your name" />
+          <input className={inputClassName} name="name" required autoComplete="name" />
         </label>
         <label className="mt-7 block md:mt-0">
           <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Email</span>
-          <input className={inputClassName} name="email" type="email" required autoComplete="email" placeholder="you@company.com" />
+          <input className={inputClassName} name="email" type="email" required autoComplete="email" />
         </label>
         <label className="mt-7 block">
-          <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Company</span>
-          <input className={inputClassName} name="company" autoComplete="organization" placeholder="Company or organisation" />
+          <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Company name</span>
+          <input className={inputClassName} name="company" autoComplete="organization" />
+        </label>
+        <label className="mt-7 block">
+          <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Project location</span>
+          <input className={inputClassName} name="location" required placeholder="City, country" />
         </label>
         <label className="mt-7 block">
           <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Project market</span>
@@ -69,22 +73,28 @@ export function ContactInquiryForm({ whatsappNumber }: ContactInquiryFormProps) 
           </select>
         </label>
         <label className="mt-7 block">
-          <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Project location</span>
-          <input className={inputClassName} name="location" required placeholder="City, country" />
-        </label>
-        <label className="mt-7 block">
-          <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Expected timeline</span>
-          <input className={inputClassName} name="timeline" placeholder="When would you like to begin?" />
+          <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">How did you first hear about Linnorea?</span>
+          <select className={`${inputClassName} appearance-none`} name="referralSource" defaultValue="" required>
+            <option value="" disabled className="bg-[var(--color-bg-base)]">Select an option</option>
+            <option className="bg-[var(--color-bg-base)]" value="Recommendation from a friend or colleague">Recommendation from a friend or colleague</option>
+            <option className="bg-[var(--color-bg-base)]" value="Social media">Social media</option>
+            <option className="bg-[var(--color-bg-base)]" value="Search engine">Search engine</option>
+            <option className="bg-[var(--color-bg-base)]" value="Press or editorial feature">Press or editorial feature</option>
+            <option className="bg-[var(--color-bg-base)]" value="Event, exhibition, or talk">Event, exhibition, or talk</option>
+            <option className="bg-[var(--color-bg-base)]" value="Existing client or professional network">Existing client or professional network</option>
+            <option className="bg-[var(--color-bg-base)]" value="Saw a Linnorea project">Saw a Linnorea project</option>
+            <option className="bg-[var(--color-bg-base)]" value="Other">Other</option>
+          </select>
         </label>
       </div>
 
       <label className="mt-7 block">
-        <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Tell us about the project</span>
-        <textarea className={`${inputClassName} min-h-32 resize-y`} name="message" required placeholder="The place, the ambition, and what you would like to create." />
+        <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">Project brief</span>
+        <textarea className={`${inputClassName} min-h-32 resize-y`} name="message" required />
       </label>
 
       <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-sm text-xs leading-5 text-white/45">Your brief will open in WhatsApp so our studio can continue the conversation directly.</p>
+        <p className="max-w-sm text-xs leading-5 text-white/45">Your project brief will open in WhatsApp, where our studio can continue the conversation with you.</p>
         <button
           type="submit"
           disabled={isSubmitting}

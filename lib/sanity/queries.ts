@@ -209,6 +209,19 @@ export const serviceListQuery = `
   }
 `;
 
+export const privacyNoticeQuery = `
+  *[_type == "privacyNotice"][0] {
+    _id,
+    title,
+    intro,
+    sections[] {
+      title,
+      paragraphs
+    },
+    _updatedAt
+  }
+`;
+
 export const productListQuery = `
   *[_type == "product"] | order(order asc, _createdAt asc) {
     _id, name, slug, images, description, order

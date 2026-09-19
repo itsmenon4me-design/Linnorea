@@ -141,6 +141,14 @@ export type SiteSettings = {
   seoDefaults?: SeoDefaults;
 };
 
+export type PrivacyNotice = {
+  _id: string;
+  title?: string;
+  intro?: string;
+  sections?: Array<{ title?: string; paragraphs?: string[] }>;
+  _updatedAt?: string;
+};
+
 export type Insight = {
   _id: string;
   title?: string;

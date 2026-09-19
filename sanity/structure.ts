@@ -57,5 +57,10 @@ export function structure(S: StructureBuilder) {
         .child(
           S.document().schemaType("siteSettings").documentId("siteSettings").title("GLOBAL - Kontak, footer & SEO")
         ),
+      S.listItem()
+        .title("GLOBAL - Privacy Notice")
+        .child(
+          S.document().schemaType("privacyNotice").documentId("privacyNotice").title("GLOBAL - Privacy Notice")
+        ),
     ]);
 }

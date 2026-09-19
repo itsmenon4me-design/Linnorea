@@ -12,6 +12,7 @@ import { socialLink } from "./schemas/socialLink";
 import { approachItem } from "./schemas/approachItem";
 import { teamMember } from "./schemas/teamMember";
 import { insight } from "./schemas/insight";
+import { privacyNotice } from "./schemas/privacyNotice";
 import { structure } from "./structure";
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID ?? process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "stol8iwq";
@@ -43,6 +44,7 @@ export default defineConfig({
       approachItem,
       teamMember,
       insight,
+      privacyNotice,
     ],
   },
 });
