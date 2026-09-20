@@ -21,7 +21,7 @@ export function ContactInquiryForm({ whatsappNumber }: ContactInquiryFormProps) 
 
     const form = new FormData(event.currentTarget);
     const message = [
-      "Linnorea project inquiry",
+      "Project Consultation Request | Linnorea Design Works",
       "",
       `Name: ${form.get("name") || "-"}`,
       `Email: ${form.get("email") || "-"}`,
