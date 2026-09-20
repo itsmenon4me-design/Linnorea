@@ -64,7 +64,7 @@ export function HighlightProjectsCarousel({ projects, discoverLabel }: Highlight
                     quality={80}
                     draggable={false}
                     sizes="(max-width: 768px) 82vw, 33vw"
-                    className="select-none object-cover transition-transform duration-[1600ms] ease-out motion-reduce:transition-none group-hover:scale-105"
+                    className="media-hover-zoom select-none object-cover transition-transform duration-[1600ms] ease-out motion-reduce:transition-none"
                   />
                 ) : (
                   <MediaPlaceholder className="h-full w-full" />

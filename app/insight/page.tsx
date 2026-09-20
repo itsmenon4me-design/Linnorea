@@ -35,7 +35,7 @@ export default async function InsightListingPage() {
               return (
                 <Link key={insight._id} href={`/insight/${insight.slug?.current}`} className="group min-w-0">
                   <div className="relative aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]">
-                    {imageUrl ? <Image src={imageUrl} alt={insight.title ?? "Insight"} fill quality={80} sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
+                    {imageUrl ? <Image src={imageUrl} alt={insight.title ?? "Insight"} fill quality={80} sizes="(max-width: 768px) 100vw, 25vw" className="media-hover-zoom object-cover transition-transform duration-700" /> : <MediaPlaceholder className="h-full w-full" />}
                   </div>
                   <p className="mt-6 text-xs uppercase tracking-[0.16em] text-white/55">{insight.category}</p>
                   <h2 className="mt-4 text-xl font-medium leading-tight underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40">{insight.title}</h2>

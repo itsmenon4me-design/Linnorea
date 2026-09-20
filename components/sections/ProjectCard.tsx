@@ -30,7 +30,7 @@ export function ProjectCard({ project, dictionary }: ProjectCardProps) {
               fill
               quality={80}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition duration-700 ease-out group-hover:scale-105"
+              className="media-hover-zoom object-cover transition duration-700 ease-out"
             />
           ) : (
             <MediaPlaceholder className="h-full w-full" />
