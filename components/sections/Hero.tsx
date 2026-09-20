@@ -373,6 +373,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
       const attempts = (mediaRetryAttemptsRef.current.get(index) ?? 0) + 1;
       mediaRetryAttemptsRef.current.set(index, attempts);
       if (attempts > MAX_MEDIA_ERROR_RETRIES) {
+        failedVideoIndexesRef.current = new Set([...failedVideoIndexesRef.current, index]);
+        setFailedVideoIndexes(new Set(failedVideoIndexesRef.current));
         console.warn("Hero video retry limit reached; keeping poster fallback.", {
           index,
           playbackId,
