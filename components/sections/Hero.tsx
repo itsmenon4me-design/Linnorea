@@ -905,13 +905,33 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     const nextProgress = Math.min(video.currentTime / video.duration, 1);
     setProgress(nextProgress);
 
-    if (!videoAdvancedRef.current && video.currentTime >= video.duration - 0.25) {
+    if (
+      resolvedSlides.length > 1 &&
+      !videoAdvancedRef.current &&
+      video.currentTime >= video.duration - 0.25
+    ) {
       videoAdvancedRef.current = true;
       goToSlide(activeIndex + 1);
     }
   };
 
   const handleVideoEnded = (endedIndex: number) => {
+    if (resolvedSlides.length === 1 && endedIndex === activeIndex) {
+      const player = muxPlayerRefs.current[endedIndex];
+      if (player) {
+        void queueMediaOperation(endedIndex, player, async (media) => {
+          media.currentTime = 0;
+          if (!isPaused && isHeroInView && isTabVisible) {
+            await media.play();
+          }
+        }).catch((error: unknown) => {
+          console.warn("Hero single video could not be looped.", { index: endedIndex, error });
+        });
+      }
+      setProgress(0);
+      return;
+    }
+
     const isDragGestureActive = isDragging || dragTargetIndex !== null;
     if (
       isDragGestureActive &&
@@ -1119,7 +1139,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
           const isTransitionIncoming = transition?.to === index;
           const isDragIncoming = dragTargetIndex === index;
           const isTransitionVisible = isActive || isTransitionIncoming || isDragIncoming;
-          const shouldLoopDuringDrag =
+          const shouldLoop =
+            resolvedSlides.length === 1 ||
             (isDragging || dragTargetIndex !== null) &&
             (isActive || index === dragPlayingIndex || isDragIncoming);
 
@@ -1162,7 +1183,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                     }}
                     playbackId={slidePlaybackId}
                     autoPlay={isActive || isTransitionIncoming}
-                    loop={shouldLoopDuringDrag}
+                    loop={shouldLoop}
                     muted
                     playsInline
                     preload={isActive || index === nextIndex || isTransitionIncoming ? "auto" : "none"}

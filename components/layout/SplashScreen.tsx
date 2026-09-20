@@ -19,6 +19,7 @@ export function SplashScreen() {
     window.setTimeout(() => setIsVisible(true), 0);
 
     let pageLoaded = document.readyState === "complete";
+    let heroReady = window.location.pathname !== "/";
     const startedAt = performance.now();
     let hideTimeoutId: number | null = null;
     const maxWaitTimeoutId = window.setTimeout(() => setIsReady(true), MAX_INITIAL_WAIT_MS);
@@ -27,8 +28,12 @@ export function SplashScreen() {
       pageLoaded = true;
       maybeHide();
     };
+    const markHeroReady = () => {
+      heroReady = true;
+      maybeHide();
+    };
     const maybeHide = () => {
-      if (!pageLoaded) {
+      if (!pageLoaded || !heroReady) {
         return;
       }
 
@@ -40,10 +45,12 @@ export function SplashScreen() {
     };
 
     window.addEventListener("load", markPageLoaded);
+    window.addEventListener("linnorea:hero-ready", markHeroReady);
     maybeHide();
 
     return () => {
       window.removeEventListener("load", markPageLoaded);
+      window.removeEventListener("linnorea:hero-ready", markHeroReady);
       window.clearTimeout(maxWaitTimeoutId);
       if (hideTimeoutId !== null) {
         window.clearTimeout(hideTimeoutId);
