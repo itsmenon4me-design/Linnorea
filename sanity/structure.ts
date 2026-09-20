@@ -2,27 +2,27 @@ import type { StructureBuilder } from "sanity/structure";
 
 export function structure(S: StructureBuilder) {
   return S.list()
-    .title("Content")
+    .title("Linnorea content")
     .items([
       S.listItem()
         .title("Home")
         .child(
           S.list()
-            .title("Home Page Content")
+            .title("Home")
             .items([
-              S.documentTypeListItem("heroSlide").title("HOME - Hero slides (tambah/edit)"),
-              S.documentTypeListItem("visionSlide").title("HOME - Vision / goals slides"),
+              S.documentTypeListItem("heroSlide").title("Hero slides"),
+              S.documentTypeListItem("visionSlide").title("Vision / goals slides"),
               S.listItem()
-                .title("HOME - Project highlight")
+                .title("Project highlights")
                 .child(
                   S.documentList()
-                    .title("Project yang tampil di Home")
+                    .title("Projects marked as featured")
                     .filter('_type == "project" && featured == true')
                 ),
               S.listItem()
-                .title("HOME - Teks & pengaturan highlight")
+                .title("Home text and highlight settings")
                 .child(
-                  S.document().schemaType("siteSettings").documentId("siteSettings").title("HOME - Teks & pengaturan highlight")
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("Home text and highlight settings")
                 ),
             ])
         ),
@@ -30,37 +30,73 @@ export function structure(S: StructureBuilder) {
         .title("About")
         .child(
           S.list()
-            .title("About Page Content")
+            .title("About")
             .items([
               S.listItem()
-                .title("ABOUT - Teks halaman & media")
+                .title("About text and sections")
                 .child(
-                  S.document().schemaType("siteSettings").documentId("siteSettings").title("ABOUT - Teks halaman & media")
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("About text and sections")
                 ),
-              S.documentTypeListItem("teamMember").title("ABOUT - Team members"),
-              S.documentTypeListItem("insight").title("ABOUT - Insights"),
+              S.documentTypeListItem("teamMember").title("Team members"),
+              S.listItem()
+                .title("Studio visual")
+                .child(
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("Studio visual")
+                ),
             ])
         ),
       S.listItem()
         .title("Projects")
         .child(
-          S.documentTypeList("project").title("PROJECTS - Daftar project")
+          S.documentTypeList("project").title("All projects")
         ),
       S.listItem()
         .title("Services")
         .child(
-          S.documentTypeList("service").title("SERVICES - Daftar layanan")
+          S.list()
+            .title("Services")
+            .items([
+              S.documentTypeListItem("service").title("Service list"),
+              S.listItem()
+                .title("Services page text and process")
+                .child(
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("Services page text and process")
+                ),
+            ])
+        ),
+      S.listItem()
+        .title("Products")
+        .child(
+          S.documentTypeList("product").title("All products")
+        ),
+      S.listItem()
+        .title("Insights")
+        .child(
+          S.documentTypeList("insight").title("All insights")
+        ),
+      S.listItem()
+        .title("Contact")
+        .child(
+          S.list()
+            .title("Contact")
+            .items([
+              S.listItem()
+                .title("Contact details and form settings")
+                .child(
+                  S.document().schemaType("siteSettings").documentId("siteSettings").title("Contact details and form settings")
+                ),
+            ])
         ),
       S.divider(),
       S.listItem()
-        .title("GLOBAL - Kontak, footer & SEO")
+        .title("Global settings")
         .child(
-          S.document().schemaType("siteSettings").documentId("siteSettings").title("GLOBAL - Kontak, footer & SEO")
+          S.document().schemaType("siteSettings").documentId("siteSettings").title("Global settings")
         ),
       S.listItem()
-        .title("GLOBAL - Privacy Notice")
+        .title("Privacy notice")
         .child(
-          S.document().schemaType("privacyNotice").documentId("privacyNotice").title("GLOBAL - Privacy Notice")
+          S.document().schemaType("privacyNotice").documentId("privacyNotice").title("Privacy notice")
         ),
     ]);
 }
