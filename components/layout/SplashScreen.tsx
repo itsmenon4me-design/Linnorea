@@ -6,29 +6,17 @@ import { useEffect, useState } from "react";
 const MIN_DISPLAY_MS = 500;
 const MAX_INITIAL_WAIT_MS = 10000;
 
-type SplashScreenProps = {
-  mode?: "initial" | "navigation";
-};
-
-export function SplashScreen({ mode = "initial" }: SplashScreenProps) {
+export function SplashScreen() {
   const [isVisible, setIsVisible] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (mode === "initial") {
-      if (window.sessionStorage.getItem("linnorea:splash-seen") === "1") {
-        window.setTimeout(() => setIsReady(true), 0);
-        return;
-      }
-      window.sessionStorage.setItem("linnorea:splash-seen", "1");
-      window.setTimeout(() => setIsVisible(true), 0);
+    if (window.sessionStorage.getItem("linnorea:splash-seen") === "1") {
+      window.setTimeout(() => setIsReady(true), 0);
+      return;
     }
-
-    if (mode === "navigation") {
-      window.setTimeout(() => setIsVisible(true), 0);
-      const timeoutId = window.setTimeout(() => setIsReady(true), MIN_DISPLAY_MS);
-      return () => window.clearTimeout(timeoutId);
-    }
+    window.sessionStorage.setItem("linnorea:splash-seen", "1");
+    window.setTimeout(() => setIsVisible(true), 0);
 
     let pageLoaded = document.readyState === "complete";
     const startedAt = performance.now();
@@ -61,7 +49,7 @@ export function SplashScreen({ mode = "initial" }: SplashScreenProps) {
         window.clearTimeout(hideTimeoutId);
       }
     };
-  }, [mode]);
+  }, []);
 
   const handleLogoAnimationIteration = () => {
     if (isReady && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {

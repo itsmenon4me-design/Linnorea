@@ -308,14 +308,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     }
   };
 
-  const handleVideoFailure = (index: number) => {
-    failedVideoIndexesRef.current.add(index);
-    setFailedVideoIndexes(new Set(failedVideoIndexesRef.current));
-    if (index === activeIndex) {
-      window.dispatchEvent(new Event("linnorea:hero-ready"));
-    }
-  };
-
   useEffect(() => {
     const node = rootRef.current;
     if (!node) {
@@ -459,9 +451,13 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         const handleError = (event: Event) => retryVideoAfterError(index, player, event);
         player.addEventListener("error", handleError);
         media?.addEventListener("error", handleError);
+        player.addEventListener("stalled", handleError);
+        media?.addEventListener("stalled", handleError);
         errorCleanups.set(index, () => {
           player.removeEventListener("error", handleError);
           media?.removeEventListener("error", handleError);
+          player.removeEventListener("stalled", handleError);
+          media?.removeEventListener("stalled", handleError);
         });
       });
     };
@@ -986,12 +982,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         visibility: index === activeIndex ? "visible" : "hidden",
       });
     });
-    console.log("[Hero drag transform]", {
-      phase: "pointer-down-reset",
-      timestamp: new Date().toISOString(),
-      activeIndex,
-      transformOwner: "drag-pointer",
-    });
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -1063,19 +1053,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     }
     gsap.set(outgoingPanel, { xPercent: deltaPercent });
     gsap.set(incomingPanel, { xPercent: deltaPercent + direction * 100, visibility: "visible" });
-    console.log("[Hero drag transform]", {
-      phase: "pointer-move",
-      timestamp: new Date().toISOString(),
-      deltaPercent: Number(deltaPercent.toFixed(2)),
-      direction,
-      activeIndex,
-      targetIndex,
-      targetChanged,
-      passedPlayTrigger,
-      outgoingXPercent: Number(gsap.getProperty(outgoingPanel, "xPercent")),
-      incomingXPercent: Number(gsap.getProperty(incomingPanel, "xPercent")),
-      transformOwner: "drag-pointer",
-    });
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLElement>) => {
@@ -1093,13 +1070,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     const distance = event.clientX - drag.startX;
     if (Math.abs(distance) >= DRAG_THRESHOLD_PX && drag.swapActive) {
       dragCommitRef.current = true;
-      console.log("[Hero drag transform]", {
-        phase: "commit-settle",
-        timestamp: new Date().toISOString(),
-        from: activeIndex,
-        to: drag.targetIndex,
-        transformOwner: "commit-timeline",
-      });
       goToSlide(drag.targetIndex, true);
       dragSwapActiveRef.current = false;
       setDragTargetIndex(null);
@@ -1218,8 +1188,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                     onTimeUpdate={isActive ? handleVideoTimeUpdate : undefined}
                     onEnded={() => handleVideoEnded(index)}
                     onCanPlay={() => handleVideoCanPlay(index)}
-                    onError={() => handleVideoFailure(index)}
-                    onStalled={() => handleVideoFailure(index)}
                     className={`pointer-events-none h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${isTransitionVisible || index === nextIndex ? "visible" : "invisible"} ${isTransitionVisible && (!slideMediaUrl || readyVideoIndexes.has(index)) ? "opacity-100" : "opacity-0"}`}
                   />
                 ) : null}
