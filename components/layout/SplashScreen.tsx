@@ -7,17 +7,10 @@ const MIN_DISPLAY_MS = 500;
 const MAX_INITIAL_WAIT_MS = 10000;
 
 export function SplashScreen() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (window.sessionStorage.getItem("linnorea:splash-seen") === "1") {
-      window.setTimeout(() => setIsReady(true), 0);
-      return;
-    }
-    window.sessionStorage.setItem("linnorea:splash-seen", "1");
-    window.setTimeout(() => setIsVisible(true), 0);
-
     let pageLoaded = document.readyState === "complete";
     let heroReady = window.location.pathname !== "/";
     const startedAt = performance.now();

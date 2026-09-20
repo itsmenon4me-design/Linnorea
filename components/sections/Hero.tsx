@@ -235,7 +235,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     }
     if (media.readyState === 0) {
       media.preload = "auto";
-      media.load();
     }
     const startPlayback = () => {
       pendingPlayCleanupRef.current?.();
@@ -266,6 +265,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
             playbackId: player.getAttribute("playback-id"),
             outcome: "video-playing",
           });
+          window.dispatchEvent(new Event("linnorea:hero-ready"));
         }
       }).catch((error: unknown) => {
         if (generation === playbackGenerationRef.current) {
@@ -304,7 +304,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     if ((index === activeIndex || index === transitionRef.current?.to) && !dragSwapActiveRef.current && !isPaused && isHeroInView && isTabVisible) {
       const player = muxPlayerRefs.current[index];
       if (player) playActiveVideo(player);
-      window.dispatchEvent(new Event("linnorea:hero-ready"));
     }
   };
 
@@ -504,23 +503,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         player.preload = index === activeIndex ? "auto" : "none";
         if (playbackIds[index]) {
           player.minPreloadSegments = HERO_MIN_PRELOAD_SEGMENTS;
-          const media = player.mediaController?.media;
-          if (index === activeIndex && media && media.readyState === 0 && !preloadStartedRef.current.has(index)) {
-            preloadStartedRef.current.add(index);
-            requestManagedPreload(index, async (queuedMedia) => {
-              queuedMedia.preload = "auto";
-              queuedMedia.load();
-              await waitForMediaReady(queuedMedia, MEDIA_ERROR_RETRY_TIMEOUT_MS);
-              if (dragSwapActiveRef.current && index === activeIndexRef.current) {
-                queuedMedia.pause();
-                return;
-              }
-              await queuedMedia.play();
-              if (index !== activeIndex) {
-                queuedMedia.pause();
-              }
-            });
-          }
         }
       });
 
