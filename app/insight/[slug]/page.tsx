@@ -69,7 +69,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
     blocks.map((block, index) => {
       if (isImageBlock(block)) {
         const imageUrl = urlFor(block).width(1600).height(1000).fit("crop").auto("format").quality(80).url();
-        return <Image key={block._key ?? `${keyPrefix}-image-${index}`} src={imageUrl} alt={`${title} image ${index + 1}`} width={1600} height={1000} className="my-14 h-auto w-full object-cover" />;
+        return <Image key={block._key ?? `${keyPrefix}-image-${index}`} src={imageUrl} alt={`${title} image ${index + 1}`} width={1600} height={1000} className="my-14 h-auto w-full object-cover" data-reveal />;
       }
       if (!isPortableTextBlock(block)) return null;
       const text = block.children?.map((child) => child.text ?? "").join("") ?? "";
@@ -99,6 +99,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
         .insight-related-more {
           display: flex;
           flex-direction: column;
+          overflow-anchor: none;
         }
         .insight-related-more summary {
           order: 2;
@@ -126,8 +127,42 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
         .insight-related-more[open] summary::after {
           content: "−";
         }
-        .insight-related-more .insight-related-list {
+        .insight-related-more .insight-related-expand {
           order: 1;
+          display: grid;
+          grid-template-rows: 0fr;
+          will-change: grid-template-rows;
+          transition: grid-template-rows 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .insight-related-more[open] .insight-related-expand {
+          grid-template-rows: 1fr;
+        }
+        .insight-related-more .insight-related-expand > .insight-related-list {
+          min-height: 0;
+          overflow: hidden;
+        }
+        @keyframes insight-related-item-reveal {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 20px, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        .insight-related-more[open] .insight-related-list > [data-expandable-item] {
+          animation: insight-related-item-reveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+          will-change: transform, opacity;
+        }
+        .insight-related-more[open] .insight-related-list > [data-expandable-item]:nth-child(2) {
+          animation-delay: 0.12s;
+        }
+        .insight-related-more[open] .insight-related-list > [data-expandable-item]:nth-child(3) {
+          animation-delay: 0.24s;
+        }
+        .insight-related-more[open] .insight-related-list > [data-expandable-item]:nth-child(4) {
+          animation-delay: 0.36s;
         }
         @media (max-width: 47.99rem) {
           .insight-related-item {
@@ -140,7 +175,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
       <article className="mx-auto max-w-[88rem] px-5 pb-16 pt-24 md:px-8 md:pb-24 md:pt-32">
         <div className="insight-detail-hero md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
           <Link href="/insight" className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4">Insights</Link>
-          <div className="min-w-0">
+          <div className="min-w-0" data-reveal>
             <h1 className="max-w-[720px] font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] sm:text-6xl md:text-7xl lg:text-[5.5rem]">{title}</h1>
             <div className="mt-6 grid gap-8 text-base leading-7 md:mt-8 md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
               <div>
@@ -181,11 +216,11 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
 
         <div className="mt-24 min-w-0 md:mt-36">
           <div className="insight-detail-content">
-            <div className="insight-detail-media overflow-hidden bg-[var(--color-bg-elevated)]">
+            <div className="insight-detail-media overflow-hidden bg-[var(--color-bg-elevated)]" data-reveal>
               {coverUrl ? <Image src={coverUrl} alt={title} width={2000} height={1200} className="h-full w-full object-cover" priority /> : <MediaPlaceholder className="h-full w-full" />}
             </div>
             <div className="mt-3 text-xs text-white/50">{title}</div>
-            <div className="insight-detail-grid mt-20 border-t border-white/15 pt-8 md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
+            <div className="insight-detail-grid mt-20 border-t border-white/15 pt-8 md:grid-cols-[228px_minmax(0,1fr)] md:gap-8" data-reveal>
               <p className="text-xs uppercase tracking-[0.18em] text-white/55">{insight.atAGlanceLabel || "At a glance"}</p>
               <div className="max-w-2xl space-y-6 text-lg leading-8 text-white/75">
                 {insight.excerpt ? <p>{insight.excerpt}</p> : <p>This insight is ready for its editorial introduction to be added in Sanity Studio.</p>}
@@ -193,7 +228,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
             </div>
 
             <div className="mt-24 border-t border-white/15 pt-8">
-              <div className="insight-detail-grid md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
+              <div className="insight-detail-grid md:grid-cols-[228px_minmax(0,1fr)] md:gap-8" data-reveal>
                 <p className="text-xs uppercase tracking-[0.18em] text-white/55">{insight.category || "Insight"}</p>
                 <div className="max-w-2xl space-y-8 text-lg leading-8 text-white/75">
                   {editorialSections.length ? editorialSections.map((section, sectionIndex) => (
@@ -209,11 +244,11 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
             </div>
 
             {relatedProject ? (
-              <div className="mt-24 border-t border-white/15 pt-8">
+              <div className="mt-24 border-t border-white/15 pt-8" data-reveal>
                 <p className="text-xs uppercase tracking-[0.18em] text-white/55">Project</p>
                 <article className="mt-8 min-w-0">
                   <Link href={relatedProject.slug?.current ? `/project/${relatedProject.slug.current}` : "/project"} className="group block text-white focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white">
-                    <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]">
+                    <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]" data-reveal>
                       {relatedProject.coverImage ? (
                         <Image
                           src={urlFor(relatedProject.coverImage).width(1400).height(700).fit("crop").auto("format").quality(82).url()}
@@ -249,10 +284,10 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
             {relatedInsights.length ? (
               <div className="mt-24 border-t border-white/15 pt-8">
                 <div className="insight-detail-grid md:grid-cols-[228px_minmax(0,1fr)] md:gap-8">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">{insight.latestInsightsLabel || "Latest Insights"}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/55" data-reveal>{insight.latestInsightsLabel || "Latest Insights"}</p>
                   <div>
-                    <h2 className="font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] md:text-7xl">{insight.latestInsightsHeading || "Perspectives, trends, news."}</h2>
-                    <div className="mt-14 insight-related-list">
+                    <h2 className="font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] md:text-7xl" data-reveal>{insight.latestInsightsHeading || "Perspectives, trends, news."}</h2>
+                    <div className="mt-14 insight-related-list" data-reveal>
                       {relatedInsights.map((item) => {
                         const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
                         return (
@@ -271,22 +306,24 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                       {additionalInsights.length ? (
                         <details className="insight-related-more">
                           <summary className="text-sm text-white">Show more</summary>
-                          <div className="insight-related-list">
-                            {additionalInsights.map((item) => {
-                              const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
-                              return (
-                                <Link key={item._id} href={`/insight/${item.slug?.current}`} className="group insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
-                                  <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
-                                    {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={600} height={400} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
-                                  </span>
-                                  <span className="block">
-                                    <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
-                                    <span className="mt-4 block text-xl font-medium leading-7 underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40">{item.title}</span>
-                                    {item.excerpt ? <span className="mt-5 block text-base leading-7 text-white/70">{item.excerpt}</span> : null}
-                                  </span>
-                                </Link>
-                              );
-                            })}
+                          <div className="insight-related-expand">
+                            <div className="insight-related-list">
+                              {additionalInsights.map((item) => {
+                                const imageUrl = item.coverImage ? urlFor(item.coverImage).width(600).height(400).fit("crop").auto("format").quality(80).url() : null;
+                                return (
+                                  <Link key={item._id} data-expandable-item href={`/insight/${item.slug?.current}`} className="group insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
+                                    <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
+                                      {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={600} height={400} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+                                    </span>
+                                    <span className="block">
+                                      <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
+                                      <span className="mt-4 block text-xl font-medium leading-7 underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40">{item.title}</span>
+                                      {item.excerpt ? <span className="mt-5 block text-base leading-7 text-white/70">{item.excerpt}</span> : null}
+                                    </span>
+                                  </Link>
+                                );
+                              })}
+                            </div>
                           </div>
                         </details>
                       ) : null}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
@@ -31,6 +31,27 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [suppressCardHover, setSuppressCardHover] = useState(false);
+  const [isViewportResizing, setIsViewportResizing] = useState(false);
+  const [revealedProjectIds, setRevealedProjectIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    let settleTimer: number | undefined;
+
+    const handleResize = () => {
+      setIsViewportResizing(true);
+      if (settleTimer !== undefined) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        setIsViewportResizing(false);
+        settleTimer = undefined;
+      }, 180);
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (settleTimer !== undefined) window.clearTimeout(settleTimer);
+    };
+  }, []);
   useEffect(() => {
     setActiveCategory(searchParams.get("category"));
     setActiveLocation(searchParams.get("location"));
@@ -62,8 +83,18 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
   };
 
   const toggleView = () => {
+    setRevealedProjectIds(new Set());
     setIsListView((current) => !current);
   };
+
+  const markProjectRevealed = useCallback((projectId: string) => {
+    setRevealedProjectIds((current) => {
+      if (current.has(projectId)) return current;
+      const next = new Set(current);
+      next.add(projectId);
+      return next;
+    });
+  }, []);
 
   const openProject = (project: Project) => {
     setSuppressCardHover(false);
@@ -115,11 +146,21 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
       {visibleProjects.length > 0 ? (
         <div
           key={`${isListView ? "list" : "grid"}-${activeCategory ?? ""}-${activeLocation ?? ""}-${activeStatus ?? ""}-${activeMarket ?? ""}`}
-          className={`project-archive-grid grid grid-cols-1 gap-4 pt-8 sm:grid-cols-2 lg:grid-cols-3 ${isListView ? "project-archive-grid--list" : ""} ${suppressCardHover ? "project-archive-grid--hover-suppressed" : ""}`}
+          className={`project-archive-grid grid grid-cols-1 gap-4 pt-8 sm:grid-cols-2 lg:grid-cols-3 ${isListView ? "project-archive-grid--list" : ""} ${suppressCardHover || isViewportResizing ? "project-archive-grid--hover-suppressed" : ""} ${isViewportResizing ? "project-archive-grid--resizing" : ""}`}
           onPointerLeave={() => setSuppressCardHover(false)}
         >
           {visibleProjects.map((project, index) => (
-            <ProjectGalleryItem key={project._id} project={project} index={index} dictionary={dictionary} onOpen={() => openProject(project)} onPointerEnter={() => setSuppressCardHover(false)} isListView={isListView} />
+            <ProjectGalleryItem
+              key={project._id}
+              project={project}
+              index={index}
+              dictionary={dictionary}
+              onOpen={() => openProject(project)}
+              onPointerEnter={() => setSuppressCardHover(false)}
+              isListView={isListView}
+              hasBeenRevealed={revealedProjectIds.has(project._id)}
+              onReveal={markProjectRevealed}
+            />
           ))}
         </div>
       ) : (
@@ -172,9 +213,10 @@ function FilterControl({ label, value, options, open, onToggle, onSelect }: { la
   );
 }
 
-function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter, isListView }: { project: Project; index: number; dictionary: Dictionary; onOpen: () => void; onPointerEnter: () => void; isListView: boolean }) {
+function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter, isListView, hasBeenRevealed, onReveal }: { project: Project; index: number; dictionary: Dictionary; onOpen: () => void; onPointerEnter: () => void; isListView: boolean; hasBeenRevealed: boolean; onReveal: (projectId: string) => void }) {
   const [isImageEntering, setIsImageEntering] = useState(isListView);
   const itemRef = useRef<HTMLButtonElement>(null);
+  const shouldRevealOnMountRef = useRef(!hasBeenRevealed);
   const title = plainText(project.title) || dictionary.home.untitledProject;
   const imageUrl = project.coverImage
     ? urlFor(project.coverImage).width(1800).height(1200).fit("crop").auto("format").quality(90).url()
@@ -209,16 +251,22 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
       };
     }
 
+    if (!shouldRevealOnMountRef.current) {
+      return;
+    }
+
     const item = itemRef.current;
     let entryTimer: number | undefined;
     if (!item || typeof IntersectionObserver === "undefined") {
-      setIsImageEntering(!isListView);
+      setIsImageEntering(true);
+      onReveal(project._id);
       return;
     }
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsImageEntering(true);
+        onReveal(project._id);
         entryTimer = window.setTimeout(() => setIsImageEntering(false), 1100);
         observer.disconnect();
       }
@@ -228,7 +276,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
       observer.disconnect();
       if (entryTimer !== undefined) window.clearTimeout(entryTimer);
     };
-  }, [isListView]);
+  }, [isListView, onReveal, project._id]);
 
   return (
     <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isImageEntering && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? `project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)] ${isImageEntering ? "project-list-item--entering" : ""}` : ""}`}>

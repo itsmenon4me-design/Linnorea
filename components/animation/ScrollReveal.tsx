@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 type ScrollRevealProps = {
   children: React.ReactNode;
   className?: string;
-  as?: "div" | "main" | "section";
+  as?: "div" | "header" | "main" | "section";
   style?: React.CSSProperties;
 };
 

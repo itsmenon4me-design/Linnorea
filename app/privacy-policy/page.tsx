@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
+import { ScrollReveal } from "@/components/animation/ScrollReveal";
 import { dictionary } from "@/lib/i18n/dictionaries";
 import { sanityClient } from "@/lib/sanity/client";
 import { privacyNoticeQuery } from "@/lib/sanity/queries";
@@ -94,8 +95,8 @@ export default async function PrivacyPolicyPage() {
     <main className="bg-[var(--color-bg-base)] text-white">
       <Header dictionary={dictionary} />
 
-      <header className="mx-auto max-w-7xl px-5 pb-20 pt-36 md:px-8 md:pb-32 md:pt-48">
-        <div className="grid gap-12 md:grid-cols-[0.55fr_1.45fr] md:gap-20">
+      <ScrollReveal as="header" className="mx-auto max-w-7xl px-5 pb-20 pt-36 md:px-8 md:pb-32 md:pt-48">
+        <div data-reveal className="grid gap-12 md:grid-cols-[0.55fr_1.45fr] md:gap-20">
           <p className="border-l border-[var(--color-accent-gold)] pl-4 text-sm text-white/70">Privacy</p>
           <div>
             <h1 className="max-w-4xl text-5xl font-medium leading-[0.9] tracking-[-0.08em] md:text-8xl">{title}</h1>
@@ -104,14 +105,14 @@ export default async function PrivacyPolicyPage() {
             </p>
           </div>
         </div>
-      </header>
+      </ScrollReveal>
 
-      <section className="border-y border-white/15">
+      <ScrollReveal as="section" className="border-y border-white/15">
         <div className="mx-auto max-w-5xl px-5 py-16 md:px-8 md:py-24">
-          <p className="max-w-3xl text-sm leading-7 text-white/50">Last updated: {formatUpdatedDate(notice?._updatedAt)}</p>
+          <p data-reveal className="max-w-3xl text-sm leading-7 text-white/50">Last updated: {formatUpdatedDate(notice?._updatedAt)}</p>
           <div className="mt-12 max-w-3xl space-y-12">
             {sections.map((section) => (
-              <article key={section.title}>
+              <article key={section.title} data-reveal>
                 <h2 className="text-2xl font-medium tracking-[-0.04em] md:text-3xl">{section.title}</h2>
                 <div className="mt-4 space-y-4 text-base leading-8 text-white/70">
                   {section.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
@@ -120,7 +121,7 @@ export default async function PrivacyPolicyPage() {
             ))}
           </div>
         </div>
-      </section>
+      </ScrollReveal>
     </main>
   );
 }

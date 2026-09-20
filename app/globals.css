@@ -73,6 +73,12 @@ button {
   color: rgb(255 255 255) !important;
 }
 
+.project-filter-button:active,
+.project-filter-control:active,
+.project-view-toggle:active {
+  opacity: 0.55;
+}
+
 .project-archive-controls {
   align-items: flex-end;
   display: flex !important;
@@ -205,6 +211,12 @@ button {
   min-height: 2.25rem;
   width: 2.25rem;
   padding: 0;
+  border-radius: 0.35rem;
+  transition: color 300ms ease-out, opacity 300ms ease-out, background-color 300ms ease-out;
+}
+
+.project-view-toggle[aria-pressed="true"] {
+  color: rgb(255 255 255);
 }
 
 .project-gallery-item {
@@ -550,6 +562,14 @@ button {
 .project-archive-grid--hover-suppressed .project-card-meta {
   opacity: 0 !important;
   transform: translate(1.25rem, 1.25rem) !important;
+}
+
+.project-archive-grid--resizing .project-gallery-image,
+.project-archive-grid--resizing .project-gallery-image-hover,
+.project-archive-grid--resizing .project-gallery-media,
+.project-archive-grid--resizing .project-card-meta {
+  animation: none !important;
+  transition: none !important;
 }
 
 .project-viewer-gallery-image {
