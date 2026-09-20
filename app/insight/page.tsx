@@ -31,11 +31,11 @@ export default async function InsightListingPage() {
         {visibleInsights.length ? (
           <div className="mt-20 grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-4">
             {visibleInsights.map((insight) => {
-              const imageUrl = insight.coverImage ? urlFor(insight.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null;
+              const imageUrl = insight.coverImage ? urlFor(insight.coverImage).width(1400).height(934).fit("crop").auto("format").quality(80).url() : null;
               return (
                 <Link key={insight._id} href={`/insight/${insight.slug?.current}`} className="group min-w-0">
                   <div className="relative aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]">
-                    {imageUrl ? <Image src={imageUrl} alt={insight.title ?? "Insight"} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
+                    {imageUrl ? <Image src={imageUrl} alt={insight.title ?? "Insight"} fill quality={80} sizes="(max-width: 768px) 100vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <MediaPlaceholder className="h-full w-full" />}
                   </div>
                   <p className="mt-6 text-xs uppercase tracking-[0.16em] text-white/55">{insight.category}</p>
                   <h2 className="mt-4 text-xl font-medium leading-tight underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40">{insight.title}</h2>

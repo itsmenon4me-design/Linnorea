@@ -62,7 +62,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
       </section>
       <section className="relative mx-5 aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)] md:mx-10">
         {validCoverImage ? (
-          <Image src={urlFor(validCoverImage).width(2200).height(1240).fit("crop").auto("format").quality(82).url()} alt={title} fill priority sizes="100vw" className="object-cover" />
+          <Image src={urlFor(validCoverImage).width(2200).height(1240).fit("crop").auto("format").quality(82).url()} alt={title} fill quality={82} priority sizes="100vw" className="object-cover" />
         ) : <MediaPlaceholder className="absolute inset-0" />}
       </section>
 
@@ -89,18 +89,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
           {validGallery[0] ? (
             <ScrollReveal as="div">
               <div data-reveal className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
-                <Image src={urlFor(validGallery[0]).width(2200).height(1240).fit("crop").auto("format").quality(82).url()} alt={`${title} gallery 1`} fill sizes="100vw" className="object-cover" />
+                <Image src={urlFor(validGallery[0]).width(2200).height(1240).fit("crop").auto("format").quality(82).url()} alt={`${title} gallery 1`} fill quality={82} sizes="100vw" className="object-cover" />
               </div>
             </ScrollReveal>
           ) : null}
           {validGallery.length > 1 ? (
             <div className="grid gap-12 md:grid-cols-2 md:gap-x-16 md:gap-y-24">
               {validGallery.slice(1).map((image, index) => {
-                const imageUrl = urlFor(image).width(1600).height(1200).fit("crop").auto("format").quality(78).url();
+                const imageUrl = urlFor(image).width(1800).height(1350).fit("crop").auto("format").quality(80).url();
                 return (
                   <ScrollReveal key={image._key ?? `${project._id}-${index + 1}`} as="div">
                     <div data-reveal className={`relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)] ${index % 3 === 1 ? "md:mt-24" : ""}`}>
-                      <Image src={imageUrl} alt={`${title} gallery ${index + 2}`} fill sizes="(min-width: 768px) 42vw, 100vw" className="object-cover" />
+                      <Image src={imageUrl} alt={`${title} gallery ${index + 2}`} fill quality={80} sizes="(min-width: 768px) 42vw, 100vw" className="object-cover" />
                     </div>
                   </ScrollReveal>
                 );
@@ -132,7 +132,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
             </div>
             <div data-reveal className="space-y-8">
               {body ? <p className="max-w-3xl whitespace-pre-line text-xl leading-[1.45] md:text-2xl">{body}</p> : null}
-              {image ? <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]"><Image src={urlFor(image).width(1800).height(1350).fit("crop").auto("format").quality(78).url()} alt={section.heading || title} fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover" /></div> : null}
+              {image ? <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]"><Image src={urlFor(image).width(1800).height(1350).fit("crop").auto("format").quality(80).url()} alt={section.heading || title} fill quality={80} sizes="(min-width: 768px) 60vw, 100vw" className="object-cover" /></div> : null}
             </div>
           </ScrollReveal>
         );
@@ -173,7 +173,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
               return (
                 <Link key={item._id} href={`/project/${item.slug?.current?.trim()}`} className="group block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
                   <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                    {image ? <Image src={urlFor(image).width(1000).height(750).fit("crop").auto("format").quality(78).url()} alt={itemTitle} fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}
+                    {image ? <Image src={urlFor(image).width(1000).height(750).fit("crop").auto("format").quality(80).url()} alt={itemTitle} fill quality={80} sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw" className="object-cover" /> : <MediaPlaceholder className="absolute inset-0" />}
                   </div>
                   <p className="mt-5 text-[10px] uppercase tracking-[0.28em] text-white/55">{plainText(item.location) || plainText(item.styleTag) || "Project"}</p>
                   <h2 className="mt-3 max-w-sm text-2xl leading-tight tracking-[-0.04em] underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-white/40 group-hover:opacity-60">{itemTitle}</h2>

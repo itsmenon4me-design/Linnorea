@@ -50,6 +50,7 @@ export function AboutInsightCards({ cards }: { cards: AboutCard[] }) {
                     src={imageUrl}
                     alt={card.title ?? "Project or insight"}
                     fill
+                    quality={80}
                     sizes="(max-width: 768px) 100vw, 25vw"
                     className="object-cover"
                   />

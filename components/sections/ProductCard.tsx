@@ -22,6 +22,7 @@ export function ProductCard({ name, description, imageUrl, detailHref, discoverL
             src={imageUrl}
             alt={name}
             fill
+            quality={80}
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
           />

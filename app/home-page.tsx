@@ -80,7 +80,7 @@ async function HomeHighlights() {
                 title: plainText(project.title) || dictionary.home.untitledProject,
                 style: plainText(project.styleTag) || project.category || dictionary.ui.projectCategory,
                 tagline: plainText(project.homeTagline),
-                imageUrl: project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null,
+                imageUrl: project.coverImage ? urlFor(project.coverImage).width(1800).height(1200).fit("crop").auto("format").quality(80).url() : null,
                 href: project.slug?.current ? `/project/${project.slug.current}` : null,
               }))}
               discoverLabel={dictionary.home.discover}

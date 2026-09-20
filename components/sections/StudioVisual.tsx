@@ -46,12 +46,12 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
   }, [playbackId]);
 
   if (playbackId) {
-    const imageUrl = image ? urlFor(image).width(1920).height(1280).fit("crop").auto("format").quality(78).url() : null;
+    const imageUrl = image ? urlFor(image).width(1920).height(1280).fit("crop").auto("format").quality(80).url() : null;
 
     return (
       <div ref={containerRef} className="absolute inset-0">
         {imageUrl ? (
-          <Image src={imageUrl} alt="Linnorea studio" fill sizes="100vw" className="object-cover" />
+          <Image src={imageUrl} alt="Linnorea studio" fill quality={80} sizes="100vw" className="object-cover" />
         ) : null}
         {isNearViewport && !videoFailed ? (
           <MuxPlayer
@@ -61,7 +61,7 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
             loop
             playsInline
             preload="metadata"
-            poster={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=0`}
+            poster={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=0&width=1920&height=1280&fit_mode=crop`}
             aria-label={videoLabel}
             theme="microvideo"
             nohotkeys
@@ -85,7 +85,7 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
   }
 
   if (image) {
-    return <Image src={urlFor(image).width(1920).height(1280).fit("crop").auto("format").quality(78).url()} alt="Linnorea studio" fill sizes="100vw" className="object-cover" />;
+    return <Image src={urlFor(image).width(1920).height(1280).fit("crop").auto("format").quality(80).url()} alt="Linnorea studio" fill quality={80} sizes="100vw" className="object-cover" />;
   }
 
   return <MediaPlaceholder className="absolute inset-0" />;

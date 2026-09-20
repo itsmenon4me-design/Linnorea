@@ -64,7 +64,7 @@ export default async function ServicePage() {
     href: insight.slug?.current ? `/insight/${insight.slug.current}` : null,
     category: plainText(insight.category),
     excerpt: plainText(insight.excerpt),
-    url: insight.coverImage ? urlFor(insight.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null,
+    url: insight.coverImage ? urlFor(insight.coverImage).width(1400).height(934).fit("crop").auto("format").quality(80).url() : null,
   }));
   const process = settings?.servicesProcess?.length
     ? settings.servicesProcess.map((item) => ({
@@ -123,7 +123,7 @@ export default async function ServicePage() {
               return (
                 <article key={title} data-reveal className="grid min-h-[26rem] md:grid-cols-2">
                   <div className={`relative min-h-[20rem] overflow-hidden bg-[var(--color-bg-elevated)] ${reversed ? "md:order-2" : ""}`}>
-                    {visualUrl ? <Image src={visualUrl} alt={visualAlt} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" /> : <div className="absolute inset-0 bg-[var(--color-bg-elevated)]" aria-hidden="true" />}
+                    {visualUrl ? <Image src={visualUrl} alt={visualAlt} fill quality={80} sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" /> : <div className="absolute inset-0 bg-[var(--color-bg-elevated)]" aria-hidden="true" />}
                   </div>
                   <div className={`flex flex-col justify-center bg-white/[0.045] px-7 py-12 md:px-14 md:py-16 ${reversed ? "md:order-1" : ""}`}>
                     <p className="text-xs uppercase tracking-[0.2em] text-white/45">Our approach</p>

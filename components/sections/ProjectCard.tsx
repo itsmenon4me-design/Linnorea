@@ -15,7 +15,7 @@ export function ProjectCard({ project, dictionary }: ProjectCardProps) {
   const market = plainText(project.market);
   const style = plainText(project.styleTag);
   const slug = project.slug?.current;
-  const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1200).height(900).fit("crop").auto("format").quality(78).url() : null;
+  const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1400).height(1050).fit("crop").auto("format").quality(80).url() : null;
 
   if (!slug) return null;
 
@@ -28,6 +28,7 @@ export function ProjectCard({ project, dictionary }: ProjectCardProps) {
               src={imageUrl}
               alt={title}
               fill
+              quality={80}
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition duration-700 ease-out group-hover:scale-105"
             />

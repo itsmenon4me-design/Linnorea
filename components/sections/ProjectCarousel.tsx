@@ -70,6 +70,7 @@ export function ProjectHighlightCarousel({ images, label, previousLabel, nextLab
             src={urlFor(image).width(1800).height(700).fit("crop").auto("format").quality(80).url()}
             alt={`${label} ${index + 1}`}
             fill
+            quality={80}
             sizes="100vw"
             className={`object-cover transition-opacity duration-700 ${index === activeIndex ? "opacity-100" : "opacity-0"}`}
             priority={index === 0}

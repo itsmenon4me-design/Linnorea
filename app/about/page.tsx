@@ -230,12 +230,12 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             </div>
             <div className="space-y-14 md:space-y-20">
               {principles.map((item, index) => {
-                const imageUrl = item.image ? urlFor(item.image).width(900).height(600).fit("crop").auto("format").quality(80).url() : null;
+                const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null;
                 return (
                   <div key={`${item.title}-${index}`} className="grid gap-4 lg:grid-cols-[0.35fr_0.65fr] lg:gap-14">
                     <div>
                       <h2 className="font-serif text-3xl leading-none tracking-[-0.05em] text-white md:text-4xl">{item.title}</h2>
-                      {imageUrl ? <div className="relative mt-6 aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]"><Image src={imageUrl} alt={item.title ?? "Principle"} fill sizes="(max-width: 1024px) 100vw, 30vw" className="object-cover" /></div> : null}
+                      {imageUrl ? <div className="relative mt-6 aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]"><Image src={imageUrl} alt={item.title ?? "Principle"} fill quality={80} sizes="(max-width: 1024px) 100vw, 30vw" className="object-cover" /></div> : null}
                     </div>
                     <p className="max-w-xl text-base leading-7 text-white/70 md:text-[1.08rem] md:leading-8">{plainText(item.description)}</p>
                   </div>
@@ -259,7 +259,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             <div className="mt-12 grid gap-8 md:mt-16 md:grid-cols-[1.15fr_0.85fr] md:items-start md:gap-10 lg:mt-20 lg:grid-cols-[1.3fr_0.7fr] lg:gap-12">
               <div className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
                 {(settings?.aboutVisionImage ?? selectedProjects[0]?.coverImage) ? (
-                  <Image src={urlFor(settings?.aboutVisionImage ?? selectedProjects[0].coverImage!).width(1600).height(1200).fit("crop").auto("format").quality(80).url()} alt="Linnorea project atmosphere" fill sizes="(max-width: 768px) 100vw, 65vw" className="object-cover" />
+                  <Image src={urlFor(settings?.aboutVisionImage ?? selectedProjects[0].coverImage!).width(1800).height(1350).fit("crop").auto("format").quality(80).url()} alt="Linnorea project atmosphere" fill quality={80} sizes="(max-width: 768px) 100vw, 65vw" className="object-cover" />
                 ) : <MediaPlaceholder className="h-full w-full" />}
               </div>
               <p className="max-w-sm pt-2 text-base leading-7 text-white/65 md:text-lg md:leading-8">{plainText(settings?.aboutVisionSupport) || "To make spaces that do not ask for attention, but reward it: spaces with an atmosphere that grows more meaningful through use, memory, and time."}</p>
@@ -296,7 +296,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
               </div>
               {settings?.aboutMissionImage ? (
                 <div className="relative mt-12 aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
-                  <Image src={urlFor(settings.aboutMissionImage).width(1400).height(900).fit("crop").auto("format").quality(80).url()} alt="Linnorea mission" fill sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
+                  <Image src={urlFor(settings.aboutMissionImage).width(1400).height(900).fit("crop").auto("format").quality(80).url()} alt="Linnorea mission" fill quality={80} sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
                 </div>
               ) : null}
             </div>
@@ -322,7 +322,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
                     <div className="min-w-0 pl-0 text-left"><h2 className="text-4xl font-medium leading-[0.92] tracking-[-0.06em] md:text-5xl">{title}</h2>{subtitle && !isPreview ? <p className="mt-5 max-w-xl text-base text-white/80">{subtitle}</p> : null}<p className="mt-5 max-w-xl text-sm leading-6 text-white/60 md:text-base md:leading-7">{plainText(item.description) || dictionary.about.processDescriptionPlaceholder}</p></div>
                   </div>
                   <div className={`relative min-w-0 aspect-[16/9] overflow-hidden bg-[linear-gradient(135deg,#17191c,#07080a)] ${index % 2 === 1 ? "md:order-1" : ""}`}>
-                    {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 768px) 100vw, 60vw" className="object-cover" /> : <div className="absolute inset-0 flex items-end justify-between p-6 text-[10px] uppercase tracking-[0.2em] text-white/40"><span>{title}</span><span>Material study</span></div>}
+                    {imageUrl ? <Image src={imageUrl} alt={title} fill quality={78} sizes="(max-width: 768px) 100vw, 60vw" className="object-cover" /> : <div className="absolute inset-0 flex items-end justify-between p-6 text-[10px] uppercase tracking-[0.2em] text-white/40"><span>{title}</span><span>Material study</span></div>}
                   </div>
                 </article>
               );
@@ -354,11 +354,11 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             ) : leadership.length ? (
               <div className="about-card-list about-card-list--leadership mt-14 md:mt-20">
                 {leadership.map((member) => {
-                  const imageUrl = urlFor(member.photo!).width(900).height(675).fit("crop").auto("format").quality(80).url();
+                  const imageUrl = urlFor(member.photo!).width(1000).height(750).fit("crop").auto("format").quality(80).url();
                   return (
                     <article key={member._id} data-reveal-item className="about-card-item min-w-0">
                       <div className="about-card-media relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-bg-elevated)]">
-                        <Image src={imageUrl} alt={member.name!} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover grayscale" />
+                        <Image src={imageUrl} alt={member.name!} fill quality={80} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover grayscale" />
                       </div>
                       <div className="about-card-copy min-w-0">
                         <h2 className="text-xl font-medium leading-tight tracking-[-0.04em] lg:text-2xl">{member.name}</h2>

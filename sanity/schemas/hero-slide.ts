@@ -35,7 +35,7 @@ export const heroSlide = defineType({
       name: "heroVideo",
       title: "Hero video",
       type: "mux.video",
-      description: "Optional Mux upload. Use a 1920x1080 H.264 source up to 60 seconds.",
+      description: "Optional Mux upload. Use a 3840x2160 4K H.264 master up to 60 seconds; Mux will deliver adaptive quality per device.",
     }),
     defineField({
       name: "order",

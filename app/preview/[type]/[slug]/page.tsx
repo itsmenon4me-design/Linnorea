@@ -388,7 +388,7 @@ export default async function PreviewDetailPage({ params }: PreviewDetailPagePro
         ) : (
           <div className="preview-detail-wide mt-24 min-w-0 md:mt-36">
             <div className="preview-project-media relative overflow-hidden bg-[var(--color-bg-elevated)]">
-              {projectImage ? <Image src={projectImage} alt={content.title} fill sizes="(min-width: 768px) 878px, 100vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+              {projectImage ? <Image src={projectImage} alt={content.title} fill quality={82} sizes="(min-width: 768px) 878px, 100vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
             </div>
             <div className="preview-detail-grid mt-16 grid gap-10 md:grid-cols-2 md:gap-5">
               <p className="text-xs uppercase tracking-[0.18em] text-white/55">Project overview</p>
@@ -417,10 +417,10 @@ export default async function PreviewDetailPage({ params }: PreviewDetailPagePro
               <p className="text-xs uppercase tracking-[0.18em] text-white/55">Project gallery</p>
               <div className="mt-8 grid gap-5 sm:grid-cols-2">
                 {(project?.gallery?.length ? project.gallery : [null, null]).map((image, index) => {
-                  const galleryImage = image ? urlFor(image).width(1200).height(800).fit("crop").auto("format").quality(82).url() : null;
+                  const galleryImage = image ? urlFor(image).width(1400).height(934).fit("crop").auto("format").quality(80).url() : null;
                   return (
                     <div key={image?._key ?? `gallery-placeholder-${index}`} className="relative aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]">
-                      {galleryImage ? <Image src={galleryImage} alt={`${content.title} view ${index + 1}`} fill sizes="(min-width: 640px) 50vw, 100vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+                      {galleryImage ? <Image src={galleryImage} alt={`${content.title} view ${index + 1}`} fill quality={80} sizes="(min-width: 640px) 50vw, 100vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                     </div>
                   );
                 })}

@@ -143,7 +143,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
                       <div data-reveal className="mx-auto mt-16 max-w-[41rem]">
                         <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
                           {activeService?.imageUrl ? (
-                            <Image src={activeService.imageUrl} alt={activeService.title} fill sizes="(max-width: 768px) 100vw, 832px" className="object-cover" />
+                            <Image src={activeService.imageUrl} alt={activeService.title} fill quality={80} sizes="(max-width: 768px) 100vw, 832px" className="object-cover" />
                           ) : (
                             <MediaPlaceholder className="absolute inset-0" />
                           )}
@@ -207,6 +207,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
                           src={card.url}
                           alt={card.title}
                           fill
+                          quality={80}
                           sizes="(max-width: 768px) 82vw, 648px"
                           loading="eager"
                           unoptimized
@@ -268,12 +269,12 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
             {projectCards[0].href ? (
               <Link href={projectCards[0].href} className="block">
                 <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]">
-                  <Image src={projectCards[0].url} alt={projectCards[0].title} fill sizes="(max-width: 768px) 100vw, 1336px" className="object-cover" />
+                  <Image src={projectCards[0].url} alt={projectCards[0].title} fill quality={80} sizes="(max-width: 768px) 100vw, 1336px" className="object-cover" />
                 </div>
               </Link>
             ) : (
               <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]">
-                <Image src={projectCards[0].url} alt={projectCards[0].title} fill sizes="(max-width: 768px) 100vw, 1336px" className="object-cover" />
+                <Image src={projectCards[0].url} alt={projectCards[0].title} fill quality={80} sizes="(max-width: 768px) 100vw, 1336px" className="object-cover" />
               </div>
             )}
             <div className="mt-5">
@@ -309,7 +310,7 @@ export function ServiceExperience({ services, projectImages, projectCards = [], 
                   {insight.href ? (
                     <Link href={insight.href} className="group block">
                       <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)]">
-                        {insight.url ? <Image src={insight.url} alt={insight.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+                        {insight.url ? <Image src={insight.url} alt={insight.title} fill quality={80} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                       </div>
                       <p className="mt-7 text-xs tracking-[0.16em] text-white/60">{insight.category}</p>
                       <h3 className="mt-4 text-xl font-medium leading-tight tracking-[-0.04em] underline decoration-transparent underline-offset-4 transition group-hover:decoration-white/40 sm:text-2xl">{insight.title}</h3>

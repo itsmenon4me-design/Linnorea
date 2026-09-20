@@ -219,7 +219,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
   const shouldRevealOnMountRef = useRef(!hasBeenRevealed);
   const title = plainText(project.title) || dictionary.home.untitledProject;
   const imageUrl = project.coverImage
-    ? urlFor(project.coverImage).width(1800).height(1200).fit("crop").auto("format").quality(90).url()
+    ? urlFor(project.coverImage).width(1400).height(934).fit("crop").auto("format").quality(82).url()
     : project.fallbackImageUrl ?? fallbackProjectImages[index % fallbackProjectImages.length];
   const aspectRatio = getImageAspectRatio(project.coverImage);
 
@@ -282,7 +282,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
     <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isImageEntering && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? `project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)] ${isImageEntering ? "project-list-item--entering" : ""}` : ""}`}>
       <div className={`project-gallery-media relative overflow-hidden rounded-[0.65rem] bg-[var(--color-bg-elevated)] ${isListView ? "project-list-thumb h-16 w-[5.5rem]" : ""}`} style={isListView ? undefined : { aspectRatio }}>
         <div className="project-gallery-image-hover absolute inset-0">
-          {imageUrl ? <Image src={imageUrl} alt={title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="project-gallery-image object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+          {imageUrl ? <Image src={imageUrl} alt={title} fill quality={82} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="project-gallery-image object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
         </div>
         {!isListView ? (
           <div className="project-card-meta pointer-events-none absolute bottom-2 left-2 mr-2 flex max-w-[calc(100%-1rem)] items-end rounded-xl bg-black/20 p-4 text-white">
@@ -554,7 +554,7 @@ function ProjectViewerImage({ image, imageUrl: fallbackUrl, title, index, isGall
       className={`project-viewer-gallery-item w-full min-w-0 overflow-hidden rounded-[0.65rem] bg-white/5 ${index === 0 ? "first" : ""} ${isGalleryOpen ? "project-viewer-gallery-item--strip" : ""}`}
       style={!isGalleryOpen ? { aspectRatio: getImageAspectRatio(image) } : undefined}
     >
-      <Image src={imageUrl} alt={`${title} ${index + 1}`} fill draggable={false} sizes="(max-width: 768px) 100vw, 66vw" className={`project-viewer-gallery-image object-cover ${isGalleryOpen ? (isGalleryZooming ? "project-viewer-gallery-image--zooming" : "") : isInView && animateEntry ? "project-viewer-gallery-image--entry" : ""}`} />
+      <Image src={imageUrl} alt={`${title} ${index + 1}`} fill quality={82} draggable={false} sizes="(max-width: 768px) 100vw, 66vw" className={`project-viewer-gallery-image object-cover ${isGalleryOpen ? (isGalleryZooming ? "project-viewer-gallery-image--zooming" : "") : isInView && animateEntry ? "project-viewer-gallery-image--entry" : ""}`} />
     </button>
   );
 }

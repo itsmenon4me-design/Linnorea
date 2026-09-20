@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["gsap"],
   },
   images: {
+    qualities: [75, 78, 80, 82],
     remotePatterns: [
       {
         protocol: "https",

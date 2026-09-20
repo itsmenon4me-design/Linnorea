@@ -78,7 +78,7 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
                   <ProductDetailImage src={imageUrl} alt={`${name} ${index + 1}`} />
                 ) : (
                   <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-elevated)] md:aspect-[16/9]">
-                    <Image src={imageUrl} alt={`${name} ${index + 1}`} fill sizes="100vw" className="object-cover" />
+                    <Image src={imageUrl} alt={`${name} ${index + 1}`} fill quality={78} sizes="100vw" className="object-cover" />
                   </div>
                 )}
               </div>
