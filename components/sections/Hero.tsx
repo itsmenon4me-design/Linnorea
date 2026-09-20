@@ -1146,7 +1146,7 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
                     quality={82}
                     priority={index === 0}
                     sizes="100vw"
-                    onLoad={isActive ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
+                    onLoad={isActive && !slidePlaybackId ? () => window.dispatchEvent(new Event("linnorea:hero-ready")) : undefined}
                     className={`object-cover transition-opacity duration-300 motion-reduce:transition-none ${isTransitionVisible && readyVideoIndexes.has(index) ? "opacity-0" : "opacity-100"}`}
                   />
                 ) : (
