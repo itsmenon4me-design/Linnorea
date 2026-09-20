@@ -40,11 +40,11 @@ export default async function ServicePage() {
     id: service._id,
     title: plainText(service.title) || dictionary.ui.untitledService,
     description: plainText(service.description) || dictionary.ui.placeholderServiceDescription,
-    imageUrl: service.image ? urlFor(service.image).width(1400).height(934).fit("crop").auto("format").quality(78).url() : null,
+    imageUrl: service.image ? urlFor(service.image).width(3840).height(2562).fit("crop").auto("format").quality(78).url() : null,
   }));
   const projectImageItems = projectImages.map((image, index) => ({
     id: image._key ?? `project-${index}`,
-    url: urlFor(image).width(1400).height(934).fit("crop").auto("format").quality(78).url(),
+    url: urlFor(image).width(3840).height(2562).fit("crop").auto("format").quality(78).url(),
     alt: `Linnorea selected project ${index + 1}`,
   }));
   const projectCardItems = projects
@@ -56,7 +56,7 @@ export default async function ServicePage() {
       category: plainText(project.category) || "Project",
       location: plainText(project.location),
       tagline: plainText(project.homeTagline),
-      url: urlFor(project.coverImage!).width(1400).height(934).fit("crop").auto("format").quality(78).url(),
+      url: urlFor(project.coverImage!).width(3840).height(2562).fit("crop").auto("format").quality(78).url(),
     }));
   const insightItems = uniqueImageInsights(insights).map((insight) => ({
     id: insight._id,
@@ -64,13 +64,13 @@ export default async function ServicePage() {
     href: insight.slug?.current ? `/insight/${insight.slug.current}` : null,
     category: plainText(insight.category),
     excerpt: plainText(insight.excerpt),
-    url: insight.coverImage ? urlFor(insight.coverImage).width(1400).height(934).fit("crop").auto("format").quality(80).url() : null,
+    url: insight.coverImage ? urlFor(insight.coverImage).width(3840).height(2562).fit("crop").auto("format").quality(80).url() : null,
   }));
   const process = settings?.servicesProcess?.length
     ? settings.servicesProcess.map((item) => ({
         title: plainText(item.title),
         description: plainText(item.description),
-        imageUrl: item.image ? urlFor(item.image).width(1400).height(1050).fit("crop").auto("format").quality(78).url() : null,
+        imageUrl: item.image ? urlFor(item.image).width(3840).height(2880).fit("crop").auto("format").quality(78).url() : null,
       }))
     : defaultProcess;
 

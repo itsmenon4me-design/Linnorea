@@ -67,7 +67,7 @@ export function ProjectHighlightCarousel({ images, label, previousLabel, nextLab
         {slides.map((image, index) => (
           <Image
             key={image._key ?? `${image.asset?._ref ?? "highlight"}-${index}`}
-            src={urlFor(image).width(1800).height(700).fit("crop").auto("format").quality(80).url()}
+            src={urlFor(image).width(3840).height(1493).fit("crop").auto("format").quality(80).url()}
             alt={`${label} ${index + 1}`}
             fill
             quality={80}

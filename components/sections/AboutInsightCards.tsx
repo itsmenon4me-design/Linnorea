@@ -39,7 +39,7 @@ export function AboutInsightCards({ cards }: { cards: AboutCard[] }) {
       <div data-reveal className="about-card-list about-card-list--editorial mt-16 md:mt-20">
         {visibleCards.map((card) => {
           const imageUrl = card.coverImage
-            ? urlFor(card.coverImage).width(1600).height(1100).fit("crop").auto("format").quality(80).url()
+            ? urlFor(card.coverImage).width(3840).height(2640).fit("crop").auto("format").quality(80).url()
             : null;
 
           return (

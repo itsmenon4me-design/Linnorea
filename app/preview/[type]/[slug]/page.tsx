@@ -91,7 +91,7 @@ export default async function PreviewDetailPage({ params }: PreviewDetailPagePro
   const project = type === "project"
     ? await sanityClient.fetch<Project | null>(projectBySlugQuery, { slug }, { next: { revalidate: 60 } })
     : null;
-  const projectImage = project?.coverImage ? urlFor(project.coverImage).width(1800).height(1100).fit("crop").auto("format").quality(82).url() : null;
+  const projectImage = project?.coverImage ? urlFor(project.coverImage).width(3840).height(2347).fit("crop").auto("format").quality(82).url() : null;
 
   return (
     <ScrollReveal className="min-h-screen bg-[var(--color-bg-base)] text-white">
@@ -417,7 +417,7 @@ export default async function PreviewDetailPage({ params }: PreviewDetailPagePro
               <p className="text-xs uppercase tracking-[0.18em] text-white/55">Project gallery</p>
               <div className="mt-8 grid gap-5 sm:grid-cols-2">
                 {(project?.gallery?.length ? project.gallery : [null, null]).map((image, index) => {
-                  const galleryImage = image ? urlFor(image).width(1400).height(934).fit("crop").auto("format").quality(80).url() : null;
+                  const galleryImage = image ? urlFor(image).width(3840).height(2562).fit("crop").auto("format").quality(80).url() : null;
                   return (
                     <div key={image?._key ?? `gallery-placeholder-${index}`} className="relative aspect-[3/2] overflow-hidden bg-[var(--color-bg-elevated)]">
                       {galleryImage ? <Image src={galleryImage} alt={`${content.title} view ${index + 1}`} fill quality={80} sizes="(min-width: 640px) 50vw, 100vw" className="object-cover" /> : <MediaPlaceholder className="h-full w-full" />}

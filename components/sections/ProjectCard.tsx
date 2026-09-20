@@ -15,7 +15,7 @@ export function ProjectCard({ project, dictionary }: ProjectCardProps) {
   const market = plainText(project.market);
   const style = plainText(project.styleTag);
   const slug = project.slug?.current;
-  const imageUrl = project.coverImage ? urlFor(project.coverImage).width(1400).height(1050).fit("crop").auto("format").quality(80).url() : null;
+  const imageUrl = project.coverImage ? urlFor(project.coverImage).width(3840).height(2880).fit("crop").auto("format").quality(80).url() : null;
 
   if (!slug) return null;
 

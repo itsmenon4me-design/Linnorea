@@ -230,7 +230,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             </div>
             <div className="space-y-14 md:space-y-20">
               {principles.map((item, index) => {
-                const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null;
+                const imageUrl = item.image ? urlFor(item.image).width(3840).height(2560).fit("crop").auto("format").quality(80).url() : null;
                 return (
                   <div key={`${item.title}-${index}`} className="grid gap-4 lg:grid-cols-[0.35fr_0.65fr] lg:gap-14">
                     <div>
@@ -259,7 +259,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             <div className="mt-12 grid gap-8 md:mt-16 md:grid-cols-[1.15fr_0.85fr] md:items-start md:gap-10 lg:mt-20 lg:grid-cols-[1.3fr_0.7fr] lg:gap-12">
               <div className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
                 {(settings?.aboutVisionImage ?? selectedProjects[0]?.coverImage) ? (
-                  <Image src={urlFor(settings?.aboutVisionImage ?? selectedProjects[0].coverImage!).width(1800).height(1350).fit("crop").auto("format").quality(80).url()} alt="Linnorea project atmosphere" fill quality={80} sizes="(max-width: 768px) 100vw, 65vw" className="object-cover" />
+                  <Image src={urlFor(settings?.aboutVisionImage ?? selectedProjects[0].coverImage!).width(3840).height(2880).fit("crop").auto("format").quality(80).url()} alt="Linnorea project atmosphere" fill quality={80} sizes="(max-width: 768px) 100vw, 65vw" className="object-cover" />
                 ) : <MediaPlaceholder className="h-full w-full" />}
               </div>
               <p className="max-w-sm pt-2 text-base leading-7 text-white/65 md:text-lg md:leading-8">{plainText(settings?.aboutVisionSupport) || "To make spaces that do not ask for attention, but reward it: spaces with an atmosphere that grows more meaningful through use, memory, and time."}</p>
@@ -296,7 +296,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
               </div>
               {settings?.aboutMissionImage ? (
                 <div className="relative mt-12 aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)]">
-                  <Image src={urlFor(settings.aboutMissionImage).width(1400).height(900).fit("crop").auto("format").quality(80).url()} alt="Linnorea mission" fill quality={80} sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
+                  <Image src={urlFor(settings.aboutMissionImage).width(3840).height(2469).fit("crop").auto("format").quality(80).url()} alt="Linnorea mission" fill quality={80} sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
                 </div>
               ) : null}
             </div>
@@ -315,7 +315,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             {(isPreview ? previewProcessItems : processItems).length ? (isPreview ? previewProcessItems : processItems).map((item, index) => {
               const title = plainText(item.title) || dictionary.about.processStage;
               const subtitle = plainText(item.subtitle);
-              const imageUrl = item.image ? urlFor(item.image).width(1200).height(800).fit("crop").auto("format").quality(78).url() : null;
+              const imageUrl = item.image ? urlFor(item.image).width(3840).height(2560).fit("crop").auto("format").quality(78).url() : null;
               return (
                 <article key={`${title}-${index}`} data-reveal className={`grid min-w-0 gap-8 pb-20 md:grid-cols-2 md:items-center md:gap-10 md:pb-36 ${index < (isPreview ? previewProcessItems : processItems).length - 1 ? "border-b border-white/15" : ""}`}>
                   <div className={`about-process-copy min-w-0 text-left ${index % 2 === 1 ? "md:order-2" : ""}`}>
@@ -354,7 +354,7 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
             ) : leadership.length ? (
               <div className="about-card-list about-card-list--leadership mt-14 md:mt-20">
                 {leadership.map((member) => {
-                  const imageUrl = urlFor(member.photo!).width(1000).height(750).fit("crop").auto("format").quality(80).url();
+                  const imageUrl = urlFor(member.photo!).width(3840).height(2880).fit("crop").auto("format").quality(80).url();
                   return (
                     <article key={member._id} data-reveal-item className="about-card-item min-w-0">
                       <div className="about-card-media relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-bg-elevated)]">

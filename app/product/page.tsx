@@ -32,7 +32,7 @@ export default async function ProductPage() {
           const imageUrl = (product.images ?? [])
             .filter((image) => Boolean(image.asset?._ref))
             .slice(0, 1)
-            .map((image) => urlFor(image).width(1400).height(1400).fit("crop").auto("format").quality(78).url());
+            .map((image) => urlFor(image).width(3840).height(3840).fit("crop").auto("format").quality(78).url());
           return <ScrollReveal key={product._id} className="w-full">
             <ProductCard
               name={name}

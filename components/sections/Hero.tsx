@@ -1117,8 +1117,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
       <div className="absolute inset-0">
         {resolvedSlides.map((slide, index) => {
           const slidePlaybackId = playbackIds[index];
-          const slideMediaUrl = slide.image ? urlFor(slide.image).width(2400).height(1500).fit("crop").auto("format").quality(82).url() : null;
-          const slidePosterUrl = slideMediaUrl ?? (slidePlaybackId ? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0&width=2400&height=1500&fit_mode=crop` : null);
+          const slideMediaUrl = slide.image ? urlFor(slide.image).width(3840).height(2400).fit("crop").auto("format").quality(82).url() : null;
+          const slidePosterUrl = slideMediaUrl ?? (slidePlaybackId ? `https://image.mux.com/${slidePlaybackId}/thumbnail.jpg?time=0&width=3840&height=2400&fit_mode=crop` : null);
           const isActive = index === activeIndex;
           const isTransitionIncoming = transition?.to === index;
           const isDragIncoming = dragTargetIndex === index;

@@ -219,7 +219,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
   const shouldRevealOnMountRef = useRef(!hasBeenRevealed);
   const title = plainText(project.title) || dictionary.home.untitledProject;
   const imageUrl = project.coverImage
-    ? urlFor(project.coverImage).width(1400).height(934).fit("crop").auto("format").quality(82).url()
+    ? urlFor(project.coverImage).width(3840).height(2562).fit("crop").auto("format").quality(82).url()
     : project.fallbackImageUrl ?? fallbackProjectImages[index % fallbackProjectImages.length];
   const aspectRatio = getImageAspectRatio(project.coverImage);
 
@@ -523,7 +523,7 @@ function ProjectViewerImage({ image, imageUrl: fallbackUrl, title, index, isGall
   const [isInView, setIsInView] = useState(!isGalleryOpen);
   const [isGalleryZooming] = useState(isGalleryOpen);
   const imageRef = useRef<HTMLButtonElement>(null);
-  const imageUrl = image ? urlFor(image).width(1800).height(1200).fit("crop").auto("format").quality(82).url() : fallbackUrl;
+  const imageUrl = image ? urlFor(image).width(3840).height(2560).fit("crop").auto("format").quality(82).url() : fallbackUrl;
 
   useEffect(() => {
     if (isGalleryOpen) return;

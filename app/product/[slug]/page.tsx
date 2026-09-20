@@ -51,7 +51,7 @@ export default async function ProductDetailPage({ params }: ProductDetailProps) 
   const description = plainText(product.description) || dictionary.ui.placeholderProductDescription;
   const imageUrls = (product.images ?? [])
     .filter((image) => Boolean(image.asset?._ref))
-    .map((image) => urlFor(image).width(2200).height(1650).fit("crop").auto("format").quality(78).url());
+    .map((image) => urlFor(image).width(3840).height(2880).fit("crop").auto("format").quality(78).url());
   const whatsappNumber = settings?.whatsappNumber?.replace(/\D/g, "");
   const whatsappHref = whatsappNumber
     ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Halo Linnorea, saya ingin menanyakan produk ${name}.`)}`

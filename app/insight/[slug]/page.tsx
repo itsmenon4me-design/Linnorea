@@ -55,7 +55,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
 
   const title = insight.title ?? "Insight";
   const publishedDate = formatEditorialDate(insight.publishedAt);
-  const coverUrl = insight.coverImage ? urlFor(insight.coverImage).width(2000).height(1200).fit("crop").auto("format").quality(82).url() : null;
+  const coverUrl = insight.coverImage ? urlFor(insight.coverImage).width(3840).height(2304).fit("crop").auto("format").quality(82).url() : null;
   const relatedInsights = insight.relatedInsights?.length
     ? insight.relatedInsights.filter((item) => item._id !== insight._id)
     : allInsights.filter((item) => item._id !== insight._id).slice(0, 4);
@@ -68,8 +68,8 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
   const renderBlocks = (blocks: InsightContentBlock[], keyPrefix: string) =>
     blocks.map((block, index) => {
       if (isImageBlock(block)) {
-        const imageUrl = urlFor(block).width(1800).height(1125).fit("crop").auto("format").quality(80).url();
-        return <Image key={block._key ?? `${keyPrefix}-image-${index}`} src={imageUrl} alt={`${title} image ${index + 1}`} width={1800} height={1125} quality={80} className="my-14 h-auto w-full object-cover" data-reveal />;
+        const imageUrl = urlFor(block).width(3840).height(2400).fit("crop").auto("format").quality(80).url();
+        return <Image key={block._key ?? `${keyPrefix}-image-${index}`} src={imageUrl} alt={`${title} image ${index + 1}`} width={3840} height={2400} quality={80} className="my-14 h-auto w-full object-cover" data-reveal />;
       }
       if (!isPortableTextBlock(block)) return null;
       const text = block.children?.map((child) => child.text ?? "").join("") ?? "";
@@ -217,7 +217,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
         <div className="mt-24 min-w-0 md:mt-36">
           <div className="insight-detail-content">
             <div className="insight-detail-media overflow-hidden bg-[var(--color-bg-elevated)]" data-reveal>
-              {coverUrl ? <Image src={coverUrl} alt={title} width={2000} height={1200} quality={82} className="h-full w-full object-cover" priority /> : <MediaPlaceholder className="h-full w-full" />}
+              {coverUrl ? <Image src={coverUrl} alt={title} width={3840} height={2304} quality={82} className="h-full w-full object-cover" priority /> : <MediaPlaceholder className="h-full w-full" />}
             </div>
             <div className="mt-3 text-xs text-white/50">{title}</div>
             <div className="insight-detail-grid mt-20 border-t border-white/15 pt-8 md:grid-cols-[228px_minmax(0,1fr)] md:gap-8" data-reveal>
@@ -251,7 +251,7 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                     <div className="relative aspect-[16/8] overflow-hidden bg-[var(--color-bg-elevated)]" data-reveal>
                       {relatedProject.coverImage ? (
                         <Image
-                          src={urlFor(relatedProject.coverImage).width(1400).height(700).fit("crop").auto("format").quality(82).url()}
+                          src={urlFor(relatedProject.coverImage).width(3840).height(1920).fit("crop").auto("format").quality(82).url()}
                           alt={relatedProject.title ?? "Project"}
                           fill
                           sizes="(max-width: 768px) 100vw, 1336px"
@@ -289,11 +289,11 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                     <h2 className="font-serif text-5xl font-normal leading-[0.94] tracking-[-0.055em] md:text-7xl" data-reveal>{insight.latestInsightsHeading || "Perspectives, trends, news."}</h2>
                     <div className="mt-14 insight-related-list" data-reveal>
                       {relatedInsights.map((item) => {
-                        const imageUrl = item.coverImage ? urlFor(item.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null;
+                        const imageUrl = item.coverImage ? urlFor(item.coverImage).width(3840).height(2560).fit("crop").auto("format").quality(80).url() : null;
                         return (
                           <Link key={item._id} href={`/insight/${item.slug?.current}`} className="group insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
                             <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
-                              {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={1200} height={800} quality={80} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+                              {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={3840} height={2560} quality={80} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                             </span>
                             <span className="block">
                               <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
@@ -309,11 +309,11 @@ export default async function InsightDetailPage({ params }: InsightDetailProps) 
                           <div className="insight-related-expand">
                             <div className="insight-related-list">
                               {additionalInsights.map((item) => {
-                                const imageUrl = item.coverImage ? urlFor(item.coverImage).width(1200).height(800).fit("crop").auto("format").quality(80).url() : null;
+                                const imageUrl = item.coverImage ? urlFor(item.coverImage).width(3840).height(2560).fit("crop").auto("format").quality(80).url() : null;
                                 return (
                                   <Link key={item._id} data-expandable-item href={`/insight/${item.slug?.current}`} className="group insight-related-item min-w-0 border-b border-white/25 py-8 text-white transition hover:text-white/70">
                                     <span className="aspect-[3/2] w-full shrink-0 overflow-hidden bg-[var(--color-bg-elevated)]">
-                                      {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={1200} height={800} quality={80} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
+                                      {imageUrl ? <Image src={imageUrl} alt={item.title ?? "Insight"} width={3840} height={2560} quality={80} className="h-full w-full object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
                                     </span>
                                     <span className="block">
                                       <span className="block text-xs uppercase tracking-[0.18em] text-white/45">{item.category}</span>
