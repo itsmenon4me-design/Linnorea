@@ -111,7 +111,6 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
   const activeSlide = resolvedSlides[activeIndex] ?? resolvedSlides[0];
   const eyebrow = plainText(activeSlide?.eyebrow) || dictionary.home.eyebrow;
   const headline = plainText(activeSlide?.headline) || dictionary.home.headline;
-  const subheadline = plainText(activeSlide?.subheadline) || dictionary.home.subheadline;
   const playbackIds = useMemo(
     () =>
       resolvedSlides.map((slide) => {
@@ -528,7 +527,9 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
       window.clearInterval(syncRetryId);
       observer.disconnect();
     };
-  }, [activeIndex, isHeroInView, isPaused, isTabVisible, nextIndex]);
+  // The player helper is intentionally recreated with the component state; rerunning this observer for it would restart the sync interval.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex, isHeroInView, isPaused, isTabVisible, nextIndex, playbackIds]);
 
   useEffect(() => {
     pendingPlayCleanupRef.current?.();
@@ -554,6 +555,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
       player.removeEventListener("play", handlePlay);
       player.removeEventListener("canplay", handleCanPlay);
     };
+  // The event handlers use the current playback helper without recreating media listeners on every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, activePlaybackId, isHeroInView, isPaused, isTabVisible, mounted]);
 
   useEffect(() => {
@@ -634,6 +637,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
       document.removeEventListener("visibilitychange", resumePlayingVideo);
       window.removeEventListener("focus", resumePlayingVideo);
     };
+  // The visibility listener intentionally reads the latest player helper without restarting listeners on each render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHeroInView, isPaused]);
 
   useEffect(() => {
@@ -675,6 +680,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     if (incomingPlayer) {
       playActiveVideo(incomingPlayer);
     }
+  // This effect responds to transition state and intentionally uses the current player helper.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHeroInView, isPaused, isTabVisible, transition]);
 
   useEffect(() => {
@@ -691,6 +698,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
     playActiveVideo(activePlayer);
     const retryId = window.setTimeout(() => playActiveVideo(activePlayer), 50);
     return () => window.clearTimeout(retryId);
+  // This effect responds to active playback state and intentionally uses the current player helper.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, isHeroInView, isPaused, isTabVisible]);
 
   useEffect(() => {
@@ -714,6 +723,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         }
       }
     });
+  // The preload helper is intentionally kept stable for the active and next player indices.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, nextIndex]);
 
   useEffect(() => {
@@ -729,6 +740,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
 
     preloadStartedRef.current.add(nextIndex);
     requestManagedPreload(nextIndex, (media) => media.load());
+  // The preload helper is intentionally kept stable while the next slide changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextIndex, playbackIds]);
 
   const goToSlide = (index: number, isManualNavigation = false) => {
@@ -844,6 +857,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
         window.clearTimeout(imageTimerId);
       }
     };
+  // Auto-advance intentionally uses the current slide navigation helper.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeIndex,
     activePlaybackId,
@@ -964,6 +979,8 @@ export function Hero({ dictionary, slides = [] }: HeroProps) {
       return;
     }
 
+    // Reset transient drag state after the transition settles.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDragPlayingIndex(null);
   }, [activeIndex, transition]);
 

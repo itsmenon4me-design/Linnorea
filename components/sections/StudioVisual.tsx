@@ -42,6 +42,8 @@ export function StudioVisual({ image, video, videoLabel }: StudioVisualProps) {
   }, [playbackId]);
 
   useEffect(() => {
+    // Reset the media error state whenever Sanity provides a different video.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVideoFailed(false);
   }, [playbackId]);
 

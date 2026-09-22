@@ -115,7 +115,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
       {project.quote ? (
         <section className="mx-auto max-w-[90rem] px-5 py-12 md:px-10 md:py-20">
           <blockquote className="max-w-4xl border-l border-[var(--color-accent-gold)] pl-6 text-2xl leading-tight tracking-[-0.03em] md:pl-10 md:text-5xl">
-            "{project.quote}"
+            &quot;{project.quote}&quot;
             {project.quoteAuthor ? <cite className="mt-6 block text-[10px] not-italic uppercase tracking-[0.25em] text-white/55">By {project.quoteAuthor}</cite> : null}
           </blockquote>
         </section>

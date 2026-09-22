@@ -18,10 +18,6 @@ export const revalidate = 60;
 type ProductDetail = Product & { slug?: { current?: string } };
 type ProductDetailProps = { params: Promise<{ slug: string }> };
 
-const productListQuery = `*[_type == "product"] | order(order asc, _createdAt asc) {
-  _id, name, slug, images, description, order
-}`;
-
 const productBySlugQuery = `*[_type == "product" && slug.current == $slug][0] {
   _id, name, slug, images, description, order
 }`;

@@ -3,17 +3,15 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const MIN_DISPLAY_MS = 500;
 const MAX_INITIAL_WAIT_MS = 10000;
 
 export function SplashScreen() {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isReady, setIsReady] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isReady, setIsReady] = useState(true);
 
   useEffect(() => {
-    let pageLoaded = document.readyState === "complete";
-    let heroReady = window.location.pathname !== "/";
-    const startedAt = performance.now();
+    let pageLoaded = true;
+    let heroReady = true;
     let hideTimeoutId: number | null = null;
     const maxWaitTimeoutId = window.setTimeout(() => setIsReady(true), MAX_INITIAL_WAIT_MS);
 
@@ -30,11 +28,13 @@ export function SplashScreen() {
         return;
       }
 
-      const remaining = Math.max(MIN_DISPLAY_MS - (performance.now() - startedAt), 0);
       if (hideTimeoutId !== null) {
         window.clearTimeout(hideTimeoutId);
       }
-      hideTimeoutId = window.setTimeout(() => setIsReady(true), remaining);
+      hideTimeoutId = window.setTimeout(() => {
+        setIsReady(true);
+        setIsVisible(false);
+      }, 0);
     };
 
     window.addEventListener("load", markPageLoaded);
@@ -61,7 +61,7 @@ export function SplashScreen() {
     <div
       aria-hidden="true"
       suppressHydrationWarning
-      className={`splash-screen ${isVisible ? "splash-screen--visible" : "splash-screen--hidden"} ${isReady ? "splash-screen--ready" : ""}`}
+      className={`splash-screen ${isVisible && !isReady ? "splash-screen--visible" : "splash-screen--hidden"} ${isReady ? "splash-screen--ready" : ""}`}
     >
       <Image
         src="/assets/logo-mark.png"

@@ -24,6 +24,8 @@
 
 html {
   scroll-behavior: auto;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -246,6 +248,73 @@ button {
   scrollbar-color: rgba(255, 255, 255, 0.42) rgba(255, 255, 255, 0.08);
   scrollbar-width: thin;
   overflow-anchor: none;
+}
+
+.project-viewer-modal {
+  animation: project-viewer-modal-overlay-in 350ms ease-out both;
+}
+
+.project-viewer-modal-panel {
+  animation: project-viewer-modal-panel-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.project-viewer-modal--closing {
+  animation: project-viewer-modal-overlay-out 200ms ease-in both;
+  pointer-events: none;
+}
+
+.project-viewer-modal--closing .project-viewer-modal-panel {
+  animation: project-viewer-modal-panel-out 200ms ease-in both;
+}
+
+@keyframes project-viewer-modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes project-viewer-modal-overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes project-viewer-modal-panel-in {
+  from {
+    clip-path: inset(20px round 0.8rem);
+    filter: blur(20px);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    clip-path: inset(0 round 0.8rem);
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes project-viewer-modal-panel-out {
+  from {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    filter: blur(20px);
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }
 
 .project-viewer-scroll--hidden {
@@ -490,19 +559,14 @@ button {
 
 .project-card-meta {
   opacity: 0;
-  transform: translate(1.25rem, 1.25rem);
-  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  transform: translate(0, 0);
+  background: rgb(0 0 0 / 0.3);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: opacity 600ms ease-out;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .project-archive-grid .project-gallery-item:hover .project-gallery-image {
-    transform: scale(var(--project-image-scale));
-  }
-
-  .project-archive-grid .project-gallery-item:hover .project-gallery-image-hover {
-    transform: scale(1.05);
-  }
-
   .project-archive-grid .project-gallery-item:hover .project-card-meta {
     opacity: 1;
     transform: translate(0, 0);
@@ -546,12 +610,6 @@ button {
   transition: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .project-archive-grid--list .project-gallery-item:hover .project-gallery-media {
-    transform: scale(0.96);
-  }
-}
-
 .project-gallery-item--image-entering .project-gallery-image {
   animation: project-archive-image-zoom-out 1100ms cubic-bezier(0, 0, 0.2, 1) both;
 }
@@ -571,11 +629,6 @@ button {
 
 .project-archive-grid--hover-suppressed .project-gallery-image {
   transform: none !important;
-}
-
-.project-archive-grid--hover-suppressed .project-card-meta {
-  opacity: 0 !important;
-  transform: translate(1.25rem, 1.25rem) !important;
 }
 
 .project-archive-grid--resizing .project-gallery-image,
@@ -599,8 +652,28 @@ button {
   }
 
   .project-archive-grid .project-card-meta {
-    opacity: 0;
-    transform: translate(1.25rem, 1.25rem);
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@media (any-pointer: coarse) {
+  .project-archive-grid .project-card-meta {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (any-pointer: coarse) {
+  .project-archive-grid .project-gallery-item:hover .project-card-meta {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (any-pointer: fine) {
+  .project-archive-grid--hover-suppressed .project-card-meta {
+    opacity: 0 !important;
   }
 }
 
@@ -638,6 +711,8 @@ button {
   .project-gallery-image,
   .project-gallery-image-hover,
   .project-gallery-media,
+  .project-viewer-modal,
+  .project-viewer-modal-panel,
   .project-viewer-gallery-image--entry,
   .project-viewer-gallery-image--zooming,
   .project-scroll-reveal {
@@ -736,6 +811,12 @@ button {
 .splash-screen--visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+.splash-screen--hidden {
+  visibility: hidden;
+  opacity: 0 !important;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

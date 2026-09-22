@@ -35,7 +35,8 @@ export function ContactInquiryForm({ whatsappNumber }: ContactInquiryFormProps) 
 
     try {
       const destination = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(destination, "_blank", "noopener,noreferrer");
+      const whatsappWindow = window.open(destination, "_blank", "noopener,noreferrer");
+      if (!whatsappWindow) throw new Error("WhatsApp window was blocked");
       setStatus("success");
       event.currentTarget.reset();
     } catch {

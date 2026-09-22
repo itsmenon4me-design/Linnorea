@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { AnimationEvent } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
@@ -22,17 +23,31 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeLocation, setActiveLocation] = useState<string | null>(null);
-  const [activeStatus, setActiveStatus] = useState<string | null>(null);
-  const [activeMarket, setActiveMarket] = useState<string | null>(null);
+  const activeCategory = searchParams.get("category");
+  const activeLocation = searchParams.get("location");
+  const activeStatus = searchParams.get("status");
+  const activeMarket = searchParams.get("market");
   const [openFilter, setOpenFilter] = useState<"location" | "status" | "market" | null>(null);
   const [isListView, setIsListView] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [suppressCardHover, setSuppressCardHover] = useState(false);
   const [isViewportResizing, setIsViewportResizing] = useState(false);
   const [revealedProjectIds, setRevealedProjectIds] = useState<Set<string>>(() => new Set());
+  const [optimisticProject, setOptimisticProject] = useState<Project | null | undefined>(undefined);
+  const selectedProjectKey = searchParams.get("project");
+  const urlSelectedProject = useMemo(
+    () => selectedProjectKey
+      ? projects.find((project) => getProjectQueryKey(project) === selectedProjectKey) ?? null
+      : null,
+    [projects, selectedProjectKey],
+  );
+  const selectedProject = optimisticProject === undefined ? urlSelectedProject : optimisticProject;
+
+  useEffect(() => {
+    const handleHistoryNavigation = () => setOptimisticProject(undefined);
+    window.addEventListener("popstate", handleHistoryNavigation);
+    return () => window.removeEventListener("popstate", handleHistoryNavigation);
+  }, []);
 
   useEffect(() => {
     let settleTimer: number | undefined;
@@ -52,19 +67,6 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
       if (settleTimer !== undefined) window.clearTimeout(settleTimer);
     };
   }, []);
-  useEffect(() => {
-    setActiveCategory(searchParams.get("category"));
-    setActiveLocation(searchParams.get("location"));
-    setActiveStatus(searchParams.get("status"));
-    setActiveMarket(searchParams.get("market"));
-    const projectKey = searchParams.get("project");
-    setSelectedProject(
-      projectKey
-        ? projects.find((project) => getProjectQueryKey(project) === projectKey) ?? null
-        : null,
-    );
-  }, [projects, searchParams]);
-
   const visibleProjects = useMemo(() => projects.filter((project) => {
     const matches = (value: string | undefined, selected: string | null) => !selected || value?.trim() === selected;
     return matches(normalizeProjectCategory(project.category), activeCategory)
@@ -98,8 +100,8 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
 
   const openProject = (project: Project) => {
     setSuppressCardHover(false);
-    setSelectedProject(project);
     setIsDescriptionExpanded(false);
+    setOptimisticProject(project);
     const next = new URLSearchParams(searchParams.toString());
     next.set("project", getProjectQueryKey(project));
     next.delete("gallery");
@@ -108,8 +110,8 @@ export function ProjectListingGrid({ projects, categories, dictionary }: Project
 
   const closeProject = () => {
     setSuppressCardHover(true);
-    setSelectedProject(null);
     setIsDescriptionExpanded(false);
+    setOptimisticProject(null);
     const next = new URLSearchParams(searchParams.toString());
     next.delete("project");
     next.delete("gallery");
@@ -281,7 +283,7 @@ function ProjectGalleryItem({ project, index, dictionary, onOpen, onPointerEnter
   return (
     <button ref={itemRef} type="button" onClick={onOpen} onPointerEnter={onPointerEnter} className={`project-gallery-item group mb-4 block w-full break-inside-avoid text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isImageEntering && !isListView ? "project-gallery-item--image-entering" : ""} ${isListView ? `project-list-item grid gap-4 border-b border-white/10 pb-4 sm:grid-cols-[5.5rem_minmax(0,1fr)] ${isImageEntering ? "project-list-item--entering" : ""}` : ""}`}>
       <div className={`project-gallery-media relative overflow-hidden rounded-[0.65rem] bg-[var(--color-bg-elevated)] ${isListView ? "project-list-thumb h-16 w-[5.5rem]" : ""}`} style={isListView ? undefined : { aspectRatio }}>
-        <div className="project-gallery-image-hover absolute inset-0">
+        <div className="project-gallery-image-hover media-hover-zoom absolute inset-0">
           {imageUrl ? <Image src={imageUrl} alt={title} fill quality={82} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="project-gallery-image object-cover" /> : <MediaPlaceholder className="h-full w-full" />}
         </div>
         {!isListView ? (
@@ -307,6 +309,7 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   const [isGalleryOpen, setIsGalleryOpen] = useState(initialGalleryOpen);
   const [animateNormalImages, setAnimateNormalImages] = useState(true);
   const [initialGalleryIndex, setInitialGalleryIndex] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
   const gallerySwiperRef = useRef<SwiperInstance | null>(null);
   const viewerScrollRef = useRef<HTMLDivElement>(null);
   const descriptionScrollTopRef = useRef(0);
@@ -320,17 +323,38 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
     return key && all.findIndex((candidate) => (candidate.image?.asset?._ref ?? candidate.url) === key) === index;
   });
 
+  const requestClose = useCallback(() => {
+    if (isClosing) return;
+    setIsClosing(true);
+  }, [isClosing]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") requestClose();
     };
+    const root = document.documentElement;
+    const body = document.body;
+    const previousRootOverflow = root.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    root.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = "";
+      root.style.overflow = previousRootOverflow;
+      body.style.overflow = previousBodyOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, requestClose]);
+
+  useEffect(() => {
+    if (!isClosing) return;
+    const closeTimer = window.setTimeout(onClose, 250);
+    return () => window.clearTimeout(closeTimer);
+  }, [isClosing, onClose]);
+
+  const handleCloseAnimationEnd = (event: AnimationEvent<HTMLDivElement>) => {
+    if (isClosing && event.target === event.currentTarget) onClose();
+  };
 
   const toggleGallery = () => {
     if (!isGalleryOpen) {
@@ -372,11 +396,11 @@ function ProjectViewer({ project, dictionary, initialGalleryOpen, isDescriptionE
   }, [isDescriptionExpanded]);
 
   return (
-    <div ref={viewerScrollRef} role="dialog" aria-modal="true" aria-labelledby="project-viewer-title" onKeyDown={(event) => { if (event.key === "Escape") onClose(); }} tabIndex={-1} className={`project-viewer-scroll fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 backdrop-blur-sm md:p-6 ${isDescriptionExpanded ? "" : "project-viewer-scroll--hidden"}`}>
-      <div className={`project-viewer-shell relative mx-auto grid max-w-[1440px] gap-3 rounded-[0.8rem] bg-[#111315] p-3 text-white md:h-[90vh] md:overflow-hidden md:p-4 ${isGalleryOpen ? "project-viewer-shell--gallery md:grid-cols-1" : "md:grid-cols-[30%_70%]"}`}>
+    <div ref={viewerScrollRef} role="dialog" aria-modal="true" aria-labelledby="project-viewer-title" onKeyDown={(event) => { if (event.key === "Escape") requestClose(); }} tabIndex={-1} className={`project-viewer-scroll project-viewer-modal fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 backdrop-blur-sm md:p-6 ${isClosing ? "project-viewer-modal--closing" : ""} ${isDescriptionExpanded ? "" : "project-viewer-scroll--hidden"}`} onAnimationEnd={handleCloseAnimationEnd}>
+      <div className={`project-viewer-shell project-viewer-modal-panel relative mx-auto grid max-w-[1440px] gap-3 rounded-[0.8rem] bg-[#111315] p-3 text-white md:h-[90vh] md:overflow-hidden md:p-4 ${isGalleryOpen ? "project-viewer-shell--gallery md:grid-cols-1" : "md:grid-cols-[30%_70%]"}`}>
         {!isGalleryOpen ? <aside className={`project-viewer-scroll order-2 relative flex min-h-0 min-w-0 flex-col overflow-visible p-4 md:order-none md:p-6 ${isDescriptionExpanded ? "project-viewer-scroll--expanded" : ""}`}>
           <div className="flex items-center justify-between gap-3">
-            <button type="button" onClick={onClose} className="min-h-11 px-3 text-xs uppercase tracking-[0.16em] text-white/55 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{dictionary.ui.close}</button>
+            <button type="button" onClick={requestClose} className="min-h-11 px-3 text-xs uppercase tracking-[0.16em] text-white/55 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{dictionary.ui.close}</button>
             <button type="button" aria-label={dictionary.ui.gallery} onClick={toggleGallery} className="inline-flex min-h-11 items-center text-[10px] uppercase tracking-[0.2em] text-white/55 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
               {isGalleryOpen ? dictionary.ui.close : dictionary.ui.gallery}
             </button>
