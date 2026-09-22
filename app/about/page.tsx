@@ -11,7 +11,7 @@ import { getSiteSeo } from "@/lib/sanity/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import { uniqueImageInsights } from "@/lib/sanity/insights";
 import { urlFor } from "@/lib/sanity/image";
-import { insightListQuery, projectListQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
+import { insightListQuery, projectAtmosphereImagesQuery, siteSettingsQuery, teamMembersQuery } from "@/lib/sanity/queries";
 import { plainText, type Insight, type Project, type SiteSettings, type TeamMember } from "@/lib/sanity/types";
 
 export const revalidate = 60;
@@ -25,7 +25,11 @@ export default async function AboutPage({ searchParams }: { searchParams: Promis
   const isPreview = preview === "1";
   const [settings, projects, teamMembers, insights] = await Promise.all([
     sanityClient.fetch<SiteSettings | null>(siteSettingsQuery, {}, { next: { revalidate } }),
-    sanityClient.fetch<Project[]>(projectListQuery, {}, { next: { revalidate } }),
+    sanityClient.fetch<Pick<Project, "_id" | "title" | "coverImage" | "category" | "styleTag" | "homeTagline" | "location" | "slug">[]>(
+      projectAtmosphereImagesQuery,
+      {},
+      { next: { revalidate } },
+    ),
     sanityClient.fetch<TeamMember[]>(teamMembersQuery, {}, { next: { revalidate } }),
     sanityClient.fetch<Insight[]>(insightListQuery, {}, { next: { revalidate } }),
   ]);

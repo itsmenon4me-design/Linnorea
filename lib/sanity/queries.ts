@@ -49,6 +49,19 @@ export const projectListQuery = `
   }
 `;
 
+export const projectAtmosphereImagesQuery = `
+  *[_type == "project" && defined(coverImage)] | order(order asc, _createdAt asc) {
+    _id,
+    title,
+    coverImage,
+    category,
+    styleTag,
+    homeTagline,
+    location,
+    slug
+  }
+`;
+
 export const projectBySlugQuery = `
   *[_type == "project" && slug.current == $slug][0] {
     _id,

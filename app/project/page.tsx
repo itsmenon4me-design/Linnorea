@@ -10,7 +10,6 @@ import type { Project } from "@/lib/sanity/types";
 import { fallbackProjects } from "@/lib/sanity/fallbackProjects";
 
 export const revalidate = 60;
-export const dynamic = "force-dynamic";
 
 async function fetchProjectsSafely() {
   try {
