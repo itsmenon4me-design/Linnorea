@@ -6,14 +6,14 @@ import { useEffect, useState } from "react";
 const MAX_INITIAL_WAIT_MS = 10000;
 
 export function SplashScreen() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isReady, setIsReady] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    let pageLoaded = true;
-    let heroReady = true;
+    let pageLoaded = document.readyState === "complete";
+    let heroReady = false;
     let hideTimeoutId: number | null = null;
-    const maxWaitTimeoutId = window.setTimeout(() => setIsReady(true), MAX_INITIAL_WAIT_MS);
+    let maxWaitTimeoutId: number | null = null;
 
     const markPageLoaded = () => {
       pageLoaded = true;
@@ -31,20 +31,43 @@ export function SplashScreen() {
       if (hideTimeoutId !== null) {
         window.clearTimeout(hideTimeoutId);
       }
-      hideTimeoutId = window.setTimeout(() => {
-        setIsReady(true);
-        setIsVisible(false);
-      }, 0);
+      setIsReady(true);
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        hideTimeoutId = window.setTimeout(() => setIsVisible(false), 450);
+      }
+    };
+
+    const restartSplash = () => {
+      setIsReady(false);
+      setIsVisible(true);
+      pageLoaded = true;
+      heroReady = true;
+      maybeHide();
     };
 
     window.addEventListener("load", markPageLoaded);
     window.addEventListener("linnorea:hero-ready", markHeroReady);
-    maybeHide();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        restartSplash();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    maxWaitTimeoutId = window.setTimeout(() => {
+      heroReady = true;
+      maybeHide();
+    }, MAX_INITIAL_WAIT_MS);
+    if (pageLoaded) {
+      maybeHide();
+    }
 
     return () => {
       window.removeEventListener("load", markPageLoaded);
       window.removeEventListener("linnorea:hero-ready", markHeroReady);
-      window.clearTimeout(maxWaitTimeoutId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (maxWaitTimeoutId !== null) {
+        window.clearTimeout(maxWaitTimeoutId);
+      }
       if (hideTimeoutId !== null) {
         window.clearTimeout(hideTimeoutId);
       }
@@ -61,7 +84,7 @@ export function SplashScreen() {
     <div
       aria-hidden="true"
       suppressHydrationWarning
-      className={`splash-screen ${isVisible && !isReady ? "splash-screen--visible" : "splash-screen--hidden"} ${isReady ? "splash-screen--ready" : ""}`}
+      className={`splash-screen ${isVisible ? "splash-screen--visible" : "splash-screen--hidden"} ${isReady ? "splash-screen--ready" : ""}`}
     >
       <Image
         src="/assets/logo-mark.png"
