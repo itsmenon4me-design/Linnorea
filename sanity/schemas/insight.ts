@@ -2,9 +2,9 @@ import { defineField, defineType } from "sanity";
 
 export const insight = defineType({
   name: "insight",
-  title: "ABOUT - Insight",
+  title: "INSIGHTS - Article",
   type: "document",
-  description: "Artikel atau insight yang dapat tampil di About dan Services.",
+  description: "Article or insight that can appear in the Insights area and supporting cards on About or Services.",
   fieldsets: [
     { name: "basic", title: "Basic information", options: { collapsible: true, collapsed: false } },
     { name: "media", title: "Cover and contributors", options: { collapsible: true, collapsed: false } },
